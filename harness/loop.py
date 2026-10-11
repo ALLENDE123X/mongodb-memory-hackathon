@@ -10,13 +10,14 @@ the same way but their outcomes are never shown to the watcher or used for retri
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 from agents.scrubber import scrub
-from agents.watcher import propose
+from agents.watcher import claim_brief, propose
 from eval.metrics import score
 from eval.synthetic_claims import load_claims, public_view
 from harness.features import features
@@ -26,6 +27,7 @@ from harness.rules import apply_rules
 from memory.store import ConflictError, Store
 
 MAX_REVISIONS = 1
+MAX_FEEDBACK_BRIEFS = 6  # keep the revision prompt small when a rule is badly over-broad
 
 
 def log(msg: str) -> None:
@@ -113,6 +115,20 @@ def _false_hold(active: list[dict], ep: dict) -> bool:
             and not apply_rules(active, ep["features"], "paid"))
 
 
+def _rejection_feedback(cand: dict, verdict: dict, evidence: list[dict]) -> str:
+    """Tell the watcher why a rule failed, with the regressing claims in full, not just their ids."""
+    by_id = {e["claim_id"]: e for e in evidence}
+    ids = [c for c in verdict.get("regressions", []) if c in by_id]
+    briefs = [claim_brief(by_id[c]) for c in ids[:MAX_FEEDBACK_BRIEFS]]
+    text = f"{cand.get('description')!r}: {verdict['reason']}"
+    if briefs:
+        text += ("\n  Claims it wrongly matched (the real outcome contradicts the rule, so narrow it "
+                 "to exclude what distinguishes them):\n  " + json.dumps(briefs, default=str))
+        if len(ids) > len(briefs):
+            text += f"\n  ...and {len(ids) - len(briefs)} more"
+    return text
+
+
 def learn(store: Store, run_id: str, iteration: int) -> dict:
     evidence = latest_train_evidence(store, run_id)
     _, active = store.active()
@@ -183,14 +199,14 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                     stats["rejected"] += 1
                     stats["rejected_rules"].append({"rule_id": cand["rule_id"], "kind": kind,
                                                     "description": cand.get("description"), "reason": verdict["reason"]})
-                    rejected_feedback.append(f"{cand.get('description')!r}: {verdict['reason']}")
+                    rejected_feedback.append(_rejection_feedback(cand, verdict, evidence))
                     log(f"  rejected {cand['rule_id']} [{kind}]: {cand.get('description')} -> {verdict['reason']}")
             _, active = store.active()
             groups = {"uncovered": [e for e in groups["uncovered"] if _uncovered_denial(active, e)],
                       "holds": [e for e in groups["holds"] if _false_hold(active, e)]}
             if not rejected_feedback or not (groups["uncovered"] or groups["holds"]):
                 break
-            feedback = "; ".join(rejected_feedback)
+            feedback = "\n".join(rejected_feedback)
     return stats
 
 

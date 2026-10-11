@@ -36,9 +36,16 @@ def _payer_notes(payer: str, rules: list[dict]) -> str:
     own = [r for r in rules if r["payer"] in (payer, "*")]
     if not own:
         return "No payer-specific rules learned yet."
-    return "\n".join(f"- {r['description']}" + (f" (denies with CARC {r['predict']['carc']})"
-                                                 if r["predict"]["outcome"] == "denied" else " (pays)")
-                     for r in own)
+    denials = [f"- {r['description']} (denies with CARC {r['predict']['carc']})"
+               for r in own if r["predict"]["outcome"] == "denied"]
+    exceptions = [f"- {r['description']} (pays)" for r in own if r["predict"]["outcome"] != "denied"]
+    parts = []
+    if denials:  # rule text names the codes it was learned from; the policy behind it is broader
+        parts.append("Learned payer policy (examples, not exhaustive: the codes named below illustrate a "
+                     "pattern, so apply the policy to similar codes and situations too):\n" + "\n".join(denials))
+    if exceptions:  # exceptions must not be stretched: they are only safe as stated
+        parts.append("Learned exceptions (apply only as stated):\n" + "\n".join(exceptions))
+    return "\n\n".join(parts)
 
 
 def _memories(similar: list[dict]) -> str:
