@@ -1,0 +1,394 @@
+{
+  "run_id": "run1",
+  "scrubber_model": "anthropic/claude-sonnet-5-5",
+  "watcher_model": "anthropic/claude-opus-5-5",
+  "curve": [
+    {
+      "iteration": 0,
+      "ruleset_version": 0,
+      "rule_count": 0,
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.682,
+        "accuracy_with_reason": 0.682,
+        "denials_caught": 5,
+        "denials_caught_right_reason": 5,
+        "unnecessary_holds": 1,
+        "unnecessary_hold_rate": 0.091,
+        "missed_denials": 6
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 0.748,
+        "accuracy_with_reason": 0.75,
+        "denials_caught": 10,
+        "denials_caught_right_reason": 10,
+        "unnecessary_holds": 3,
+        "unnecessary_hold_rate": 0.273,
+        "missed_denials": 3
+      }
+    },
+    {
+      "iteration": 1,
+      "ruleset_version": 3,
+      "rule_count": 3,
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.772,
+        "accuracy_with_reason": 0.773,
+        "denials_caught": 8,
+        "denials_caught_right_reason": 8,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 3
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 0.755,
+        "accuracy_with_reason": 0.75,
+        "denials_caught": 9,
+        "denials_caught_right_reason": 9,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 4
+      }
+    },
+    {
+      "iteration": 2,
+      "ruleset_version": 7,
+      "rule_count": 7,
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.818,
+        "accuracy_with_reason": 0.818,
+        "denials_caught": 9,
+        "denials_caught_right_reason": 9,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 2
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 0.909,
+        "accuracy_with_reason": 0.917,
+        "denials_caught": 13,
+        "denials_caught_right_reason": 13,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 0
+      }
+    },
+    {
+      "iteration": 3,
+      "ruleset_version": 7,
+      "rule_count": 7,
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.818,
+        "accuracy_with_reason": 0.818,
+        "denials_caught": 9,
+        "denials_caught_right_reason": 9,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 2
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 0.909,
+        "accuracy_with_reason": 0.917,
+        "denials_caught": 13,
+        "denials_caught_right_reason": 13,
+        "unnecessary_holds": 2,
+        "unnecessary_hold_rate": 0.182,
+        "missed_denials": 0
+      }
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "R-001",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW bundles venipuncture 36415 into the payment for a same-claim lab panel (e.g., 80053) and denies it with CARC 97.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 1,
+      "carc": "97",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "BAYVIEW"
+        },
+        {
+          "field": "cpts",
+          "op": "contains",
+          "value": "36415"
+        },
+        {
+          "field": "cpts",
+          "op": "contains_any",
+          "value": [
+            "80053",
+            "80048",
+            "80061",
+            "85025",
+            "83036"
+          ]
+        }
+      ],
+      "evidence": [
+        "run1:0:CLM-016"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-002",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR rejects modifier 59 as inconsistent with the procedure (CARC 4) and expects the X{EPSU} subset modifiers (e.g., XU) instead.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 2,
+      "carc": "4",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "NORTHSTAR"
+        },
+        {
+          "any_line": [
+            {
+              "field": "modifiers",
+              "op": "contains",
+              "value": "59"
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "run1:0:CLM-026"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-003",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR requires prior authorization for advanced imaging (MRI/CT such as 70551, 72148, 74177) and denies with CARC 197 when no auth is on the claim.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 3,
+      "carc": "197",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "NORTHSTAR"
+        },
+        {
+          "field": "prior_auth",
+          "op": "missing"
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "70551",
+                "70552",
+                "70553",
+                "72141",
+                "72146",
+                "72148",
+                "72149",
+                "72158",
+                "73721",
+                "74176",
+                "74177",
+                "74178",
+                "71250",
+                "71260",
+                "70450"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "run1:0:CLM-030"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-004",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW denies telehealth billed with POS 02 when the patient was at home (POS 10 required) with CARC 5.",
+      "status": "promoted",
+      "iteration": 1,
+      "version": 4,
+      "carc": "5",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "BAYVIEW"
+        },
+        {
+          "field": "pos",
+          "op": "eq",
+          "value": "02"
+        },
+        {
+          "field": "context.patient_location",
+          "op": "eq",
+          "value": "home"
+        }
+      ],
+      "evidence": [
+        "run1:1:CLM-012"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-005",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW denies claims with a service line billed at zero charge as missing information (CARC 16, RARC M79).",
+      "status": "promoted",
+      "iteration": 1,
+      "version": 5,
+      "carc": "16",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "BAYVIEW"
+        },
+        {
+          "any_line": [
+            {
+              "field": "charge",
+              "op": "lte",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "run1:1:CLM-015"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-006",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW (Medicaid managed care) denies claims submitted more than 90 days after the date of service for timely filing (CARC 29).",
+      "status": "promoted",
+      "iteration": 1,
+      "version": 6,
+      "carc": "29",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "BAYVIEW"
+        },
+        {
+          "field": "days_to_submit",
+          "op": "gt",
+          "value": 90
+        }
+      ],
+      "evidence": [
+        "run1:1:CLM-027"
+      ],
+      "rejection_reason": null
+    },
+    {
+      "rule_id": "R-007",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR caps outpatient therapy visits at 20 per plan year and denies further PT/OT/ST visits (GP/GO/GN modifier lines) with CARC 119 once 20 visits have been used year-to-date.",
+      "status": "promoted",
+      "iteration": 1,
+      "version": 7,
+      "carc": "119",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "NORTHSTAR"
+        },
+        {
+          "field": "context.visit_count_ytd",
+          "op": "gte",
+          "value": 20
+        },
+        {
+          "any_line": [
+            {
+              "field": "modifiers",
+              "op": "contains_any",
+              "value": [
+                "GP",
+                "GO",
+                "GN"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "run1:1:CLM-021"
+      ],
+      "rejection_reason": null
+    }
+  ],
+  "learning": [
+    {
+      "iteration": 0,
+      "misses": 3,
+      "proposed": 3,
+      "promoted": 3,
+      "rejected": 0,
+      "revised": 0
+    },
+    {
+      "iteration": 1,
+      "misses": 4,
+      "proposed": 4,
+      "promoted": 4,
+      "rejected": 0,
+      "revised": 0
+    },
+    {
+      "iteration": 2,
+      "misses": 0,
+      "proposed": 0,
+      "promoted": 0,
+      "rejected": 0,
+      "revised": 0
+    }
+  ],
+  "counts": {
+    "episodes": 184,
+    "rules": 7,
+    "rulesets": 8,
+    "evaluations": 7,
+    "audits": 11
+  }
+}
