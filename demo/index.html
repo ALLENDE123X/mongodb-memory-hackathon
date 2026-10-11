@@ -78,11 +78,16 @@ svg .val { fill:var(--ink); font-weight:700; font-size:16px; }
 .mem .cnt { font-weight:800; font-variant-numeric:tabular-nums; }
 .mem .off { color:var(--warn); font-weight:700; }
 footer { margin:64px 0 24px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+#sample-banner { position:sticky; top:0; z-index:10; background:#ffb300; color:#1a1200; font-weight:900; text-align:center;
+  letter-spacing:.08em; padding:12px 16px; font-size:1.2rem; border-bottom:4px solid #7a5200; }
+#sample-banner[hidden] { display:none; }
+.mem a { color:var(--heldout); font-weight:700; word-break:break-all; }
 #err { display:none; background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad); padding:16px; border-radius:12px; margin-top:24px; }
 @media (max-width:640px) { html { font-size:17px; } .rsi-row { grid-template-columns:1fr; gap:4px; } }
 </style>
 </head>
 <body>
+<div id="sample-banner" role="alert" hidden>SAMPLE DATA, NOT A RESULT</div>
 <main>
   <header>
     <div class="eyebrow">Recursive revenue-cycle harness</div>
@@ -101,6 +106,7 @@ footer { margin:64px 0 24px; padding-top:20px; border-top:1px solid var(--line);
   <section id="s-rules" hidden>
     <h2>What it learned, and what the gate refused</h2>
     <p class="sub">Every candidate rule is replayed against observed payer outcomes by the harness itself. Zero regressions or it does not ship.</p>
+    <p class="sub">Rules learned in round N are first scored at iteration N+1.</p>
     <div id="timeline"></div>
   </section>
 
@@ -236,7 +242,8 @@ function renderCurve(d) {
   svg.replaceChildren(...kids);
   $("curve-sub").textContent =
     `Balanced accuracy per iteration (n = ${pts[0].heldout.n} held-out, ${pts[0].train.n} train). ` +
-    "Held-out claims never become learning evidence. Train is what the watcher studies.";
+    "Held-out claims never become learning evidence. Train is what the watcher studies. " +
+    "Rules learned in round N are first scored at iteration N+1.";
 }
 
 // ---- rule timeline
@@ -295,7 +302,8 @@ function renderRsi(d) {
       h("div", null, h("b", null, `Round ${l.iteration}`)),
       h("div", null, h("div", { class: "bar", title: `${l.promoted} of ${l.proposed} proposals promoted` },
         h("i", { style: `width:${r == null ? 0 : Math.round(r * 100)}%` })),
-        h("div", { class: "meta" }, `${l.uncovered_denials ?? 0} uncovered denials, ${l.false_holds ?? 0} false holds, ${l.revised ?? 0} revised`)),
+        h("div", { class: "meta" }, [["uncovered denials", l.uncovered_denials ?? l.misses], ["false holds", l.false_holds], ["revised", l.revised]]
+          .map(([k, v]) => `${v ?? "n/a"} ${k}`).join(", "))),
       h("div", null, r == null ? h("b", null, "no proposals (n=0)") : h("b", null, `${pct(r)} `),
         h("span", { class: "meta" }, r == null ? "" : `${l.promoted}/${l.proposed}, n=${l.n}`)));
   });
@@ -313,10 +321,14 @@ function renderMemory(d) {
       cols.map((c) => h("div", { class: "row" }, h("code", null, c.collection),
         c.count ? h("span", { class: "cnt" }, c.count) : h("span", { class: "off" }, "0 / not enabled"))));
   });
-  if (d.raindrop && typeof d.raindrop === "object") {
-    const rows = Object.entries(d.raindrop).filter(([, v]) => v == null || typeof v !== "object");
-    cards.push(h("div", { class: "panel" }, h("div", { class: "t" }, "Observability"), h("div", { class: "meta" }, "agent traces"),
-      rows.map(([k, v]) => h("div", { class: "row" }, h("code", null, k), h("span", { class: "cnt" }, String(v))))));
+  const rd = d.raindrop;
+  if (rd && typeof rd === "object" && (rd.dashboard_url || rd.total)) {
+    const sent = Object.entries(rd.events_sent || {});
+    const url = /^https?:\/\//.test(rd.dashboard_url || "") ? rd.dashboard_url : null;
+    cards.push(h("div", { class: "panel" }, h("div", { class: "t" }, "Raindrop"), h("div", { class: "meta" }, "agent telemetry events sent"),
+      sent.map(([k, v]) => h("div", { class: "row" }, h("code", null, k), h("span", { class: "cnt" }, String(v)))),
+      h("div", { class: "row" }, h("code", null, "total"), h("span", { class: "cnt" }, String(rd.total ?? 0))),
+      url ? h("div", { class: "row" }, h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, "Open the Raindrop dashboard")) : null));
   }
   $("mem").replaceChildren(...cards);
 }
@@ -332,7 +344,9 @@ async function main() {
     renderHeader(d); renderCurve(d); renderTimeline(d); renderRsi(d); renderMemory(d);
     for (const id of ["s-curve", "s-rules", "s-rsi", "s-mem"]) $(id).hidden = false;
     if (!d.rsi.length) $("s-rsi").hidden = true;
-    document.title = `Held-out accuracy ${f2(d.baseline.heldout.balanced_accuracy)} to ${f2(d.curve[d.curve.length - 1].heldout.balanced_accuracy)}: Recursive Revenue-Cycle Harness`;
+    const sample = d.run_id === "sample" || !!d.synthetic_sample;
+    $("sample-banner").hidden = !sample;
+    document.title = `${sample ? "SAMPLE " : ""}Held-out accuracy ${f2(d.baseline.heldout.balanced_accuracy)} to ${f2(d.curve[d.curve.length - 1].heldout.balanced_accuracy)}: Recursive Revenue-Cycle Harness`;
   } catch (e) {
     $("headline").textContent = "Could not load the run";
     const box = $("err"); box.style.display = "block";

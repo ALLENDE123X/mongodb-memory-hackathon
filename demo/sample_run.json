@@ -1,4 +1,6 @@
 {
+  "synthetic_sample": true,
+  "_note": "Synthetic sample from a fake-model mongomock run with injected rule shapes. NOT a real result; for developing the demo page only.",
   "run_id": "sample",
   "scrubber_model": null,
   "watcher_model": null,
@@ -2024,5 +2026,13 @@
     "audits": 27,
     "semantic_kb": 18,
     "taxonomy": 9
+  },
+  "raindrop": {
+    "dashboard_url": "https://example.invalid/raindrop-dashboard",
+    "events_sent": {
+      "scrub": 138,
+      "gate_verdict": 23
+    },
+    "total": 161
   }
 }

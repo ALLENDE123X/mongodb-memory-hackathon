@@ -28,7 +28,8 @@ def seeded_db(monkeypatch):
 def test_export_has_all_keys_and_consistent_stats(monkeypatch):
     db, _ = seeded_db(monkeypatch)
     out = export(db, "t")
-    assert KEYS <= out.keys() and "raindrop" not in out
+    assert KEYS <= out.keys()
+    assert {"dashboard_url", "events_sent", "total"} <= out["raindrop"].keys()  # JOB-14 block, kept as is
     assert out["baseline"]["label"] == "no learned rules" and out["baseline"]["rule_count"] == 0
     assert out["curve"][1]["label"] == f"ruleset v{out['curve'][1]['ruleset_version']}"
     r = out["rsi"][0]
@@ -85,3 +86,25 @@ def test_html_references_only_relative_resources_and_has_required_copy():
     assert "All claims synthetic. Payer simulator stands in for real 835 remittances." in html
     assert "0 / not enabled" in html and "prefers-color-scheme: dark" in html
     assert "—" not in html and "–" not in html  # no em or en dashes in page copy
+
+
+def test_export_tolerates_none_fixes_and_regressions(monkeypatch):
+    db, store = seeded_db(monkeypatch)
+    db.evaluations.update_many({}, {"$set": {"fixes": None, "regressions": None, "redundant": None}})
+    db.rules.update_many({}, {"$set": {"regressions": None}})
+    store.audit("promotion", run_id="t", rule_id="nope", fixes=None)
+    out = export(db, "t")
+    assert all(g["fixes"] == 0 and g["regressions"] == 0 for g in out["gate"])
+    assert all(r["fixes"] == [] and r["regressions"] == [] for r in out["rules"])
+    assert next(e for e in out["ledger"] if e["rule_id"] == "nope")["fixes"] == 0
+
+
+def test_sample_is_flagged_and_page_shows_banner_and_rsi_na():
+    sample = json.loads((DEMO / "sample_run.json").read_text())
+    assert sample["synthetic_sample"] is True and sample["_note"] and sample["run_id"] == "sample"
+    html = (DEMO / "index.html").read_text()
+    assert "SAMPLE DATA, NOT A RESULT" in html and 'd.run_id === "sample" || !!d.synthetic_sample' in html
+    assert '"SAMPLE "' in html                                   # title prefix
+    assert "l.uncovered_denials ?? l.misses" in html and '?? "n/a"' in html
+    assert "Rules learned in round N are first scored at iteration N+1." in html
+    assert "Open the Raindrop dashboard" in html
