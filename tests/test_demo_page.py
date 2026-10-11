@@ -40,9 +40,9 @@ def test_export_has_all_keys_and_consistent_stats(monkeypatch):
     assert rejected and any(g["regressions"] for g in rejected)
     kinds = {e["kind"] for e in out["ledger"]}
     assert {"proposal", "promotion", "rejection"} <= kinds
-    # absent collections show up as zero, never missing
-    assert out["memory_counts"]["semantic"] == [{"collection": "semantic_kb", "count": 0}]
-    assert out["memory_counts"]["taxonomic"] == [{"collection": "taxonomy", "count": 0}]
+    # every memory type is always present with the live count (0 when a collection is empty or absent)
+    assert out["memory_counts"]["semantic"] == [{"collection": "semantic_kb", "count": db.semantic_kb.count_documents({})}]
+    assert out["memory_counts"]["taxonomic"] == [{"collection": "taxonomy", "count": db.taxonomy.count_documents({})}]
     assert out["memory_counts"]["episodic"][0]["count"] == db.episodes.count_documents({})
     json.dumps(out, default=str)
 
@@ -56,6 +56,7 @@ def test_export_handles_exception_superseded_consolidation_and_probe(monkeypatch
     db.rules.update_one({"_id": first}, {"$set": {"status": "superseded", "superseded_by": "R-900"}})
     store.audit("consolidation", run_id="t", iteration=0, rule_id="R-900", superseded=[first], description="merged")
     store.audit("rejection", run_id="t", rule_id="PROBE-1", reason="would wrongly deny", probe=True)
+    before = db.semantic_kb.count_documents({})
     db.semantic_kb.insert_one({"_id": "x"})
     out = export(db, "t")
     exc = next(r for r in out["rules"] if r["rule_id"] == "R-900")
@@ -65,7 +66,7 @@ def test_export_handles_exception_superseded_consolidation_and_probe(monkeypatch
     by_kind = {e["kind"]: e for e in out["ledger"]}
     assert by_kind["consolidation"]["extra"]["superseded"] == [first]
     assert "probe" in by_kind
-    assert out["memory_counts"]["semantic"][0]["count"] == 1
+    assert out["memory_counts"]["semantic"][0]["count"] == before + 1
 
 
 def test_baseline_label_only_when_rule_count_is_zero():
