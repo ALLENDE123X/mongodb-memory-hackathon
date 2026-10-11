@@ -2,44 +2,8 @@
   {
     "id": "CLM-001",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 61,
-      "sex": "M",
-      "member_id": "SYN-222791"
-    },
-    "provider": {
-      "npi": "9980588871",
-      "specialty": "Gastroenterology",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-07",
-    "submission_date": "2026-07-09",
-    "place_of_service": "22",
-    "diagnoses": [
-      "R10.9",
-      "K57.30"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "74177",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 210000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "ordering_reason": "persistent abdominal pain"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "197",
@@ -48,55 +12,97 @@
         "PR-01"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000001",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-222791",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19640815",
+        "groupNumber": "NS-GRP-2791"
+      },
+      "billing": {
+        "npi": "9980588871",
+        "employerId": "990588871",
+        "organizationName": "SYNTHETIC GASTROENTEROLOGY ASSOCIATES",
+        "taxonomyCode": "207RG0100X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-001",
+        "claimChargeAmount": "2100.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "R109"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "K5730"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-001-1",
+            "serviceDate": "20260707",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "74177",
+              "lineItemChargeAmount": "2100.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-09",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "persistent abdominal pain"
+    }
   },
   {
     "id": "CLM-002",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 66,
-      "sex": "F",
-      "member_id": "SYN-434839"
-    },
-    "provider": {
-      "npi": "9954862057",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-02",
-    "submission_date": "2026-09-04",
-    "place_of_service": "11",
-    "diagnoses": [
-      "K21.9",
-      "E03.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      },
-      {
-        "line": 2,
-        "cpt": "84443",
-        "modifiers": [],
-        "dx_pointers": [],
-        "units": 1,
-        "charge_cents": 3800
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "16",
@@ -105,175 +111,315 @@
         "PR-11"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000002",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-434839",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19591010"
+      },
+      "billing": {
+        "npi": "9954862057",
+        "employerId": "994862057",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-002",
+        "claimChargeAmount": "188.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "K219"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E039"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-002-1",
+            "serviceDate": "20260902",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-002-2",
+            "serviceDate": "20260902",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "84443",
+              "lineItemChargeAmount": "38.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": []
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-04",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-003",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 52,
-      "sex": "F",
-      "member_id": "SYN-770658"
-    },
-    "provider": {
-      "npi": "9994811311",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-11",
-    "submission_date": "2026-08-13",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E78.5",
-      "E03.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "80061",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 5500
-      },
-      {
-        "line": 2,
-        "cpt": "84443",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3800
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. BAYVIEW lab claim with no separately billed venipuncture.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000003",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-770658",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19730818"
+      },
+      "billing": {
+        "npi": "9994811311",
+        "employerId": "994811311",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-003",
+        "claimChargeAmount": "93.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E785"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E039"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-003-1",
+            "serviceDate": "20260811",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "80061",
+              "lineItemChargeAmount": "55.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-003-2",
+            "serviceDate": "20260811",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "84443",
+              "lineItemChargeAmount": "38.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-13",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-004",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "telehealth",
-    "patient": {
-      "age": 78,
-      "sex": "M",
-      "member_id": "SYN-167868"
-    },
-    "provider": {
-      "npi": "9943353265",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-09",
-    "submission_date": "2026-09-11",
-    "place_of_service": "02",
-    "diagnoses": [
-      "I10",
-      "E11.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "visit_mode": "synchronous audio-video",
-      "patient_location": "home"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. CASCADE accepts telehealth E/M on POS 02 without modifier 95.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000004",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-167868",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19480518"
+      },
+      "billing": {
+        "npi": "9943353265",
+        "employerId": "993353265",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-004",
+        "claimChargeAmount": "150.00",
+        "placeOfServiceCode": "02",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "I10"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E119"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-004-1",
+            "serviceDate": "20260909",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-11",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    }
   },
   {
     "id": "CLM-005",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 67,
-      "sex": "M",
-      "member_id": "SYN-837261"
-    },
-    "provider": {
-      "npi": "9967513613",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-29",
-    "submission_date": "2026-10-01",
-    "place_of_service": "11",
-    "diagnoses": [
-      "I10",
-      "Z23"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      },
-      {
-        "line": 2,
-        "cpt": "90686",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3500
-      },
-      {
-        "line": 3,
-        "cpt": "G0008",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "same_day_services": "office visit with influenza vaccine"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "4",
@@ -282,97 +428,219 @@
         "PR-03"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000005",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-837261",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19590316"
+      },
+      "billing": {
+        "npi": "9967513613",
+        "employerId": "997513613",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-005",
+        "claimChargeAmount": "215.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "I10"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "Z23"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-005-1",
+            "serviceDate": "20260929",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-005-2",
+            "serviceDate": "20260929",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "90686",
+              "lineItemChargeAmount": "35.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-005-3",
+            "serviceDate": "20260929",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "G0008",
+              "lineItemChargeAmount": "30.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-10-01",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "same_day_services": "office visit with influenza vaccine"
+    }
   },
   {
     "id": "CLM-006",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 22,
-      "sex": "M",
-      "member_id": "SYN-407224"
-    },
-    "provider": {
-      "npi": "9970455853",
-      "specialty": "Emergency Medicine",
-      "in_network": false
-    },
-    "date_of_service": "2026-08-30",
-    "submission_date": "2026-09-02",
-    "place_of_service": "23",
-    "diagnoses": [
-      "S93.401A"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99284",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 65000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "emergency": true
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Emergency department services (POS 23) are covered out-of-network at BAYVIEW.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000006",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-407224",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "20040110"
+      },
+      "billing": {
+        "npi": "9970455853",
+        "employerId": "990455853",
+        "organizationName": "SYNTHETIC EMERGENCY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207P00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-006",
+        "claimChargeAmount": "650.00",
+        "placeOfServiceCode": "23",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "S93401A"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-006-1",
+            "serviceDate": "20260830",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99284",
+              "lineItemChargeAmount": "650.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              },
+              "emergencyIndicator": "Y"
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-02",
+      "provider_in_network": false,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "emergency": true
+    }
   },
   {
     "id": "CLM-007",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 58,
-      "sex": "M",
-      "member_id": "SYN-786579"
-    },
-    "provider": {
-      "npi": "9975432319",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-01-12",
-    "submission_date": "2026-08-04",
-    "place_of_service": "11",
-    "diagnoses": [
-      "I10",
-      "E78.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 22000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "resubmission": false,
-      "delay_note": "coordination of benefits lookup delayed submission"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "29",
@@ -381,95 +649,189 @@
         "PR-02"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000007",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-786579",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19670303",
+        "groupNumber": "NS-GRP-6579"
+      },
+      "billing": {
+        "npi": "9975432319",
+        "employerId": "995432319",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-007",
+        "claimChargeAmount": "220.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "I10"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E785"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-007-1",
+            "serviceDate": "20260112",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "220.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-04",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "resubmission": false,
+      "delay_note": "coordination of benefits lookup delayed submission"
+    }
   },
   {
     "id": "CLM-008",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 72,
-      "sex": "F",
-      "member_id": "SYN-803340"
-    },
-    "provider": {
-      "npi": "9918780175",
-      "specialty": "Gastroenterology",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-14",
-    "submission_date": "2026-07-16",
-    "place_of_service": "22",
-    "diagnoses": [
-      "R10.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "74177",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 205000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "ordering_reason": "persistent abdominal pain"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. CASCADE does not require prior authorization for advanced outpatient imaging.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000008",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-803340",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19530816"
+      },
+      "billing": {
+        "npi": "9918780175",
+        "employerId": "998780175",
+        "organizationName": "SYNTHETIC GASTROENTEROLOGY ASSOCIATES",
+        "taxonomyCode": "207RG0100X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-008",
+        "claimChargeAmount": "2050.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "R109"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-008-1",
+            "serviceDate": "20260714",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "74177",
+              "lineItemChargeAmount": "2050.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-16",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "ordering_reason": "persistent abdominal pain"
+    }
   },
   {
     "id": "CLM-009",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "preventive",
-    "patient": {
-      "age": 46,
-      "sex": "F",
-      "member_id": "SYN-092815"
-    },
-    "provider": {
-      "npi": "9990139624",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-03-10",
-    "submission_date": "2026-03-13",
-    "place_of_service": "11",
-    "diagnoses": [
-      "Z00.00"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99396",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 30000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "last_preventive_dos": "2025-11-18",
-      "last_preventive_cpt": "99396"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "119",
@@ -478,152 +840,290 @@
         "PR-06"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000009",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-092815",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19790619",
+        "groupNumber": "NS-GRP-2815"
+      },
+      "billing": {
+        "npi": "9990139624",
+        "employerId": "990139624",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-009",
+        "claimChargeAmount": "300.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "Z0000"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-009-1",
+            "serviceDate": "20260310",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99396",
+              "lineItemChargeAmount": "300.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-03-13",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-11-18",
+      "last_preventive_cpt": "99396"
+    }
   },
   {
     "id": "CLM-010",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 71,
-      "sex": "M",
-      "member_id": "SYN-661318"
-    },
-    "provider": {
-      "npi": "9960913909",
-      "specialty": "Orthopedic Surgery",
-      "in_network": true
-    },
-    "date_of_service": "2026-05-06",
-    "submission_date": "2026-05-12",
-    "place_of_service": "22",
-    "diagnoses": [
-      "M54.16",
-      "M54.50"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "72148",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 162000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "ordering_reason": "lumbar radiculopathy, 8 weeks of PT without improvement"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. CASCADE does not require prior authorization for advanced outpatient imaging.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000010",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-661318",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19550127"
+      },
+      "billing": {
+        "npi": "9960913909",
+        "employerId": "990913909",
+        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
+        "taxonomyCode": "207X00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-010",
+        "claimChargeAmount": "1620.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M5416"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M5450"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-010-1",
+            "serviceDate": "20260506",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "72148",
+              "lineItemChargeAmount": "1620.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-12",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "ordering_reason": "lumbar radiculopathy, 8 weeks of PT without improvement"
+    }
   },
   {
     "id": "CLM-011",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 74,
-      "sex": "M",
-      "member_id": "SYN-148525"
-    },
-    "provider": {
-      "npi": "9938885393",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-20",
-    "submission_date": "2026-08-24",
-    "place_of_service": "11",
-    "diagnoses": [
-      "Z96.651",
-      "M62.81"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97110",
-        "modifiers": [
-          "GP",
-          "KX"
-        ],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 3,
-        "charge_cents": 9500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "visit_count_ytd": 26,
-      "plan_year_start": "2026-01-01"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. CASCADE has no hard PT visit cap; KX attests continued necessity.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000011",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-148525",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19511108"
+      },
+      "billing": {
+        "npi": "9938885393",
+        "employerId": "998885393",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-011",
+        "claimChargeAmount": "95.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "Z96651"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M6281"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-011-1",
+            "serviceDate": "20260820",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "95.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "3",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP",
+                "KX"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-24",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_count_ytd": 26,
+      "plan_year_start": "2026-01-01"
+    }
   },
   {
     "id": "CLM-012",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "telehealth",
-    "patient": {
-      "age": 38,
-      "sex": "M",
-      "member_id": "SYN-575513"
-    },
-    "provider": {
-      "npi": "9913735379",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-05-13",
-    "submission_date": "2026-05-15",
-    "place_of_service": "02",
-    "diagnoses": [
-      "F41.1"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [
-          "95"
-        ],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "visit_mode": "synchronous audio-video",
-      "patient_location": "home"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "5",
@@ -632,46 +1132,95 @@
         "PR-09"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000012",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-575513",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19870918"
+      },
+      "billing": {
+        "npi": "9913735379",
+        "employerId": "993735379",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-012",
+        "claimChargeAmount": "150.00",
+        "placeOfServiceCode": "02",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "F411"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-012-1",
+            "serviceDate": "20260513",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              },
+              "procedureModifiers": [
+                "95"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-15",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    }
   },
   {
     "id": "CLM-013",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 70,
-      "sex": "F",
-      "member_id": "SYN-363387"
-    },
-    "provider": {
-      "npi": "9950047439",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-04-07",
-    "submission_date": "2026-04-09",
-    "place_of_service": "11",
-    "diagnoses": [
-      "R53.83"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "82306",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 6500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "167",
@@ -680,96 +1229,187 @@
         "PR-08"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000013",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-363387",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19560321"
+      },
+      "billing": {
+        "npi": "9950047439",
+        "employerId": "990047439",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-013",
+        "claimChargeAmount": "65.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "R5383"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-013-1",
+            "serviceDate": "20260407",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "82306",
+              "lineItemChargeAmount": "65.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-04-09",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-014",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 76,
-      "sex": "F",
-      "member_id": "SYN-487574"
-    },
-    "provider": {
-      "npi": "9991186252",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-01-20",
-    "submission_date": "2026-10-09",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E11.9",
-      "I10"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 21500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "resubmission": false,
-      "delay_note": "credentialing hold released late"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Submitted 262 days after DOS, inside CASCADE's 365-day filing window.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000014",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-487574",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19490221"
+      },
+      "billing": {
+        "npi": "9991186252",
+        "employerId": "991186252",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-014",
+        "claimChargeAmount": "215.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E119"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "I10"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-014-1",
+            "serviceDate": "20260120",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "215.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-10-09",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "resubmission": false,
+      "delay_note": "credentialing hold released late"
+    }
   },
   {
     "id": "CLM-015",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "procedure",
-    "patient": {
-      "age": 31,
-      "sex": "M",
-      "member_id": "SYN-986828"
-    },
-    "provider": {
-      "npi": "9928807290",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-21",
-    "submission_date": "2026-07-23",
-    "place_of_service": "11",
-    "diagnoses": [
-      "B07.8"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "17110",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 0
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "16",
@@ -778,57 +1418,90 @@
         "PR-12"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000015",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-986828",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19941222"
+      },
+      "billing": {
+        "npi": "9928807290",
+        "employerId": "998807290",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-015",
+        "claimChargeAmount": "0.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "B078"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-015-1",
+            "serviceDate": "20260721",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "17110",
+              "lineItemChargeAmount": "0.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-23",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-016",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 41,
-      "sex": "M",
-      "member_id": "SYN-599528"
-    },
-    "provider": {
-      "npi": "9990786666",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-08",
-    "submission_date": "2026-07-10",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E11.9",
-      "E78.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "80053",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 4500
-      },
-      {
-        "line": 2,
-        "cpt": "36415",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 1500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "97",
@@ -837,177 +1510,347 @@
         "PR-05"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000016",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-599528",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19841004"
+      },
+      "billing": {
+        "npi": "9990786666",
+        "employerId": "990786666",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-016",
+        "claimChargeAmount": "60.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E119"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E785"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-016-1",
+            "serviceDate": "20260708",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "80053",
+              "lineItemChargeAmount": "45.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-016-2",
+            "serviceDate": "20260708",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "36415",
+              "lineItemChargeAmount": "15.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-10",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-017",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 29,
-      "sex": "F",
-      "member_id": "SYN-291703"
-    },
-    "provider": {
-      "npi": "9942366712",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-10-02",
-    "submission_date": "2026-10-06",
-    "place_of_service": "11",
-    "diagnoses": [
-      "J02.9",
-      "Z23"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      },
-      {
-        "line": 2,
-        "cpt": "90686",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3500
-      },
-      {
-        "line": 3,
-        "cpt": "90471",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. BAYVIEW does not require modifier 25 on an E/M billed with vaccine administration.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000017",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-291703",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19970804"
+      },
+      "billing": {
+        "npi": "9942366712",
+        "employerId": "992366712",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-017",
+        "claimChargeAmount": "215.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "J029"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "Z23"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-017-1",
+            "serviceDate": "20261002",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-017-2",
+            "serviceDate": "20261002",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "90686",
+              "lineItemChargeAmount": "35.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-017-3",
+            "serviceDate": "20261002",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "90471",
+              "lineItemChargeAmount": "30.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-10-06",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-018",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 69,
-      "sex": "F",
-      "member_id": "SYN-176031"
-    },
-    "provider": {
-      "npi": "9937215901",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-15",
-    "submission_date": "2026-07-17",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E11.9",
-      "N18.30"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "80053",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 4500
-      },
-      {
-        "line": 2,
-        "cpt": "36415",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 1500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. CASCADE pays venipuncture separately from the lab panel.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000018",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-176031",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19561101"
+      },
+      "billing": {
+        "npi": "9937215901",
+        "employerId": "997215901",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-018",
+        "claimChargeAmount": "60.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E119"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "N1830"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-018-1",
+            "serviceDate": "20260715",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "80053",
+              "lineItemChargeAmount": "45.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-018-2",
+            "serviceDate": "20260715",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "36415",
+              "lineItemChargeAmount": "15.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-17",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-019",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "telehealth",
-    "patient": {
-      "age": 26,
-      "sex": "F",
-      "member_id": "SYN-450400"
-    },
-    "provider": {
-      "npi": "9908838737",
-      "specialty": "Psychiatry",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-08",
-    "submission_date": "2026-09-10",
-    "place_of_service": "10",
-    "diagnoses": [
-      "F41.1",
-      "F32.A"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [
-          "GT"
-        ],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 22000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "visit_mode": "synchronous audio-video",
-      "patient_location": "home"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "4",
@@ -1016,114 +1859,221 @@
         "PR-09"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000019",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-450400",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "20000519"
+      },
+      "billing": {
+        "npi": "9908838737",
+        "employerId": "998838737",
+        "organizationName": "SYNTHETIC PSYCHIATRY ASSOCIATES",
+        "taxonomyCode": "2084P0800X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-019",
+        "claimChargeAmount": "220.00",
+        "placeOfServiceCode": "10",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "F411"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "F32A"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-019-1",
+            "serviceDate": "20260908",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "220.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GT"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-10",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    }
   },
   {
     "id": "CLM-020",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 39,
-      "sex": "F",
-      "member_id": "SYN-223307"
-    },
-    "provider": {
-      "npi": "9992440268",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-05-19",
-    "submission_date": "2026-05-21",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M25.561",
-      "M62.81"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97530",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 2,
-        "charge_cents": 10000
-      },
-      {
-        "line": 2,
-        "cpt": "97140",
-        "modifiers": [
-          "XU",
-          "GP"
-        ],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 8500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "visit_count_ytd": 9
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
-      "reason": "Paid. NCCI pair billed with XU, which NORTHSTAR accepts; visit count under the annual limit.",
+      "reason": "Paid. NCCI pair 97110/97164 bypassed with XU, which NORTHSTAR accepts; visit count under the annual limit.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000020",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-223307",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19870427",
+        "groupNumber": "NS-GRP-3307"
+      },
+      "billing": {
+        "npi": "9992440268",
+        "employerId": "992440268",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-020",
+        "claimChargeAmount": "215.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M25561"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M6281"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-020-1",
+            "serviceDate": "20260519",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "100.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "2",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-020-2",
+            "serviceDate": "20260519",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97164",
+              "lineItemChargeAmount": "115.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              },
+              "procedureModifiers": [
+                "XU",
+                "GP"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-21",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 9,
+      "reevaluation_reason": "status change after a fall; plan of care updated"
+    }
   },
   {
     "id": "CLM-021",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 55,
-      "sex": "F",
-      "member_id": "SYN-547280"
-    },
-    "provider": {
-      "npi": "9938528084",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-12",
-    "submission_date": "2026-08-14",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M54.50",
-      "M62.81"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97110",
-        "modifiers": [
-          "GP"
-        ],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 2,
-        "charge_cents": 9500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "visit_count_ytd": 20,
-      "plan_year_start": "2026-01-01"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "119",
@@ -1132,115 +2082,196 @@
         "PR-07"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000021",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-547280",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19701012",
+        "groupNumber": "NS-GRP-7280"
+      },
+      "billing": {
+        "npi": "9938528084",
+        "employerId": "998528084",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-021",
+        "claimChargeAmount": "95.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M5450"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M6281"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-021-1",
+            "serviceDate": "20260812",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "95.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "2",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-14",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 20,
+      "plan_year_start": "2026-01-01"
+    }
   },
   {
     "id": "CLM-022",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 45,
-      "sex": "M",
-      "member_id": "SYN-528820"
-    },
-    "provider": {
-      "npi": "9901826330",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-25",
-    "submission_date": "2026-08-28",
-    "place_of_service": "11",
-    "diagnoses": [
-      "I10",
-      "E11.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 22000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Clean in-network BAYVIEW office visit submitted within filing window.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000022",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-528820",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19810813"
+      },
+      "billing": {
+        "npi": "9901826330",
+        "employerId": "991826330",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-022",
+        "claimChargeAmount": "220.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "I10"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E119"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-022-1",
+            "serviceDate": "20260825",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "220.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-28",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-023",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 48,
-      "sex": "M",
-      "member_id": "SYN-268656"
-    },
-    "provider": {
-      "npi": "9935515058",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-05",
-    "submission_date": "2026-08-07",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E11.9",
-      "D64.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "85025",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3000
-      },
-      {
-        "line": 2,
-        "cpt": "80061",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 5500
-      },
-      {
-        "line": 3,
-        "cpt": "36415",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 1500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "97",
@@ -1249,94 +2280,217 @@
         "PR-05"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000023",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-268656",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19771015"
+      },
+      "billing": {
+        "npi": "9935515058",
+        "employerId": "995515058",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-023",
+        "claimChargeAmount": "100.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E119"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "D649"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-023-1",
+            "serviceDate": "20260805",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "85025",
+              "lineItemChargeAmount": "30.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-023-2",
+            "serviceDate": "20260805",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "80061",
+              "lineItemChargeAmount": "55.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-023-3",
+            "serviceDate": "20260805",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "36415",
+              "lineItemChargeAmount": "15.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-07",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    }
   },
   {
     "id": "CLM-024",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 40,
-      "sex": "F",
-      "member_id": "SYN-124023"
-    },
-    "provider": {
-      "npi": "9944834782",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-06-30",
-    "submission_date": "2026-07-02",
-    "place_of_service": "11",
-    "diagnoses": [
-      "R53.83"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "82306",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 6500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. NORTHSTAR has no diagnosis restriction on vitamin D testing.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000024",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-124023",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19851115",
+        "groupNumber": "NS-GRP-4023"
+      },
+      "billing": {
+        "npi": "9944834782",
+        "employerId": "994834782",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-024",
+        "claimChargeAmount": "65.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "R5383"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-024-1",
+            "serviceDate": "20260630",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "82306",
+              "lineItemChargeAmount": "65.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-02",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    }
   },
   {
     "id": "CLM-025",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 75,
-      "sex": "M",
-      "member_id": "SYN-141705"
-    },
-    "provider": {
-      "npi": "9986492083",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-06-23",
-    "submission_date": "2026-06-25",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E66.9",
-      "R53.83"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "82306",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 6500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "167",
@@ -1345,114 +2499,218 @@
         "PR-08"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000025",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-141705",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19510116"
+      },
+      "billing": {
+        "npi": "9986492083",
+        "employerId": "996492083",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-025",
+        "claimChargeAmount": "65.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E669"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "R5383"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-025-1",
+            "serviceDate": "20260623",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "82306",
+              "lineItemChargeAmount": "65.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-25",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-026",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 44,
-      "sex": "M",
-      "member_id": "SYN-768426"
-    },
-    "provider": {
-      "npi": "9984656321",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-04-22",
-    "submission_date": "2026-04-24",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M62.81",
-      "M25.561"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97530",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 2,
-        "charge_cents": 10000
-      },
-      {
-        "line": 2,
-        "cpt": "97140",
-        "modifiers": [
-          "59",
-          "GP"
-        ],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 8500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "visit_count_ytd": 6
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "4",
-      "reason": "NORTHSTAR does not accept modifier 59 on NCCI pair edits; requires XS/XU (here 97140 needed XU).",
+      "reason": "NORTHSTAR does not accept modifier 59 to bypass an NCCI PTP edit; 97164 (re-evaluation, column 2 of the 97110 edit) needed XU.",
       "violated_rules": [
         "PR-04"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000026",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-768426",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19820314",
+        "groupNumber": "NS-GRP-8426"
+      },
+      "billing": {
+        "npi": "9984656321",
+        "employerId": "994656321",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-026",
+        "claimChargeAmount": "215.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M6281"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M25561"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-026-1",
+            "serviceDate": "20260422",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "100.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "2",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-026-2",
+            "serviceDate": "20260422",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97164",
+              "lineItemChargeAmount": "115.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "59",
+                "GP"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-04-24",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 6,
+      "reevaluation_reason": "status change after a fall; plan of care updated"
+    }
   },
   {
     "id": "CLM-027",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 34,
-      "sex": "F",
-      "member_id": "SYN-821993"
-    },
-    "provider": {
-      "npi": "9951819093",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-03-02",
-    "submission_date": "2026-06-15",
-    "place_of_service": "11",
-    "diagnoses": [
-      "J45.909",
-      "J06.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 22000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "resubmission": false,
-      "delay_note": "claim held in billing work queue"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "29",
@@ -1461,94 +2719,192 @@
         "PR-02"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000027",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-821993",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19920123"
+      },
+      "billing": {
+        "npi": "9951819093",
+        "employerId": "991819093",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-027",
+        "claimChargeAmount": "220.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "J45909"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "J069"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-027-1",
+            "serviceDate": "20260302",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "220.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-15",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "resubmission": false,
+      "delay_note": "claim held in billing work queue"
+    }
   },
   {
     "id": "CLM-028",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 52,
-      "sex": "M",
-      "member_id": "SYN-960308"
-    },
-    "provider": {
-      "npi": "9924628194",
-      "specialty": "Orthopedic Surgery",
-      "in_network": true
-    },
-    "date_of_service": "2026-06-02",
-    "submission_date": "2026-06-05",
-    "place_of_service": "22",
-    "diagnoses": [
-      "M54.16"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "72148",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 158000
-      }
-    ],
-    "prior_auth_number": "NS-PA-26-004417",
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "ordering_reason": "lumbar radiculopathy"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Advanced imaging with a valid NORTHSTAR prior authorization on file.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000028",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-960308",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19740203",
+        "groupNumber": "NS-GRP-0308"
+      },
+      "billing": {
+        "npi": "9924628194",
+        "employerId": "994628194",
+        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
+        "taxonomyCode": "207X00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-028",
+        "claimChargeAmount": "1580.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M5416"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-028-1",
+            "serviceDate": "20260602",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "72148",
+              "lineItemChargeAmount": "1580.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ],
+        "claimSupplementalInformation": {
+          "priorAuthorizationNumber": "NS-PA-26-004417"
+        }
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-05",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "lumbar radiculopathy"
+    }
   },
   {
     "id": "CLM-029",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 27,
-      "sex": "F",
-      "member_id": "SYN-907511"
-    },
-    "provider": {
-      "npi": "9963726516",
-      "specialty": "Dermatology",
-      "in_network": false
-    },
-    "date_of_service": "2026-06-09",
-    "submission_date": "2026-06-12",
-    "place_of_service": "11",
-    "diagnoses": [
-      "L70.0"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99203",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 20000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "referral_on_file": true
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "242",
@@ -1557,49 +2913,91 @@
         "PR-10"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000029",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-907511",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19981204"
+      },
+      "billing": {
+        "npi": "9963726516",
+        "employerId": "993726516",
+        "organizationName": "SYNTHETIC DERMATOLOGY ASSOCIATES",
+        "taxonomyCode": "207N00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-029",
+        "claimChargeAmount": "200.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "L700"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-029-1",
+            "serviceDate": "20260609",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99203",
+              "lineItemChargeAmount": "200.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-12",
+      "provider_in_network": false,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "referral_on_file": true
+    }
   },
   {
     "id": "CLM-030",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 47,
-      "sex": "F",
-      "member_id": "SYN-526018"
-    },
-    "provider": {
-      "npi": "9915908301",
-      "specialty": "Neurology",
-      "in_network": true
-    },
-    "date_of_service": "2026-04-14",
-    "submission_date": "2026-04-20",
-    "place_of_service": "22",
-    "diagnoses": [
-      "G43.909",
-      "R51.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "70551",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 185000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "ordering_reason": "persistent headaches, failed conservative treatment"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "197",
@@ -1608,56 +3006,97 @@
         "PR-01"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000030",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-526018",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19780716",
+        "groupNumber": "NS-GRP-6018"
+      },
+      "billing": {
+        "npi": "9915908301",
+        "employerId": "995908301",
+        "organizationName": "SYNTHETIC NEUROLOGY ASSOCIATES",
+        "taxonomyCode": "2084N0400X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-030",
+        "claimChargeAmount": "1850.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "G43909"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "R519"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-030-1",
+            "serviceDate": "20260414",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "70551",
+              "lineItemChargeAmount": "1850.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-04-20",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "persistent headaches, failed conservative treatment"
+    }
   },
   {
     "id": "CLM-031",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "procedure",
-    "patient": {
-      "age": 80,
-      "sex": "F",
-      "member_id": "SYN-043520"
-    },
-    "provider": {
-      "npi": "9956174833",
-      "specialty": "Orthopedic Surgery",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-22",
-    "submission_date": "2026-09-24",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M17.11"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "20610",
-        "modifiers": [
-          "RT"
-        ],
-        "dx_pointers": [],
-        "units": 1,
-        "charge_cents": 21000
-      },
-      {
-        "line": 2,
-        "cpt": "J3301",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 40,
-        "charge_cents": 0
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "16",
@@ -1667,109 +3106,223 @@
         "PR-12"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000031",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-043520",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19460519"
+      },
+      "billing": {
+        "npi": "9956174833",
+        "employerId": "996174833",
+        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
+        "taxonomyCode": "207X00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-031",
+        "claimChargeAmount": "210.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M1711"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-031-1",
+            "serviceDate": "20260922",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "20610",
+              "lineItemChargeAmount": "210.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": []
+              },
+              "procedureModifiers": [
+                "RT"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-031-2",
+            "serviceDate": "20260922",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "J3301",
+              "lineItemChargeAmount": "0.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "40",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-24",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-032",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "procedure",
-    "patient": {
-      "age": 42,
-      "sex": "F",
-      "member_id": "SYN-412524"
-    },
-    "provider": {
-      "npi": "9927316723",
-      "specialty": "Dermatology",
-      "in_network": true
-    },
-    "date_of_service": "2026-05-27",
-    "submission_date": "2026-05-29",
-    "place_of_service": "11",
-    "diagnoses": [
-      "B07.8",
-      "D48.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "17110",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 16000
-      },
-      {
-        "line": 2,
-        "cpt": "11102",
-        "modifiers": [
-          "59"
-        ],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 18000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "4",
-      "reason": "NORTHSTAR does not accept modifier 59 on NCCI pair edits; 11102 needed XS.",
+      "reason": "NORTHSTAR does not accept modifier 59 on NCCI pair edits; 11102 (biopsy of a separate lesion, edit with 17000) needed XS.",
       "violated_rules": [
         "PR-04"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000032",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-412524",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19840312",
+        "groupNumber": "NS-GRP-2524"
+      },
+      "billing": {
+        "npi": "9927316723",
+        "employerId": "997316723",
+        "organizationName": "SYNTHETIC DERMATOLOGY ASSOCIATES",
+        "taxonomyCode": "207N00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-032",
+        "claimChargeAmount": "320.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "L570"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "D485"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-032-1",
+            "serviceDate": "20260527",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "17000",
+              "lineItemChargeAmount": "140.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-032-2",
+            "serviceDate": "20260527",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "11102",
+              "lineItemChargeAmount": "180.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "59"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-29",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    }
   },
   {
     "id": "CLM-033",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "preventive",
-    "patient": {
-      "age": 29,
-      "sex": "M",
-      "member_id": "SYN-440242"
-    },
-    "provider": {
-      "npi": "9964628897",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-02-05",
-    "submission_date": "2026-02-09",
-    "place_of_service": "11",
-    "diagnoses": [
-      "Z00.00"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99395",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 28000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "last_preventive_dos": "2025-12-01",
-      "last_preventive_cpt": "99395"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "119",
@@ -1778,50 +3331,93 @@
         "PR-06"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000033",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-440242",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19970101",
+        "groupNumber": "NS-GRP-0242"
+      },
+      "billing": {
+        "npi": "9964628897",
+        "employerId": "994628897",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-033",
+        "claimChargeAmount": "280.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "Z0000"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-033-1",
+            "serviceDate": "20260205",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99395",
+              "lineItemChargeAmount": "280.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-02-09",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-12-01",
+      "last_preventive_cpt": "99395"
+    }
   },
   {
     "id": "CLM-034",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "lab",
-    "patient": {
-      "age": 36,
-      "sex": "F",
-      "member_id": "SYN-989834"
-    },
-    "provider": {
-      "npi": "9978878384",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-04-01",
-    "submission_date": "2026-07-28",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E66.9",
-      "E78.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "80061",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 5500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "resubmission": false,
-      "delay_note": "lab result reconciliation"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "29",
@@ -1830,117 +3426,190 @@
         "PR-02"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000034",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-989834",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19890806"
+      },
+      "billing": {
+        "npi": "9978878384",
+        "employerId": "998878384",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-034",
+        "claimChargeAmount": "55.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E669"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "E785"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-034-1",
+            "serviceDate": "20260401",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "80061",
+              "lineItemChargeAmount": "55.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-28",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "resubmission": false,
+      "delay_note": "lab result reconciliation"
+    }
   },
   {
     "id": "CLM-035",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "preventive",
-    "patient": {
-      "age": 33,
-      "sex": "M",
-      "member_id": "SYN-595711"
-    },
-    "provider": {
-      "npi": "9977774121",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-02-10",
-    "submission_date": "2026-02-12",
-    "place_of_service": "11",
-    "diagnoses": [
-      "Z00.00"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99395",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 28000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "last_preventive_dos": "2025-01-15",
-      "last_preventive_cpt": "99395"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Last preventive visit 2025-01-15 is more than 365 days before DOS.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000035",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-595711",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19930208",
+        "groupNumber": "NS-GRP-5711"
+      },
+      "billing": {
+        "npi": "9977774121",
+        "employerId": "997774121",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-035",
+        "claimChargeAmount": "280.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "Z0000"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-035-1",
+            "serviceDate": "20260210",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99395",
+              "lineItemChargeAmount": "280.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-02-12",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-01-15",
+      "last_preventive_cpt": "99395"
+    }
   },
   {
     "id": "CLM-036",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 68,
-      "sex": "M",
-      "member_id": "SYN-760189"
-    },
-    "provider": {
-      "npi": "9955597971",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-02-18",
-    "submission_date": "2026-02-23",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M17.11",
-      "I10"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 22000
-      },
-      {
-        "line": 2,
-        "cpt": "96372",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 4500
-      },
-      {
-        "line": 3,
-        "cpt": "J1100",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 10,
-        "charge_cents": 800
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "same_day_services": "office visit with therapeutic injection"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "denied",
       "carc": "4",
@@ -1949,47 +3618,128 @@
         "PR-03"
       ]
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000036",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-760189",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19570827"
+      },
+      "billing": {
+        "npi": "9955597971",
+        "employerId": "995597971",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-036",
+        "claimChargeAmount": "273.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M1711"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "I10"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-036-1",
+            "serviceDate": "20260218",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "220.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-036-2",
+            "serviceDate": "20260218",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "96372",
+              "lineItemChargeAmount": "45.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-036-3",
+            "serviceDate": "20260218",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "J1100",
+              "lineItemChargeAmount": "8.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "10",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-02-23",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "same_day_services": "office visit with therapeutic injection"
+    }
   },
   {
     "id": "CLM-037",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 55,
-      "sex": "M",
-      "member_id": "SYN-020146"
-    },
-    "provider": {
-      "npi": "9920168493",
-      "specialty": "Orthopedic Surgery",
-      "in_network": false
-    },
-    "date_of_service": "2026-05-05",
-    "submission_date": "2026-05-08",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M17.11"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99204",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 31000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "referral_on_file": true
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "242",
@@ -1998,64 +3748,91 @@
         "PR-10"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000037",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-020146",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19710207"
+      },
+      "billing": {
+        "npi": "9920168493",
+        "employerId": "990168493",
+        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
+        "taxonomyCode": "207X00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-037",
+        "claimChargeAmount": "310.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M1711"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-037-1",
+            "serviceDate": "20260505",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99204",
+              "lineItemChargeAmount": "310.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-08",
+      "provider_in_network": false,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "referral_on_file": true
+    }
   },
   {
     "id": "CLM-038",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 63,
-      "sex": "M",
-      "member_id": "SYN-514026"
-    },
-    "provider": {
-      "npi": "9914014193",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-15",
-    "submission_date": "2026-09-17",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M54.16",
-      "M62.81"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97110",
-        "modifiers": [
-          "GP"
-        ],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 2,
-        "charge_cents": 9500
-      },
-      {
-        "line": 2,
-        "cpt": "97112",
-        "modifiers": [
-          "GP"
-        ],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 9500
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "visit_count_ytd": 23,
-      "plan_year_start": "2026-01-01"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "denied",
       "carc": "119",
@@ -2064,450 +3841,964 @@
         "PR-07"
       ]
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000038",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-514026",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19630520",
+        "groupNumber": "NS-GRP-4026"
+      },
+      "billing": {
+        "npi": "9914014193",
+        "employerId": "994014193",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-038",
+        "claimChargeAmount": "190.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M5416"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M6281"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-038-1",
+            "serviceDate": "20260915",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "95.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "2",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-038-2",
+            "serviceDate": "20260915",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97112",
+              "lineItemChargeAmount": "95.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-17",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 23,
+      "plan_year_start": "2026-01-01"
+    }
   },
   {
     "id": "CLM-039",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 50,
-      "sex": "M",
-      "member_id": "SYN-761222"
-    },
-    "provider": {
-      "npi": "9902972997",
-      "specialty": "Dermatology",
-      "in_network": false
-    },
-    "date_of_service": "2026-06-16",
-    "submission_date": "2026-06-19",
-    "place_of_service": "11",
-    "diagnoses": [
-      "L30.9"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99203",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 20000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. NORTHSTAR PPO pays out-of-network office visits at the out-of-network benefit level.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000039",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-761222",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19750727",
+        "groupNumber": "NS-GRP-1222"
+      },
+      "billing": {
+        "npi": "9902972997",
+        "employerId": "992972997",
+        "organizationName": "SYNTHETIC DERMATOLOGY ASSOCIATES",
+        "taxonomyCode": "207N00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-039",
+        "claimChargeAmount": "200.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "L309"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-039-1",
+            "serviceDate": "20260616",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99203",
+              "lineItemChargeAmount": "200.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-19",
+      "provider_in_network": false,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    }
   },
   {
     "id": "CLM-040",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "procedure",
-    "patient": {
-      "age": 73,
-      "sex": "F",
-      "member_id": "SYN-147104"
-    },
-    "provider": {
-      "npi": "9997465075",
-      "specialty": "Dermatology",
-      "in_network": true
-    },
-    "date_of_service": "2026-03-11",
-    "submission_date": "2026-03-16",
-    "place_of_service": "11",
-    "diagnoses": [
-      "L57.0",
-      "D48.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [
-          "25"
-        ],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      },
-      {
-        "line": 2,
-        "cpt": "11102",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 18000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "train",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. E/M correctly carries modifier 25 alongside the same-day biopsy.",
       "violated_rules": []
     },
-    "split": "train"
+    "claim": {
+      "controlNumber": "000000040",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-147104",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19520603"
+      },
+      "billing": {
+        "npi": "9997465075",
+        "employerId": "997465075",
+        "organizationName": "SYNTHETIC DERMATOLOGY ASSOCIATES",
+        "taxonomyCode": "207N00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-040",
+        "claimChargeAmount": "330.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "L570"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "D485"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-040-1",
+            "serviceDate": "20260311",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              },
+              "procedureModifiers": [
+                "25"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-040-2",
+            "serviceDate": "20260311",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "11102",
+              "lineItemChargeAmount": "180.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-03-16",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-041",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 48,
-      "sex": "F",
-      "member_id": "SYN-318406"
-    },
-    "provider": {
-      "npi": "9947205136",
-      "specialty": "Internal Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-03-02",
-    "submission_date": "2026-07-30",
-    "place_of_service": "11",
-    "diagnoses": [
-      "E11.9",
-      "I10"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99214",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 21000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "resubmission_note": "held in billing queue after clearinghouse rejection"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Submitted 150 days after DOS, which looks late (PR-02), but NORTHSTAR's timely filing window is 180 days.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000041",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-318406",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19770419",
+        "groupNumber": "NS-GRP-8406"
+      },
+      "billing": {
+        "npi": "9947205136",
+        "employerId": "997205136",
+        "organizationName": "SYNTHETIC INTERNAL MEDICINE ASSOCIATES",
+        "taxonomyCode": "207R00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-041",
+        "claimChargeAmount": "210.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "E119"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "I10"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-041-1",
+            "serviceDate": "20260302",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99214",
+              "lineItemChargeAmount": "210.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-30",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "resubmission_note": "held in billing queue after clearinghouse rejection"
+    }
   },
   {
     "id": "CLM-042",
     "payer": "NORTHSTAR",
-    "claim_type": "professional",
     "category": "e_and_m",
-    "patient": {
-      "age": 35,
-      "sex": "M",
-      "member_id": "SYN-659832"
-    },
-    "provider": {
-      "npi": "9973118460",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-09-21",
-    "submission_date": "2026-09-24",
-    "place_of_service": "11",
-    "diagnoses": [
-      "J06.9",
-      "Z23"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99213",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 15000
-      },
-      {
-        "line": 2,
-        "cpt": "90686",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 3500
-      },
-      {
-        "line": 3,
-        "cpt": "90471",
-        "modifiers": [],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 2800
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "commercial_ppo",
-      "same_day_services": "office visit with influenza vaccine"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. E/M billed with same-day vaccine admin (90471) and no modifier 25 looks like a PR-03 error, but only CASCADE requires 25 there; NORTHSTAR pays it.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000042",
+      "tradingPartnerServiceId": "SYNNS",
+      "tradingPartnerName": "NORTHSTAR",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "NORTHSTAR"
+      },
+      "subscriber": {
+        "memberId": "SYN-659832",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19901007",
+        "groupNumber": "NS-GRP-9832"
+      },
+      "billing": {
+        "npi": "9973118460",
+        "employerId": "993118460",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "CI",
+        "patientControlNumber": "CLM-042",
+        "claimChargeAmount": "213.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "J069"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "Z23"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-042-1",
+            "serviceDate": "20260921",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99213",
+              "lineItemChargeAmount": "150.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-042-2",
+            "serviceDate": "20260921",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "90686",
+              "lineItemChargeAmount": "35.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-042-3",
+            "serviceDate": "20260921",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "90471",
+              "lineItemChargeAmount": "28.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-09-24",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "same_day_services": "office visit with influenza vaccine"
+    }
   },
   {
     "id": "CLM-043",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "procedure",
-    "patient": {
-      "age": 70,
-      "sex": "M",
-      "member_id": "SYN-275164"
-    },
-    "provider": {
-      "npi": "9932650718",
-      "specialty": "Dermatology",
-      "in_network": true
-    },
-    "date_of_service": "2026-06-10",
-    "submission_date": "2026-06-15",
-    "place_of_service": "11",
-    "diagnoses": [
-      "B07.8",
-      "D48.5"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "17110",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 16000
-      },
-      {
-        "line": 2,
-        "cpt": "11102",
-        "modifiers": [
-          "59"
-        ],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 18000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
-      "reason": "Paid. Modifier 59 on the 17110/11102 NCCI pair looks like a PR-04 error, but only NORTHSTAR rejects 59 in favor of X{EPSU}; CASCADE accepts 59.",
+      "reason": "Paid. Modifier 59 on the 17000/11102 NCCI pair looks like a PR-04 error, but only NORTHSTAR rejects 59 in favor of X{EPSU}; CASCADE accepts 59.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000043",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-275164",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19550817"
+      },
+      "billing": {
+        "npi": "9932650718",
+        "employerId": "992650718",
+        "organizationName": "SYNTHETIC DERMATOLOGY ASSOCIATES",
+        "taxonomyCode": "207N00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-043",
+        "claimChargeAmount": "320.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "L570"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "D485"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-043-1",
+            "serviceDate": "20260610",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "17000",
+              "lineItemChargeAmount": "140.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          },
+          {
+            "providerControlNumber": "CLM-043-2",
+            "serviceDate": "20260610",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "11102",
+              "lineItemChargeAmount": "180.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "59"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-06-15",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    }
   },
   {
     "id": "CLM-044",
     "payer": "CASCADE",
-    "claim_type": "professional",
     "category": "therapy",
-    "patient": {
-      "age": 69,
-      "sex": "F",
-      "member_id": "SYN-904417"
-    },
-    "provider": {
-      "npi": "9986034572",
-      "specialty": "Physical Therapy",
-      "in_network": true
-    },
-    "date_of_service": "2026-07-08",
-    "submission_date": "2026-07-10",
-    "place_of_service": "11",
-    "diagnoses": [
-      "M17.11",
-      "R26.89"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "97110",
-        "modifiers": [
-          "GP",
-          "KX"
-        ],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 2,
-        "charge_cents": 9500
-      },
-      {
-        "line": 2,
-        "cpt": "97112",
-        "modifiers": [
-          "GP",
-          "KX"
-        ],
-        "dx_pointers": [
-          2
-        ],
-        "units": 1,
-        "charge_cents": 9000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicare_advantage",
-      "visit_count_ytd": 23,
-      "plan_year_start": "2026-01-01"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. This is PT visit 24, which would exceed a 20-visit cap (PR-07), but only NORTHSTAR caps PT visits; CASCADE has no hard cap and KX attests continued necessity.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000044",
+      "tradingPartnerServiceId": "SYNCA",
+      "tradingPartnerName": "CASCADE",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "CASCADE"
+      },
+      "subscriber": {
+        "memberId": "SYN-904417",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19570505"
+      },
+      "billing": {
+        "npi": "9986034572",
+        "employerId": "996034572",
+        "organizationName": "SYNTHETIC PHYSICAL THERAPY ASSOCIATES",
+        "taxonomyCode": "225100000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "16",
+        "patientControlNumber": "CLM-044",
+        "claimChargeAmount": "185.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M1711"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "R2689"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-044-1",
+            "serviceDate": "20260708",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97110",
+              "lineItemChargeAmount": "95.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "2",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP",
+                "KX"
+              ]
+            }
+          },
+          {
+            "providerControlNumber": "CLM-044-2",
+            "serviceDate": "20260708",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "97112",
+              "lineItemChargeAmount": "90.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "2"
+                ]
+              },
+              "procedureModifiers": [
+                "GP",
+                "KX"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-07-10",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_count_ytd": 23,
+      "plan_year_start": "2026-01-01"
+    }
   },
   {
     "id": "CLM-045",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "imaging",
-    "patient": {
-      "age": 39,
-      "sex": "F",
-      "member_id": "SYN-583029"
-    },
-    "provider": {
-      "npi": "9958427103",
-      "specialty": "Radiology",
-      "in_network": true
-    },
-    "date_of_service": "2026-05-19",
-    "submission_date": "2026-05-22",
-    "place_of_service": "22",
-    "diagnoses": [
-      "M54.16",
-      "M51.26"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "72148",
-        "modifiers": [],
-        "dx_pointers": [
-          1,
-          2
-        ],
-        "units": 1,
-        "charge_cents": 165000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "ordering_reason": "lumbar radiculopathy after 8 weeks of conservative care"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. MRI lumbar spine (72148) with no prior auth number looks like a PR-01 error, but only NORTHSTAR requires imaging auth; BAYVIEW does not.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000045",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-583029",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JANE",
+        "lastName": "SYNTHETIC",
+        "gender": "F",
+        "dateOfBirth": "19870321"
+      },
+      "billing": {
+        "npi": "9958427103",
+        "employerId": "998427103",
+        "organizationName": "SYNTHETIC RADIOLOGY ASSOCIATES",
+        "taxonomyCode": "2085R0202X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-045",
+        "claimChargeAmount": "1650.00",
+        "placeOfServiceCode": "22",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "M5416"
+          },
+          {
+            "diagnosisTypeCode": "ABF",
+            "diagnosisCode": "M5126"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-045-1",
+            "serviceDate": "20260519",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "72148",
+              "lineItemChargeAmount": "1650.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1",
+                  "2"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-05-22",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "ordering_reason": "lumbar radiculopathy after 8 weeks of conservative care"
+    }
   },
   {
     "id": "CLM-046",
     "payer": "BAYVIEW",
-    "claim_type": "professional",
     "category": "preventive",
-    "patient": {
-      "age": 31,
-      "sex": "M",
-      "member_id": "SYN-736150"
-    },
-    "provider": {
-      "npi": "9921574386",
-      "specialty": "Family Medicine",
-      "in_network": true
-    },
-    "date_of_service": "2026-08-12",
-    "submission_date": "2026-08-17",
-    "place_of_service": "11",
-    "diagnoses": [
-      "Z00.00"
-    ],
-    "lines": [
-      {
-        "line": 1,
-        "cpt": "99395",
-        "modifiers": [],
-        "dx_pointers": [
-          1
-        ],
-        "units": 1,
-        "charge_cents": 26000
-      }
-    ],
-    "prior_auth_number": null,
-    "context": {
-      "eligibility_active": true,
-      "plan_type": "medicaid_managed_care",
-      "last_preventive_dos": "2025-09-15",
-      "last_preventive_cpt": "99395"
-    },
+    "split": "heldout",
     "ground_truth": {
       "outcome": "paid",
       "carc": null,
       "reason": "Paid. Preventive visit only 331 days after the last one looks like a PR-06 frequency error, but the rolling-365-day limit is NORTHSTAR-only; BAYVIEW pays it.",
       "violated_rules": []
     },
-    "split": "heldout"
+    "claim": {
+      "controlNumber": "000000046",
+      "tradingPartnerServiceId": "SYNBV",
+      "tradingPartnerName": "BAYVIEW",
+      "usageIndicator": "T",
+      "submitter": {
+        "organizationName": "SYNTHETIC BILLING SERVICE",
+        "submitterIdentification": "SYNSUB0001",
+        "contactInformation": {
+          "name": "SYNTHETIC BILLING SERVICE",
+          "phoneNumber": "5550100100"
+        }
+      },
+      "receiver": {
+        "organizationName": "BAYVIEW"
+      },
+      "subscriber": {
+        "memberId": "SYN-736150",
+        "paymentResponsibilityLevelCode": "P",
+        "firstName": "JOHN",
+        "lastName": "SYNTHETIC",
+        "gender": "M",
+        "dateOfBirth": "19950520"
+      },
+      "billing": {
+        "npi": "9921574386",
+        "employerId": "991574386",
+        "organizationName": "SYNTHETIC FAMILY MEDICINE ASSOCIATES",
+        "taxonomyCode": "207Q00000X",
+        "address": {
+          "address1": "100 SYNTHETIC WAY",
+          "city": "TESTVILLE",
+          "state": "CA",
+          "postalCode": "900000000"
+        }
+      },
+      "claimInformation": {
+        "claimFilingCode": "MC",
+        "patientControlNumber": "CLM-046",
+        "claimChargeAmount": "260.00",
+        "placeOfServiceCode": "11",
+        "claimFrequencyCode": "1",
+        "signatureIndicator": "Y",
+        "planParticipationCode": "A",
+        "benefitsAssignmentCertificationIndicator": "Y",
+        "releaseInformationCode": "Y",
+        "healthCareCodeInformation": [
+          {
+            "diagnosisTypeCode": "ABK",
+            "diagnosisCode": "Z0000"
+          }
+        ],
+        "serviceLines": [
+          {
+            "providerControlNumber": "CLM-046-1",
+            "serviceDate": "20260812",
+            "professionalService": {
+              "procedureIdentifier": "HC",
+              "procedureCode": "99395",
+              "lineItemChargeAmount": "260.00",
+              "measurementUnit": "UN",
+              "serviceUnitCount": "1",
+              "compositeDiagnosisCodePointers": {
+                "diagnosisCodePointers": [
+                  "1"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "context": {
+      "submission_date": "2026-08-17",
+      "provider_in_network": true,
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "last_preventive_dos": "2025-09-15",
+      "last_preventive_cpt": "99395"
+    }
   }
 ]

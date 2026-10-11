@@ -1,7 +1,13 @@
 """Synthetic claim dataset for the revenue-cycle harness.
 
-All data is fictional. `ground_truth` and `split` are the answer key and must never be
-shown to the scrubber; use `public_view()` to build scrubber inputs.
+Each record is {id, payer, category, split, ground_truth, claim, context}:
+  claim   - an 837P professional claim request body using the Stedi / Change Healthcare JSON
+            field names (POST /change/medicalnetwork/professionalclaims/v3/submission)
+  context - eligibility / history facts a billing team has that are not on the 837
+            (submission_date, provider_in_network, visit_count_ytd, last_preventive_dos, ...)
+
+All data is fictional. `ground_truth`, `split` and `category` are answer-key / eval metadata and
+must never be shown to the scrubber; use `public_view()` to build scrubber inputs.
 
 Validate with:  .venv/bin/python -m eval.synthetic_claims
 """
@@ -13,6 +19,7 @@ import re
 import sys
 from collections import Counter
 from datetime import date
+from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 
@@ -23,13 +30,29 @@ CATEGORIES = ("imaging", "e_and_m", "lab", "therapy", "preventive", "procedure",
 OUTCOMES = ("paid", "denied")
 SPLITS = ("train", "heldout")
 RULE_IDS = tuple(f"PR-{i:02d}" for i in range(1, 13))
-HIDDEN_KEYS = ("ground_truth", "split")
+HIDDEN_KEYS = ("ground_truth", "split", "category")
 
-REQUIRED = (
-    "id", "payer", "claim_type", "category", "patient", "provider", "date_of_service",
-    "submission_date", "place_of_service", "diagnoses", "lines", "prior_auth_number",
-    "context", "ground_truth", "split",
+REQUIRED = ("id", "payer", "category", "split", "ground_truth", "claim", "context")
+PUBLIC_KEYS = ("id", "payer", "claim", "context")
+
+# Payer routing ids (fictional) and the real X12 claim filing indicator for each plan type:
+# CI = Commercial Insurance Co., 16 = HMO Medicare Risk (Medicare Advantage), MC = Medicaid.
+PAYER_IDS = {"NORTHSTAR": "SYNNS", "CASCADE": "SYNCA", "BAYVIEW": "SYNBV"}
+CLAIM_FILING_CODES = {"NORTHSTAR": "CI", "CASCADE": "16", "BAYVIEW": "MC"}
+
+CLAIM_INFO_REQUIRED = (
+    "claimFilingCode", "patientControlNumber", "claimChargeAmount", "placeOfServiceCode",
+    "claimFrequencyCode", "signatureIndicator", "planParticipationCode",
+    "benefitsAssignmentCertificationIndicator", "releaseInformationCode",
+    "healthCareCodeInformation", "serviceLines",
 )
+PROF_SERVICE_REQUIRED = (
+    "procedureIdentifier", "procedureCode", "lineItemChargeAmount", "measurementUnit",
+    "serviceUnitCount", "compositeDiagnosisCodePointers",
+)
+CONTEXT_REQUIRED = ("submission_date", "provider_in_network", "eligibility_active", "plan_type")
+_AMOUNT = re.compile(r"\d+\.\d{2}")
+_YMD = re.compile(r"\d{8}")
 
 
 @lru_cache(maxsize=1)
@@ -39,7 +62,7 @@ def _all_claims() -> tuple[dict, ...]:
 
 
 def load_claims(split: str | None = None) -> list[dict]:
-    """Return deep copies of all claims, optionally filtered to 'train' or 'heldout'."""
+    """Return deep copies of all claim records, optionally filtered to 'train' or 'heldout'."""
     if split is not None and split not in SPLITS:
         raise ValueError(f"split must be one of {SPLITS} or None, got {split!r}")
     return [copy.deepcopy(c) for c in _all_claims() if split is None or c["split"] == split]
@@ -53,11 +76,100 @@ def get_claim(claim_id: str) -> dict:
 
 
 def public_view(claim: dict) -> dict:
-    """The claim as the scrubber sees it: no ground_truth, no split."""
-    return {k: copy.deepcopy(v) for k, v in claim.items() if k not in HIDDEN_KEYS}
+    """The record as the scrubber sees it: id, payer, the 837P `claim` body and `context`.
+
+    No ground_truth, no split, no category."""
+    return {k: copy.deepcopy(claim[k]) for k in PUBLIC_KEYS}
+
+
+def _ymd_to_date(s: str) -> date:
+    return date(int(s[:4]), int(s[4:6]), int(s[6:]))
 
 
 # ---------------------------------------------------------------- validation
+
+def _validate_837(cid: str, payer: str, clm: dict, ctx: dict) -> list[str]:
+    errs: list[str] = []
+    for k in ("controlNumber", "tradingPartnerServiceId", "tradingPartnerName", "submitter",
+              "receiver", "subscriber", "billing", "claimInformation"):
+        if k not in clm:
+            errs.append(f"{cid}: claim missing {k}")
+    if errs:
+        return errs
+    if clm["tradingPartnerServiceId"] != PAYER_IDS[payer] or clm["tradingPartnerName"] != payer \
+            or clm["receiver"].get("organizationName") != payer:
+        errs.append(f"{cid}: payer routing (tradingPartner*/receiver) does not match {payer}")
+    sub = clm["subscriber"]
+    if not (re.fullmatch(r"SYN-\d{6}", sub.get("memberId", "")) and sub.get("gender") in ("F", "M")
+            and _YMD.fullmatch(sub.get("dateOfBirth", "")) and sub.get("lastName")):
+        errs.append(f"{cid}: bad subscriber block")
+    bil = clm["billing"]
+    if not (re.fullmatch(r"99\d{8}", bil.get("npi", "")) and bil.get("organizationName")
+            and re.fullmatch(r"[0-9A-Z]{10}", bil.get("taxonomyCode", ""))):
+        errs.append(f"{cid}: bad billing provider block")
+
+    ci = clm["claimInformation"]
+    missing = [k for k in CLAIM_INFO_REQUIRED if k not in ci]
+    if missing:
+        return errs + [f"{cid}: claimInformation missing {missing}"]
+    if ci["patientControlNumber"] != cid:
+        errs.append(f"{cid}: patientControlNumber != id")
+    if ci["claimFilingCode"] != CLAIM_FILING_CODES[payer]:
+        errs.append(f"{cid}: claimFilingCode {ci['claimFilingCode']} wrong for {payer}")
+    if ci["claimFrequencyCode"] != "1":
+        errs.append(f"{cid}: claimFrequencyCode must be 1 (original)")
+    if not re.fullmatch(r"\d{2}", ci["placeOfServiceCode"]):
+        errs.append(f"{cid}: bad placeOfServiceCode")
+
+    dx = ci["healthCareCodeInformation"]
+    if not dx:
+        errs.append(f"{cid}: no diagnoses")
+    for k, d in enumerate(dx):
+        want = "ABK" if k == 0 else "ABF"
+        if d.get("diagnosisTypeCode") != want:
+            errs.append(f"{cid}: diagnosis {k + 1} type must be {want}")
+        if not re.fullmatch(r"[A-Z]\d[0-9A-Z]{1,5}", d.get("diagnosisCode", "")):
+            errs.append(f"{cid}: diagnosis {k + 1} must be ICD-10-CM without a decimal point")
+
+    lines = ci["serviceLines"]
+    if not lines:
+        errs.append(f"{cid}: no service lines")
+    total = Decimal("0")
+    sub_date = date.fromisoformat(ctx["submission_date"])
+    for i, sl in enumerate(lines, 1):
+        ps = sl.get("professionalService", {})
+        miss = [k for k in PROF_SERVICE_REQUIRED if k not in ps]
+        if miss:
+            errs.append(f"{cid}: line {i} missing {miss}")
+            continue
+        if sl.get("providerControlNumber") != f"{cid}-{i}":
+            errs.append(f"{cid}: line {i} providerControlNumber")
+        if not _YMD.fullmatch(sl.get("serviceDate", "")):
+            errs.append(f"{cid}: line {i} serviceDate must be YYYYMMDD")
+        else:
+            dos = _ymd_to_date(sl["serviceDate"])
+            if dos.year != 2026 or sub_date.year != 2026 or sub_date < dos:
+                errs.append(f"{cid}: line {i} dates must be in 2026 with submission >= DOS")
+        if ps["procedureIdentifier"] != "HC" or ps["measurementUnit"] != "UN":
+            errs.append(f"{cid}: line {i} must use HC procedure codes and UN units")
+        if not _AMOUNT.fullmatch(ps["lineItemChargeAmount"]):
+            errs.append(f"{cid}: line {i} charge must be a 2-decimal string")
+        else:
+            total += Decimal(ps["lineItemChargeAmount"])
+        if not ps["serviceUnitCount"].isdigit():
+            errs.append(f"{cid}: line {i} serviceUnitCount must be an integer string")
+        ptrs = ps["compositeDiagnosisCodePointers"].get("diagnosisCodePointers")
+        if not isinstance(ptrs, list) or any(not (str(p).isdigit() and 1 <= int(p) <= len(dx)) for p in ptrs):
+            errs.append(f"{cid}: line {i} dx pointer out of range")
+        if len(ptrs or []) > 4:
+            errs.append(f"{cid}: line {i} has more than 4 dx pointers")
+    if not _AMOUNT.fullmatch(ci["claimChargeAmount"]) or Decimal(ci["claimChargeAmount"]) != total:
+        errs.append(f"{cid}: claimChargeAmount {ci['claimChargeAmount']} != sum of lines {total}")
+    pa = ci.get("claimSupplementalInformation", {}).get("priorAuthorizationNumber")
+    if pa is not None and not pa:
+        errs.append(f"{cid}: empty priorAuthorizationNumber")
+    return errs
+
 
 def _validate(claims: list[dict]) -> list[str]:
     errs: list[str] = []
@@ -73,41 +185,31 @@ def _validate(claims: list[dict]) -> list[str]:
         if missing:
             errs.append(f"{cid}: missing {missing}")
             continue
+        if set(c) != set(REQUIRED):
+            errs.append(f"{cid}: unexpected top-level keys {sorted(set(c) - set(REQUIRED))}")
         if not re.fullmatch(r"CLM-\d{3}", cid):
             errs.append(f"{cid}: bad id format")
         if c["payer"] not in PAYERS:
             errs.append(f"{cid}: bad payer {c['payer']}")
+            continue
         if c["category"] not in CATEGORIES:
             errs.append(f"{cid}: bad category {c['category']}")
-        if c["claim_type"] != "professional":
-            errs.append(f"{cid}: claim_type must be professional")
         if c["split"] not in SPLITS:
             errs.append(f"{cid}: bad split {c['split']}")
-        p, pr = c["patient"], c["provider"]
-        if not (isinstance(p.get("age"), int) and p.get("sex") in ("F", "M")
-                and re.fullmatch(r"SYN-\d{6}", p.get("member_id", ""))):
-            errs.append(f"{cid}: bad patient block")
-        if not (re.fullmatch(r"99\d{8}", pr.get("npi", "")) and isinstance(pr.get("in_network"), bool)
-                and pr.get("specialty")):
-            errs.append(f"{cid}: bad provider block")
+        ctx = c["context"]
+        cmiss = [k for k in CONTEXT_REQUIRED if k not in ctx]
+        if cmiss:
+            errs.append(f"{cid}: context missing {cmiss}")
+            continue
+        if not isinstance(ctx["provider_in_network"], bool) or not isinstance(ctx["eligibility_active"], bool):
+            errs.append(f"{cid}: context booleans")
         try:
-            dos = date.fromisoformat(c["date_of_service"])
-            sub = date.fromisoformat(c["submission_date"])
-            if dos.year != 2026 or sub.year != 2026 or sub < dos:
-                errs.append(f"{cid}: dates must be in 2026 with submission >= DOS")
+            date.fromisoformat(ctx["submission_date"])
         except ValueError:
-            errs.append(f"{cid}: unparseable dates")
-        if not c["diagnoses"]:
-            errs.append(f"{cid}: no diagnoses")
-        if not c["lines"]:
-            errs.append(f"{cid}: no lines")
-        for i, ln in enumerate(c["lines"], 1):
-            if ln.get("line") != i:
-                errs.append(f"{cid}: line numbering")
-            if any(not (1 <= d <= len(c["diagnoses"])) for d in ln.get("dx_pointers", [])):
-                errs.append(f"{cid}: line {i} dx pointer out of range")
-            if not isinstance(ln.get("charge_cents"), int) or not isinstance(ln.get("units"), int):
-                errs.append(f"{cid}: line {i} charge/units must be int")
+            errs.append(f"{cid}: unparseable submission_date")
+            continue
+        errs.extend(_validate_837(cid, c["payer"], c["claim"], ctx))
+
         gt = c["ground_truth"]
         if gt.get("outcome") not in OUTCOMES:
             errs.append(f"{cid}: bad outcome")
@@ -126,7 +228,8 @@ def _validate(claims: list[dict]) -> list[str]:
                 errs.append(f"{cid}: unknown rule {r}")
         if not gt.get("reason"):
             errs.append(f"{cid}: empty reason")
-        if any(k in public_view(c) for k in HIDDEN_KEYS):
+        pv = public_view(c)
+        if set(pv) != set(PUBLIC_KEYS) or "ground_truth" in json.dumps(pv):
             errs.append(f"{cid}: public_view leaks hidden keys")
 
     splits = Counter(c.get("split") for c in claims)
