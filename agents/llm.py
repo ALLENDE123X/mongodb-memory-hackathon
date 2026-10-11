@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import re
+import threading
 import time
 from pathlib import Path
 
@@ -27,6 +28,7 @@ CASSETTE = Path(os.environ.get("LLM_CASSETTE_PATH", "data/cassette.jsonl"))
 SYNTHETIC_BASE = "https://api.synthetic.new/v1"
 
 _cache: dict[str, str] | None = None
+_lock = threading.Lock()
 
 
 def _key(model: str, messages: list[dict]) -> str:
@@ -88,10 +90,11 @@ def complete_json(model: str, system: str, user: str, *, max_tokens: int = 2000)
             raw = resp.choices[0].message.content or ""
             parsed = _parse(raw)
             if mode == "record":
-                CASSETTE.parent.mkdir(parents=True, exist_ok=True)
-                with CASSETTE.open("a") as f:
-                    f.write(json.dumps({"key": key, "model": model, "content": raw}) + "\n")
-                _load()[key] = raw
+                with _lock:
+                    CASSETTE.parent.mkdir(parents=True, exist_ok=True)
+                    with CASSETTE.open("a") as f:
+                        f.write(json.dumps({"key": key, "model": model, "content": raw}) + "\n")
+                    _load()[key] = raw
             return parsed, {"model": model, "latency_s": round(time.time() - t0, 2), "cached": False, "raw": raw}
         except Exception as e:  # noqa: BLE001 - surface after retries
             last_err = e

@@ -13,6 +13,7 @@ import argparse
 import os
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 from agents.scrubber import scrub
 from agents.watcher import propose
@@ -61,26 +62,34 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     head, rules = store.active()
     memory = latest_train_evidence(store, run_id)
     rows = defaultdict(list)
+    todo = []
     for split in ("train", "heldout"):
         for rec in load_claims(split):
             ep_id = f"{run_id}:{iteration}:{rec['id']}"
             existing = store.db.episodes.find_one({"_id": ep_id})
             if existing:  # idempotent resume: never re-submit a claim
                 rows[split].append(existing)
-                continue
-            view = public_view(rec)
-            decision = scrub(view, rules=rules, similar=similar_past(view, memory))
-            remit = adjudicate(rec)  # the payer, standing in for a clearinghouse round-trip
-            observed = outcome_summary(remit)
-            feats = features(view)
-            ep = {"_id": ep_id, "run_id": run_id, "iteration": iteration, "split": split,
-                  "claim_id": rec["id"], "payer": rec["payer"], "cpts": feats["cpts"],
-                  "ruleset_version": head["version"], "predicted": decision, "observed": observed,
-                  "correct": decision["predicted_outcome"] == observed["outcome"]
-                  and (observed["outcome"] == "paid" or decision.get("carc") in observed["carcs"]),
-                  "features": feats, "remittance": remit, "visible_to_learning": split == "train"}
+            else:
+                todo.append((split, rec, ep_id))
+
+    def work(item):
+        split, rec, ep_id = item
+        view = public_view(rec)
+        decision = scrub(view, rules=rules, similar=similar_past(view, memory))
+        remit = adjudicate(rec)  # the payer, standing in for a clearinghouse round-trip
+        observed = outcome_summary(remit)
+        feats = features(view)
+        return {"_id": ep_id, "run_id": run_id, "iteration": iteration, "split": split,
+                "claim_id": rec["id"], "payer": rec["payer"], "cpts": feats["cpts"],
+                "ruleset_version": head["version"], "predicted": decision, "observed": observed,
+                "correct": decision["predicted_outcome"] == observed["outcome"]
+                and (observed["outcome"] == "paid" or decision.get("carc") in observed["carcs"]),
+                "features": feats, "remittance": remit, "visible_to_learning": split == "train"}
+
+    with ThreadPoolExecutor(max_workers=int(os.environ.get("SCRUB_WORKERS", "8"))) as pool:
+        for ep in pool.map(work, todo):
             store.append_episode(ep)
-            rows[split].append(ep)
+            rows[ep["split"]].append(ep)
     metrics = {split: score(eps) for split, eps in rows.items()}
     metrics["ruleset_version"] = head["version"]
     metrics["rule_count"] = len(rules)
