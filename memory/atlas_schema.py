@@ -1,9 +1,13 @@
-"""Atlas connection + collection handles for the four memory types.
+"""Atlas connection + the collections behind the four memory types (see memory/store.py).
 
-traces       - episodic: every scrub decision + reasoning, with the real adjudication outcome
-policies     - procedural: versioned policy snapshots (rules + tool whitelist) per iteration
-rules        - procedural: per-payer rules the watcher derived, with provenance (which denials taught it)
-semantic_kb  - semantic: payer policy text / coding guidance, Voyage embeddings
+episodes     - episodic: every scrub decision + reasoning, with the real adjudication outcome
+rules        - procedural: every rule ever proposed, with status and provenance
+rulesets     - procedural: immutable, versioned snapshots of the promoted rule set
+heads        - procedural: pointer to the active ruleset (compare-and-swap on promotion)
+evaluations  - gate verdicts computed by the harness
+runs         - loop checkpoints so a restarted process resumes
+audits       - append-only log of proposals, rejections, promotions
+semantic_kb  - semantic: Voyage embeddings of training outcomes (Atlas Vector Search)
 taxonomy     - taxonomic: payer -> claim category -> denial category (CARC groups)
 """
 import os
@@ -15,7 +19,7 @@ from pymongo import MongoClient
 load_dotenv(".env.local")
 load_dotenv()
 
-COLLECTIONS = ("traces", "policies", "rules", "semantic_kb", "taxonomy")
+COLLECTIONS = ("episodes", "rules", "rulesets", "heads", "evaluations", "runs", "audits", "semantic_kb", "taxonomy")
 
 
 @lru_cache
