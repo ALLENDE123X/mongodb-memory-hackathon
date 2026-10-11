@@ -27,15 +27,15 @@ from typing import Any
 # dates) are deliberately absent so a rule cannot memorise individual claims.
 CLAIM_FIELDS = {
     "payer", "pos", "claim_filing_code", "days_to_submit", "prior_auth", "dx_codes",
-    "in_network", "line_count", "total_charge", "cpts",
+    "in_network", "line_count", "total_charge", "cpts", "days_since_last_preventive",
 }
 CONTEXT_PREFIX = "context."
-LINE_FIELDS = {"cpt", "modifiers", "units", "charge", "dx_pointer_count"}
+LINE_FIELDS = {"cpt", "modifiers", "units", "charge", "dx_pointer_count", "dx_codes"}
 
 OPS = {
     "eq", "ne", "in", "not_in", "gt", "gte", "lt", "lte", "missing", "present",
     "contains", "not_contains", "contains_any", "contains_none",
-    "startswith_any", "none_startswith",
+    "startswith_any", "none_startswith", "between",
 }
 
 
@@ -70,6 +70,11 @@ def _apply(op: str, actual: Any, expected: Any) -> bool:
         return actual in _as_list(expected)
     if op == "not_in":
         return actual not in _as_list(expected)
+    if op == "between":  # inclusive numeric range, e.g. CPT 80047-89398
+        try:
+            return float(expected[0]) <= float(actual) <= float(expected[1])
+        except (TypeError, ValueError, IndexError):
+            return False
     if op in ("gt", "gte", "lt", "lte"):
         try:
             a, e = float(actual), float(expected)
