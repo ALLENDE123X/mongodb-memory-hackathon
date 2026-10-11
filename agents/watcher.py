@@ -76,7 +76,9 @@ def claim_brief(ev: dict) -> dict:
             "context": {k: v for k, v in f["context"].items() if k != "submission_date"},
             "observed": {"outcome": ev["observed"]["outcome"],
                          "carcs": [f"{c}: {CARC_TEXT.get(c, '')}" for c in ev["observed"]["carcs"]],
-                         "rarcs": ev["observed"].get("rarcs", [])},
+                         "rarcs": ev["observed"].get("rarcs", []),
+                         # group-prefixed context, e.g. "PR-119" (patient owes) vs "CO-197"
+                         "adjustments": ev["observed"].get("adjustments", [])},
             "scrubber_said": ev.get("predicted")}
 
 
