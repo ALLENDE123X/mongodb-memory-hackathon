@@ -7,7 +7,7 @@ Collections
   heads        pointer to the active ruleset; promotion is a compare-and-swap on it
   evaluations  gate verdicts, computed by the harness (never asserted by a model)
   runs         loop checkpoints so a restarted process resumes where it stopped
-  audits       append-only log of proposals, rejections, promotions, recoveries
+  audits       append-only log of proposals, rejections, promotions, consolidations, recoveries
   semantic_kb  semantic: past denials + payer notes with Voyage embeddings
   taxonomy     taxonomic: payer -> claim category -> denial category (CARC group)
 
@@ -101,6 +101,14 @@ class Store:
         self.db.evaluations.insert_one(ev)
         return ev["_id"]
 
+    def _insert_ruleset(self, doc: dict) -> None:
+        """A ruleset for this version already exists (a racing writer, or one left by a CAS that
+        lost): treat it as a head conflict so callers park the candidate instead of crashing."""
+        try:
+            self.db.rulesets.insert_one(doc)
+        except DuplicateKeyError as e:
+            raise ConflictError(f"ruleset v{doc['version']} already exists") from e
+
     def promote(self, rule_ids: list[str], *, expected_version: int, evaluation_id: str, note: str) -> int:
         """Append a new immutable ruleset and CAS the head onto it."""
         head = self.db.heads.find_one({"_id": HEAD_ID})
@@ -109,7 +117,7 @@ class Store:
         parent = self.db.rulesets.find_one({"_id": head["ruleset_id"]})
         new_version = expected_version + 1
         new_id = f"rs-{new_version}"
-        self.db.rulesets.insert_one({
+        self._insert_ruleset({
             "_id": new_id, "version": new_version, "parent": parent["_id"],
             "rule_ids": parent["rule_ids"] + rule_ids, "added": rule_ids,
             "evaluation_id": evaluation_id, "note": note, "created_at": _now()})
@@ -120,6 +128,39 @@ class Store:
             return_document=ReturnDocument.AFTER)
         if moved is None:
             raise ConflictError("head moved during promotion")
+        return new_version
+
+    def replace_rules(self, new_rule_id: str, replaced_ids: list[str], *, expected_version: int,
+                      evaluation_id: str, note: str, audit: dict | None = None) -> int:
+        """Consolidation: append a ruleset = parent - replaced + new, CAS the head onto it, then
+        mark the replaced rules superseded. Old rulesets stay intact, so history is replayable."""
+        replaced_ids = list(dict.fromkeys(replaced_ids))
+        head = self.db.heads.find_one({"_id": HEAD_ID})
+        if head["version"] != expected_version:
+            raise ConflictError(f"head is v{head['version']}, replacement evaluated against v{expected_version}")
+        parent = self.db.rulesets.find_one({"_id": head["ruleset_id"]})
+        missing = [r for r in replaced_ids if r not in parent["rule_ids"]]
+        if missing or not replaced_ids:
+            raise ConflictError(f"rules not in active ruleset {parent['_id']}: {missing or 'none named'}")
+        new_version = expected_version + 1
+        new_id = f"rs-{new_version}"
+        self._insert_ruleset({
+            "_id": new_id, "version": new_version, "parent": parent["_id"],
+            "rule_ids": [r for r in parent["rule_ids"] if r not in replaced_ids] + [new_rule_id],
+            "added": [new_rule_id], "removed": list(replaced_ids),
+            "evaluation_id": evaluation_id, "note": note, "created_at": _now()})
+        moved = self.db.heads.find_one_and_update(
+            {"_id": HEAD_ID, "version": expected_version},
+            {"$set": {"ruleset_id": new_id, "version": new_version, "updated_at": _now()},
+             "$inc": {"revision": 1}},
+            return_document=ReturnDocument.AFTER)
+        if moved is None:
+            raise ConflictError("head moved during replacement")
+        self.db.rules.update_many({"_id": {"$in": list(replaced_ids)}},
+                                  {"$set": {"status": "superseded", "superseded_by": new_rule_id,
+                                            "superseded_in_version": new_version, "updated_at": _now()}})
+        self.audit("consolidation", rule_id=new_rule_id, replaces=list(replaced_ids), version=new_version,
+                   evaluation_id=evaluation_id, note=note, **(audit or {}))
         return new_version
 
     # -- runs + audits ---------------------------------------------------------

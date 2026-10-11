@@ -18,11 +18,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from agents import telemetry
 from agents.scrubber import scrub
-from agents.watcher import claim_brief, propose
+from agents.watcher import claim_brief, consolidate, propose
 from eval.metrics import score
 from eval.synthetic_claims import load_claims, public_view
 from harness.features import features
-from harness.gate import evaluate
+from harness.gate import evaluate, evaluate_replacement
 from harness.payer_sim import adjudicate, outcome_summary
 from harness.rules import apply_rules
 from memory.semantic import semantic_memory
@@ -204,7 +204,7 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
         feedback = None
         for attempt in range(MAX_REVISIONS + 1):
             head, active = store.active()
-            lessons = store.rejected_rules()
+            lessons = [r for r in store.rejected_rules() if not r.get("replaces")]  # consolidation lessons stay there
             try:
                 candidates, meta = propose(groups["uncovered"], groups["holds"], paid_examples=paid_examples,
                                            denied_examples=denied_examples, active_rules=active,
@@ -270,6 +270,82 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
     return stats
 
 
+# -- consolidation -------------------------------------------------------------------------
+
+def consolidate_rules(store: Store, run_id: str, iteration: int) -> dict:
+    """Ask the watcher to merge or generalize each payer's active rules, then gate each
+    replacement. Runs every learning iteration, even with zero misses, so narrow rules learned
+    early do not freeze once training accuracy saturates. Training evidence only."""
+    evidence = latest_train_evidence(store, run_id)
+    _, active = store.active()
+    payers = sorted({r["payer"] for r in active if r["payer"] != "*"})
+    stats = {"payers": payers, "proposed": 0, "promoted": 0, "rejected": 0, "replacements": []}
+    if os.environ.get("CONSOLIDATE", "1") == "0":
+        return stats
+    seq = store.db.rules.count_documents({}) + 1
+    for payer in payers:
+        _, active = store.active()
+        mine = [r for r in active if r["payer"] == payer]
+        if not mine:
+            continue
+        lessons = [r for r in store.rejected_rules(payer) if r.get("replaces")]
+        try:
+            reps, meta = consolidate(
+                payer, mine, lessons=lessons,
+                paid_examples=[e for e in evidence if e["payer"] == payer and e["observed"]["outcome"] == "paid"],
+                denied_examples=[e for e in evidence if e["payer"] == payer and e["observed"]["outcome"] == "denied"])
+        except Exception as e:  # noqa: BLE001
+            log(f"  consolidation failed for {payer}: {e}")
+            continue
+        store.audit("consolidation_proposal", run_id=run_id, iteration=iteration, payer=payer,
+                    n_replacements=len(reps), notes=meta.get("notes"), model=meta["model"])
+        for rep in reps:
+            replaces = list(dict.fromkeys(str(x) for x in (rep.get("replaces") or [])))
+            cand = {**rep["rule"], "rule_id": f"R-{seq:03d}", "payer": rep["rule"].get("payer") or payer,
+                    "replaces": replaces}
+            seq += 1
+            stats["proposed"] += 1
+            head, active = store.active()
+            by_id = {r["rule_id"]: r for r in active}
+            foreign = [rid for rid in replaces if by_id.get(rid, {}).get("payer") != payer]
+            if foreign:  # only this payer's own active rules are in scope for this call
+                verdict = {"verdict": "rejected", "stage": "scope", "replaces": replaces, "fixes": [],
+                           "regressions": [], "lost": [], "evidence_size": len(evidence),
+                           "reason": f"replaces rules that are not active {payer} rules: " + ", ".join(foreign)}
+            else:
+                verdict = evaluate_replacement(cand, [by_id[rid] for rid in replaces], active, evidence)
+            ev_id = store.insert_evaluation({"run_id": run_id, "iteration": iteration, "rule_id": cand["rule_id"],
+                                             "baseline_version": head["version"], **verdict})
+            try:
+                store.insert_rule(cand, status="candidate", iteration=iteration,
+                                  evidence=[f"{run_id}:{iteration}:{c}" for c in verdict["fixes"]])
+            except Exception:  # duplicate id after resume
+                continue
+            row = {"rule_id": cand["rule_id"], "replaces": replaces, "description": cand.get("description"),
+                   "reason": verdict["reason"]}
+            if verdict["verdict"] == "promote":
+                try:
+                    v = store.replace_rules(cand["rule_id"], replaces, expected_version=head["version"],
+                                            evaluation_id=ev_id, note=cand.get("description", ""),
+                                            audit={"run_id": run_id, "iteration": iteration})
+                except ConflictError as e:
+                    store.set_rule_status(cand["rule_id"], "parked", rejection_reason=str(e))
+                    continue
+                store.set_rule_status(cand["rule_id"], "promoted", promoted_version=v)
+                stats["promoted"] += 1
+                stats["replacements"].append({**row, "version": v, "verdict": "promote"})
+                log(f"  CONSOLIDATED v{v} {cand['rule_id']} replaces {replaces}: {cand.get('description')}")
+            else:
+                store.set_rule_status(cand["rule_id"], "rejected", rejection_reason=verdict["reason"],
+                                      regressions=verdict.get("regressions", []), lost=verdict.get("lost", []))
+                store.audit("rejection", run_id=run_id, iteration=iteration, rule_id=cand["rule_id"],
+                            reason=verdict["reason"], description=cand.get("description"), replaces=replaces)
+                stats["rejected"] += 1
+                stats["replacements"].append({**row, "verdict": "rejected"})
+                log(f"  rejected consolidation {cand['rule_id']} of {replaces}: {verdict['reason']}")
+    return stats
+
+
 # -- driver -------------------------------------------------------------------------------
 
 def run(store: Store, run_id: str, iterations: int) -> list[dict]:
@@ -290,6 +366,8 @@ def run(store: Store, run_id: str, iterations: int) -> list[dict]:
         if it < iterations:
             log(f"iteration {it}: watcher learning from training misses")
             entry["learning"] = learn(store, run_id, it)
+            log(f"iteration {it}: watcher consolidating active rules")
+            entry["consolidation"] = consolidate_rules(store, run_id, it)
         history.append(entry)
         extra = {"telemetry": telemetry.summary(prior_sent)} if telemetry.enabled() else {}
         store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running", **extra)
