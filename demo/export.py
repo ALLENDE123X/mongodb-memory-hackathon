@@ -49,9 +49,11 @@ def _in_run(doc: dict, run_id: str) -> bool:
 def export(db, run_id: str) -> dict:
     run = db.runs.find_one({"_id": run_id}) or {}
     history = run.get("history", [])
-    curve = [{"iteration": h["iteration"], "ruleset_version": h["metrics"]["ruleset_version"],
+    curve = [{"iteration": h["iteration"], "train_revealed": h.get("n"),  # training claims streamed in
+              "ruleset_version": h["metrics"]["ruleset_version"],
               "rule_count": h["metrics"]["rule_count"],
               "label": label_for(h["metrics"]["ruleset_version"], h["metrics"]["rule_count"]),
+              # heldout/train carry n, n_paid, n_denied
               "heldout": h["metrics"]["heldout"], "train": h["metrics"]["train"]} for h in history]
     evals = [e for e in db.evaluations.find({}).sort("created_at", 1) if _in_run(e, run_id)]
     eval_by_rule = {e["rule_id"]: e for e in evals}

@@ -162,7 +162,7 @@ def test_loop_consolidates_even_with_zero_misses(monkeypatch):
     monkeypatch.setattr(scrubber_mod, "complete_json", fake_scrub_llm)
     monkeypatch.setattr(watcher_mod, "complete_json", fake)
     client = mongomock.MongoClient()
-    history = loop.run(Store(client.db), "c", iterations=2)
+    history = loop.run(Store(client.db), "c", iterations=2, slices=1)
     second = history[1]
     assert second["learning"]["uncovered_denials"] == 0 and second["learning"]["false_holds"] == 0
     cons = second["consolidation"]

@@ -31,7 +31,7 @@ def test_loop_learns_rejects_and_resumes(monkeypatch):
     monkeypatch.setattr(scrubber_mod, "complete_json", fake_scrub_llm)
     monkeypatch.setattr(watcher_mod, "complete_json", fake_watch_llm)
     client = mongomock.MongoClient()
-    history = loop.run(Store(client.db), "t", iterations=1)
+    history = loop.run(Store(client.db), "t", iterations=1, slices=1)
     first, second = history[0]["metrics"]["heldout"], history[1]["metrics"]["heldout"]
     assert first["balanced_accuracy"] == 0.5          # always-paid baseline
     assert second["balanced_accuracy"] > 0.9          # learned rules transfer to held-out
@@ -43,5 +43,5 @@ def test_loop_learns_rejects_and_resumes(monkeypatch):
     assert all(e["split"] == "train" for e in loop.latest_train_evidence(Store(client.db), "t"))
     # restart: a new process resumes from the database without re-submitting
     n = client.db.episodes.count_documents({})
-    again = loop.run(Store(client.db), "t", iterations=1)
+    again = loop.run(Store(client.db), "t", iterations=1, slices=1)
     assert len(again) == 2 and client.db.episodes.count_documents({}) == n

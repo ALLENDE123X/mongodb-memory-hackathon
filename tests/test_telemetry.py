@@ -43,7 +43,7 @@ def reset(monkeypatch):
 def _run(sdk=None):
     if sdk:
         telemetry.set_sdk(sdk)
-    return loop.run(Store(mongomock.MongoClient().db), "t", iterations=1)
+    return loop.run(Store(mongomock.MongoClient().db), "t", iterations=1, slices=1)
 
 
 def test_no_key_is_a_noop(monkeypatch):
@@ -146,7 +146,7 @@ def test_export_has_raindrop_block(monkeypatch):
     monkeypatch.setenv("RAINDROP_DASHBOARD_URL", "https://app.raindrop.ai/example")
     db = mongomock.MongoClient().db
     telemetry.set_sdk(FakeSDK())
-    loop.run(Store(db), "t", iterations=1)
+    loop.run(Store(db), "t", iterations=1, slices=1)
     block = export(db, "t")["raindrop"]
     assert block["dashboard_url"] == "https://app.raindrop.ai/example"
     assert block["total"] == sum(block["events_sent"].values()) > 0
@@ -178,9 +178,9 @@ def test_signal_requires_its_parent_event(monkeypatch):
 
 def test_run_doc_telemetry_only_when_enabled():
     db = mongomock.MongoClient().db
-    loop.run(Store(db), "t", iterations=1)
+    loop.run(Store(db), "t", iterations=1, slices=1)
     assert "telemetry" not in db.runs.find_one({"_id": "t"})
     db2 = mongomock.MongoClient().db
     telemetry.set_sdk(FakeSDK())
-    loop.run(Store(db2), "t", iterations=1)
+    loop.run(Store(db2), "t", iterations=1, slices=1)
     assert db2.runs.find_one({"_id": "t"})["telemetry"]["total"] > 0

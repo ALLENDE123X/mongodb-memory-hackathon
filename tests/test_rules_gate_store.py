@@ -28,6 +28,7 @@ EVIDENCE = [
     {"claim_id": "A", "features": feats("NORTHSTAR", "72148"), "observed": {"outcome": "denied", "carcs": ["197"]}},
     {"claim_id": "B", "features": feats("NORTHSTAR", "72148", auth="PA123"), "observed": {"outcome": "paid", "carcs": []}},
     {"claim_id": "C", "features": feats("CASCADE", "72148"), "observed": {"outcome": "paid", "carcs": []}},
+    {"claim_id": "D", "features": feats("NORTHSTAR", "99213"), "observed": {"outcome": "paid", "carcs": []}},
 ]
 
 

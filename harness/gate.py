@@ -9,6 +9,11 @@ Exception rule: fixes   = paid claims the scrubber wrongly held that no active e
                 breaks  = any denied claim it fires on (it would let a real denial through)
 Replacement:    consolidation swaps active rules for one more general rule; it must keep every
                 claim they explained and contradict nothing (see `evaluate_replacement`)
+
+Min evidence:   a denial rule is only as trustworthy as the paid counterexamples it was replayed
+                against, so it needs MIN_PAYER_PAID_SEEN distinct paid claims from its payer
+                (from any payer for a "*" rule). Counted by claim_id, so re-scrubbing the same
+                claims every iteration cannot inflate it.
 """
 from __future__ import annotations
 
@@ -19,6 +24,19 @@ from harness.rules import RuleError, apply_rules, fires, outcome_of, validate
 # Pinned promotion policy (set before looking at held-out results).
 MIN_FIXES = 1          # candidate must correct at least one observed case
 MAX_REGRESSIONS = 0    # and must not contradict any observed outcome
+MIN_PAYER_PAID_SEEN = 2  # denial rule needs this many distinct paid claims from its payer replayed
+INSUFFICIENT = "insufficient evidence"  # reason prefix; a revision cannot fix it, only more claims can
+
+
+def paid_seen(payer: str, evidence: list[dict]) -> int:
+    """Distinct paid claim_ids from `payer` ("*" = any payer) in the replayed evidence."""
+    return len({ev["claim_id"] for ev in evidence if ev["observed"]["outcome"] == "paid"
+                and payer in ("*", ev.get("payer") or (ev.get("features") or {}).get("payer"))})
+
+
+def _insufficient(payer: str, seen: int) -> str:
+    return (f"{INSUFFICIENT}: only {seen} distinct paid {payer} claim(s) replayed, "
+            f"MIN_PAYER_PAID_SEEN={MIN_PAYER_PAID_SEEN} (pinned in harness/gate.py); retry when more arrive")
 
 
 def evaluate(candidate: dict, active_rules: list[dict], evidence: list[dict]) -> dict:
@@ -63,11 +81,14 @@ def evaluate(candidate: dict, active_rules: list[dict], evidence: list[dict]) ->
             f"would {noun} {len(regressions)} claim(s) whose real outcome contradicts it: " + ", ".join(regressions))
     elif len(fixes) < MIN_FIXES:
         verdict, reason = "rejected", "corrects no observed case" + (" (already covered)" if redundant else "")
+    elif kind == "denied" and (seen := paid_seen(candidate["payer"], evidence)) < MIN_PAYER_PAID_SEEN:
+        verdict, reason = "rejected", _insufficient(candidate["payer"], seen)
     else:
         verdict, reason = "promote", f"corrects {len(fixes)} observed case(s), 0 regressions"
     return {"verdict": verdict, "kind": kind, "stage": "replay", "reason": reason, "fixes": fixes,
             "regressions": regressions, "redundant": redundant,
-            "thresholds": {"min_fixes": MIN_FIXES, "max_regressions": MAX_REGRESSIONS},
+            "thresholds": {"min_fixes": MIN_FIXES, "max_regressions": MAX_REGRESSIONS,
+                           "min_payer_paid_seen": MIN_PAYER_PAID_SEEN},
             "evidence_size": len(evidence)}
 
 
@@ -142,7 +163,8 @@ def evaluate_replacement(new_rule: dict, replaced_rules: list[dict], active_rule
     replaced_rules = list({r.get("rule_id"): r for r in replaced_rules}.values())  # dedupe, keep order
     base = {"stage": "replacement", "replaces": [r.get("rule_id") for r in replaced_rules],
             "fixes": [], "regressions": [], "lost": [], "narrowed": [], "preserved": [],
-            "thresholds": {"max_regressions": MAX_REGRESSIONS, "max_lost": 0, "min_fixes": MIN_FIXES},
+            "thresholds": {"max_regressions": MAX_REGRESSIONS, "max_lost": 0, "min_fixes": MIN_FIXES,
+                           "min_payer_paid_seen": MIN_PAYER_PAID_SEEN},
             "evidence_size": len(evidence)}
     try:
         validate(new_rule)
@@ -196,6 +218,8 @@ def evaluate_replacement(new_rule: dict, replaced_rules: list[dict], active_rule
                                        + ", ".join(lost))
     elif len(fixes) < MIN_FIXES:
         verdict, reason = "rejected", "replacement explains no observed claim"
+    elif kind == "denied" and (seen := paid_seen(new_rule["payer"], evidence)) < MIN_PAYER_PAID_SEEN:
+        verdict, reason = "rejected", _insufficient(new_rule["payer"], seen)
     else:
         verdict, reason = "promote", (f"replaces {len(replaced_rules)} rule(s), fires correctly on all "
                                       f"{len(preserved)} claim(s) they explained, 0 regressions")
