@@ -10,7 +10,7 @@ import os
 from functools import lru_cache
 
 from dotenv import load_dotenv
-from pymongo import ASCENDING, DESCENDING, MongoClient
+from pymongo import MongoClient
 
 load_dotenv(".env.local")
 load_dotenv()
@@ -24,17 +24,10 @@ def get_db():
     return client[os.environ.get("MONGODB_DB", "recursive_harness")]
 
 
-def ensure_indexes():
-    db = get_db()
-    db.traces.create_index([("iteration", ASCENDING), ("claim_id", ASCENDING)])
-    db.traces.create_index([("created_at", DESCENDING)])
-    db.policies.create_index([("version", DESCENDING)], unique=True)
-    db.rules.create_index([("payer", ASCENDING), ("status", ASCENDING), ("introduced_in", ASCENDING)])
-    db.taxonomy.create_index([("kind", ASCENDING), ("name", ASCENDING)], unique=True)
-
-
 if __name__ == "__main__":
+    from memory.store import Store
+
     db = get_db()
     print("ping:", db.client.admin.command("ping"))
-    ensure_indexes()
-    print("collections:", db.list_collection_names())
+    Store(db).bootstrap()
+    print("collections:", sorted(db.list_collection_names()))
