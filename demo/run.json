@@ -118,21 +118,21 @@
         "n": 24,
         "n_paid": 11,
         "n_denied": 13,
-        "balanced_accuracy": 0.877,
-        "accuracy_with_reason": 0.875,
+        "balanced_accuracy": 0.923,
+        "accuracy_with_reason": 0.917,
         "denials_caught": 11,
         "denials_caught_right_reason": 11,
-        "unnecessary_holds": 1,
-        "unnecessary_hold_rate": 0.091,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
         "missed_denials": 2
       }
     },
     {
       "iteration": 3,
       "train_revealed": 24,
-      "ruleset_version": 17,
-      "rule_count": 16,
-      "label": "ruleset v17",
+      "ruleset_version": 16,
+      "rule_count": 15,
+      "label": "ruleset v16",
       "heldout": {
         "n": 22,
         "n_paid": 11,
@@ -163,7 +163,7 @@
     {
       "rule_id": "R-001",
       "payer": "BAYVIEW",
-      "description": "Bayview denies claims billed with POS 02 (telehealth other than the patient's home) as inconsistent with the place of service, since home telehealth must be reported with POS 10.",
+      "description": "Bayview denies telehealth claims billed with POS 02 when the patient was at home; home telehealth must be billed as POS 10.",
       "status": "rejected",
       "iteration": 0,
       "version": null,
@@ -179,6 +179,11 @@
           "field": "pos",
           "op": "eq",
           "value": "02"
+        },
+        {
+          "field": "context.patient_location",
+          "op": "eq",
+          "value": "home"
         }
       ],
       "evidence": [
@@ -199,7 +204,7 @@
     {
       "rule_id": "R-002",
       "payer": "BAYVIEW",
-      "description": "Bayview denies claims submitted more than 90 days after the date of service for an expired timely filing limit.",
+      "description": "Bayview denies claims submitted more than 90 days after the date of service as past the timely filing limit.",
       "status": "rejected",
       "iteration": 0,
       "version": null,
@@ -235,7 +240,7 @@
     {
       "rule_id": "R-003",
       "payer": "BAYVIEW",
-      "description": "Bayview does not require modifier 25 on an office/outpatient E/M billed on the same claim as immunization administration, and pays both.",
+      "description": "Bayview does not require modifier 25 on an office E/M billed on the same claim as immunization administration.",
       "status": "promoted",
       "iteration": 0,
       "version": 1,
@@ -256,11 +261,6 @@
                 99202,
                 99215
               ]
-            },
-            {
-              "field": "modifiers",
-              "op": "not_contains",
-              "value": "25"
             }
           ]
         },
@@ -335,7 +335,7 @@
     {
       "rule_id": "R-005",
       "payer": "NORTHSTAR",
-      "description": "Northstar denies claims submitted after its timely filing limit (CARC 29).",
+      "description": "Northstar denies claims submitted more than 90 days after the date of service as past its timely filing limit (CARC 29).",
       "status": "promoted",
       "iteration": 0,
       "version": 3,
@@ -350,7 +350,7 @@
         {
           "field": "days_to_submit",
           "op": "gt",
-          "value": 180
+          "value": 90
         }
       ],
       "evidence": [
@@ -371,7 +371,7 @@
     {
       "rule_id": "R-006",
       "payer": "NORTHSTAR",
-      "description": "Northstar rejects modifier 59 as inconsistent with the procedure and requires the specific X{EPSU} modifiers instead (CARC 4, RARC N823).",
+      "description": "Northstar rejects modifier 59 as a distinct-service modifier and requires the X{EPSU} subset instead, denying any line billed with 59 under CARC 4 (N823).",
       "status": "promoted",
       "iteration": 0,
       "version": 4,
@@ -411,7 +411,7 @@
     {
       "rule_id": "R-007",
       "payer": "NORTHSTAR",
-      "description": "Northstar does not deny claims from out-of-network providers and pays them under out-of-network benefits.",
+      "description": "Northstar commercial plans do not deny out-of-network providers outright; such claims are paid under out-of-network benefits.",
       "status": "promoted",
       "iteration": 0,
       "version": 5,
@@ -447,7 +447,7 @@
     {
       "rule_id": "R-008",
       "payer": "BAYVIEW",
-      "description": "Bayview denies claims billed with POS 02 (telehealth not in the patient's home) as inconsistent with the place of service (CARC 5), because it requires home telehealth to be reported with POS 10.",
+      "description": "Bayview denies telehealth claims billed with POS 02 when the patient was at home, because home telehealth must be billed as POS 10 (CARC 5).",
       "status": "promoted",
       "iteration": 1,
       "version": 6,
@@ -463,6 +463,11 @@
           "field": "pos",
           "op": "eq",
           "value": "02"
+        },
+        {
+          "field": "context.patient_location",
+          "op": "eq",
+          "value": "home"
         }
       ],
       "evidence": [
@@ -483,7 +488,7 @@
     {
       "rule_id": "R-009",
       "payer": "BAYVIEW",
-      "description": "Bayview denies claims submitted after its 90-day timely filing limit (CARC 29).",
+      "description": "Bayview denies claims submitted more than 90 days after the date of service as past its timely filing limit (CARC 29).",
       "status": "promoted",
       "iteration": 1,
       "version": 7,
@@ -519,7 +524,7 @@
     {
       "rule_id": "R-010",
       "payer": "BAYVIEW",
-      "description": "Bayview denies claims with any service line billed at a zero charge as a billing error (CARC 16, RARC M79).",
+      "description": "Bayview denies claims with CARC 16 (missing or invalid information, M79) when any service line has a zero or missing charge.",
       "status": "promoted",
       "iteration": 1,
       "version": 8,
@@ -559,7 +564,7 @@
     {
       "rule_id": "R-011",
       "payer": "BAYVIEW",
-      "description": "Bayview denies services from out-of-network providers (CARC 242), even when a referral is on file.",
+      "description": "Bayview Medicaid managed care denies services from out-of-network providers even when a referral is on file (CARC 242).",
       "status": "promoted",
       "iteration": 1,
       "version": 9,
@@ -595,7 +600,7 @@
     {
       "rule_id": "R-012",
       "payer": "CASCADE",
-      "description": "Cascade denies vitamin D assays (25-hydroxy 82306, 1,25-dihydroxy 82652) as a non-covered diagnosis (CARC 167, RARC N115 LCD/NCD) when the line points only to diagnoses outside the vitamin D NCD covered list, such as nonspecific symptoms like fatigue.",
+      "description": "Cascade (Medicare Advantage) denies 25-hydroxy vitamin D testing under CARC 167 when the line points to no covered indication, such as vitamin D deficiency, bone or mineral disorders, CKD, parathyroid disease or malabsorption; symptom codes like fatigue do not qualify.",
       "status": "promoted",
       "iteration": 1,
       "version": 10,
@@ -611,10 +616,10 @@
           "any_line": [
             {
               "field": "cpt",
-              "op": "in",
+              "op": "between",
               "value": [
-                "82306",
-                "82652"
+                82306,
+                82306
               ]
             },
             {
@@ -626,24 +631,28 @@
                 "E20",
                 "E21",
                 "E64",
+                "E66",
                 "M80",
                 "M81",
+                "M82",
                 "M83",
                 "M85",
                 "M88",
+                "M89",
                 "N18",
+                "N19",
                 "N25",
                 "K50",
                 "K51",
+                "K52",
                 "K74",
+                "K86",
                 "K90",
                 "K91",
-                "E84",
+                "Z68",
                 "Z79",
                 "Z94",
-                "Z98",
-                "R7989",
-                "D86"
+                "R7989"
               ]
             }
           ]
@@ -666,8 +675,78 @@
     },
     {
       "rule_id": "R-013",
+      "payer": "CASCADE",
+      "description": "Cascade (Medicare Advantage) denies 1,25-dihydroxy vitamin D testing under CARC 167 when the line points to no covered indication, such as vitamin D deficiency, bone or mineral disorders, CKD, parathyroid disease or malabsorption; symptom codes like fatigue do not qualify.",
+      "status": "rejected",
+      "iteration": 1,
+      "version": null,
+      "kind": "denial",
+      "carc": "167",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "CASCADE"
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "between",
+              "value": [
+                82652,
+                82652
+              ]
+            },
+            {
+              "field": "dx_codes",
+              "op": "none_startswith",
+              "value": [
+                "E55",
+                "E83",
+                "E20",
+                "E21",
+                "E64",
+                "E66",
+                "M80",
+                "M81",
+                "M82",
+                "M83",
+                "M85",
+                "M88",
+                "M89",
+                "N18",
+                "N19",
+                "N25",
+                "K50",
+                "K51",
+                "K52",
+                "K74",
+                "K86",
+                "K90",
+                "K91",
+                "Z68",
+                "Z79",
+                "Z94",
+                "R7989"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case",
+      "replaces": [],
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-014",
       "payer": "NORTHSTAR",
-      "description": "Northstar limits preventive medicine visits to one per 365 days and denies a repeat preventive E/M within that period as benefit maximum reached (CARC 119, RARC N130).",
+      "description": "Northstar limits preventive medicine visits to one per 12 months and denies a repeat preventive visit within 365 days of the last one under CARC 119.",
       "status": "promoted",
       "iteration": 1,
       "version": 11,
@@ -713,9 +792,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-014",
+      "rule_id": "R-015",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): head/neck CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (head/neck CT/MRI).",
       "status": "superseded",
       "iteration": 1,
       "version": 12,
@@ -756,13 +835,13 @@
       "regressions": [],
       "rejection_reason": null,
       "replaces": [],
-      "superseded_by": "R-021",
+      "superseded_by": "R-023",
       "probe": false
     },
     {
-      "rule_id": "R-015",
+      "rule_id": "R-016",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): chest CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (chest CT/MRI).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -801,9 +880,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-016",
+      "rule_id": "R-017",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): spine and pelvis CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (spine CT/MRI).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -826,6 +905,47 @@
               "op": "between",
               "value": [
                 72125,
+                72159
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case",
+      "replaces": [],
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-018",
+      "payer": "NORTHSTAR",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (pelvis CT/MRI).",
+      "status": "rejected",
+      "iteration": 1,
+      "version": null,
+      "kind": "denial",
+      "carc": "197",
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "NORTHSTAR"
+        },
+        {
+          "field": "prior_auth",
+          "op": "missing"
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "between",
+              "value": [
+                72191,
                 72198
               ]
             }
@@ -842,9 +962,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-017",
+      "rule_id": "R-019",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): upper extremity CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (upper extremity CT/MRI).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -883,9 +1003,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-018",
+      "rule_id": "R-020",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): lower extremity CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (lower extremity CT/MRI).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -924,9 +1044,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-019",
+      "rule_id": "R-021",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): abdomen CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (abdomen CT/MRI).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -965,9 +1085,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-020",
+      "rule_id": "R-022",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging and denies it when no authorization is on the claim (CARC 197, RARC M62): PET imaging.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (PET imaging).",
       "status": "rejected",
       "iteration": 1,
       "version": null,
@@ -1006,9 +1126,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-021",
+      "rule_id": "R-023",
       "payer": "NORTHSTAR",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI of head/neck, chest, spine, pelvis, extremities, abdomen) and denies it when no authorization is on the claim (CARC 197, RARC M62).",
+      "description": "Northstar requires prior authorization for advanced imaging (CT, MRI and PET of any body region) and denies it under CARC 197 when no authorization is on file.",
       "status": "promoted",
       "iteration": 1,
       "version": 13,
@@ -1028,67 +1148,27 @@
           "any_line": [
             {
               "field": "cpt",
-              "op": "in",
+              "op": "startswith_any",
               "value": [
-                "70450",
-                "70460",
-                "70470",
-                "70480",
-                "70481",
-                "70482",
-                "70486",
-                "70487",
-                "70488",
-                "70490",
-                "70491",
-                "70492",
-                "70496",
-                "70498",
-                "70540",
-                "70542",
-                "70543",
-                "70544",
-                "70545",
-                "70546",
-                "70547",
-                "70548",
-                "70549",
-                "70551",
-                "70552",
-                "70553",
-                "70554",
-                "70555",
-                "70557",
-                "70558",
-                "70559",
-                "71250",
-                "71260",
-                "71270",
-                "71271",
-                "71275",
-                "71550",
-                "71551",
-                "71552",
-                "71555",
+                "7045",
+                "7046",
+                "7047",
+                "7048",
+                "7049",
+                "7054",
+                "7055",
+                "7125",
+                "7126",
+                "7127",
+                "7155",
                 "72125",
                 "72126",
                 "72127",
                 "72128",
                 "72129",
-                "72130",
-                "72131",
-                "72132",
-                "72133",
-                "72141",
-                "72142",
-                "72146",
-                "72147",
-                "72148",
-                "72149",
-                "72156",
-                "72157",
-                "72158",
-                "72159",
+                "7213",
+                "7214",
+                "7215",
                 "72191",
                 "72192",
                 "72193",
@@ -1097,40 +1177,17 @@
                 "72196",
                 "72197",
                 "72198",
-                "73200",
-                "73201",
-                "73202",
-                "73206",
-                "73218",
-                "73219",
-                "73220",
-                "73221",
-                "73222",
-                "73223",
-                "73225",
-                "73700",
-                "73701",
-                "73702",
-                "73706",
-                "73718",
-                "73719",
-                "73720",
-                "73721",
-                "73722",
-                "73723",
-                "73725",
-                "74150",
-                "74160",
-                "74170",
-                "74174",
-                "74175",
-                "74176",
-                "74177",
-                "74178",
-                "74181",
-                "74182",
-                "74183",
-                "74185"
+                "7320",
+                "7321",
+                "7322",
+                "7370",
+                "7371",
+                "7372",
+                "7415",
+                "7416",
+                "7417",
+                "7418",
+                "7881"
               ]
             }
           ]
@@ -1148,15 +1205,15 @@
       "regressions": [],
       "rejection_reason": null,
       "replaces": [
-        "R-014"
+        "R-015"
       ],
       "superseded_by": null,
       "probe": false
     },
     {
-      "rule_id": "R-022",
+      "rule_id": "R-024",
       "payer": "BAYVIEW",
-      "description": "Bayview bundles venipuncture/specimen collection (36400-36416) into the payment for a clinical laboratory test billed on the same claim and denies the collection line as included in another service (CARC 97, RARC M15).",
+      "description": "Bayview bundles specimen collection (venipuncture/capillary collection) into clinical laboratory tests billed on the same claim and denies the collection under CARC 97 (M15).",
       "status": "promoted",
       "iteration": 2,
       "version": 14,
@@ -1174,7 +1231,7 @@
               "field": "cpt",
               "op": "between",
               "value": [
-                36400,
+                36415,
                 36416
               ]
             }
@@ -1209,9 +1266,9 @@
       "probe": false
     },
     {
-      "rule_id": "R-023",
+      "rule_id": "R-025",
       "payer": "CASCADE",
-      "description": "Cascade denies an office/outpatient E/M billed without modifier 25 on the same claim as a therapeutic, prophylactic or diagnostic injection or infusion administration, as the procedure code is inconsistent with the modifier (CARC 4, RARC N822).",
+      "description": "Cascade denies an office/outpatient E/M billed without modifier 25 on the same claim as a drug or injection administration service (hydration, therapeutic/diagnostic injection or infusion, chemotherapy administration) under CARC 4 (N822, missing procedure modifier).",
       "status": "promoted",
       "iteration": 2,
       "version": 15,
@@ -1247,7 +1304,7 @@
               "op": "between",
               "value": [
                 96360,
-                96379
+                96549
               ]
             }
           ]
@@ -1269,48 +1326,12 @@
       "probe": false
     },
     {
-      "rule_id": "R-024",
-      "payer": "CASCADE",
-      "description": "Cascade does not enforce a 90-180 day timely filing limit and pays claims submitted well after the date of service.",
+      "rule_id": "R-026",
+      "payer": "NORTHSTAR",
+      "description": "Northstar caps outpatient physical medicine and rehabilitation therapy visits per plan year and denies therapy services once the year-to-date visit count reaches the benefit maximum (CARC 119, N362).",
       "status": "promoted",
       "iteration": 2,
       "version": 16,
-      "kind": "exception",
-      "carc": null,
-      "when": [
-        {
-          "field": "payer",
-          "op": "eq",
-          "value": "CASCADE"
-        },
-        {
-          "field": "days_to_submit",
-          "op": "gt",
-          "value": 90
-        }
-      ],
-      "evidence": [
-        "final:2:CLM-014"
-      ],
-      "learned_from": [
-        "CLM-014"
-      ],
-      "fixes": [
-        "CLM-014"
-      ],
-      "regressions": [],
-      "rejection_reason": null,
-      "replaces": [],
-      "superseded_by": null,
-      "probe": false
-    },
-    {
-      "rule_id": "R-025",
-      "payer": "NORTHSTAR",
-      "description": "Northstar caps outpatient therapy visits per plan year and denies physical medicine/rehabilitation services once the year-to-date visit count reaches the limit, as benefit maximum reached (CARC 119, RARC N362): physical medicine CPT family.",
-      "status": "promoted",
-      "iteration": 2,
-      "version": 17,
       "kind": "denial",
       "carc": "119",
       "when": [
@@ -1318,11 +1339,6 @@
           "field": "payer",
           "op": "eq",
           "value": "NORTHSTAR"
-        },
-        {
-          "field": "context.visit_count_ytd",
-          "op": "gte",
-          "value": 20
         },
         {
           "any_line": [
@@ -1335,6 +1351,11 @@
               ]
             }
           ]
+        },
+        {
+          "field": "context.visit_count_ytd",
+          "op": "gte",
+          "value": 20
         }
       ],
       "evidence": [
@@ -1348,49 +1369,6 @@
       ],
       "regressions": [],
       "rejection_reason": null,
-      "replaces": [],
-      "superseded_by": null,
-      "probe": false
-    },
-    {
-      "rule_id": "R-026",
-      "payer": "NORTHSTAR",
-      "description": "Northstar caps outpatient therapy visits per plan year and denies physical medicine/rehabilitation services once the year-to-date visit count reaches the limit, as benefit maximum reached (CARC 119, RARC N362): any line carrying a PT/OT/SLP therapy modifier.",
-      "status": "rejected",
-      "iteration": 2,
-      "version": null,
-      "kind": "denial",
-      "carc": "119",
-      "when": [
-        {
-          "field": "payer",
-          "op": "eq",
-          "value": "NORTHSTAR"
-        },
-        {
-          "field": "context.visit_count_ytd",
-          "op": "gte",
-          "value": 20
-        },
-        {
-          "any_line": [
-            {
-              "field": "modifiers",
-              "op": "contains_any",
-              "value": [
-                "GP",
-                "GO",
-                "GN"
-              ]
-            }
-          ]
-        }
-      ],
-      "evidence": [],
-      "learned_from": [],
-      "fixes": [],
-      "regressions": [],
-      "rejection_reason": "corrects no observed case (already covered)",
       "replaces": [],
       "superseded_by": null,
       "probe": false
@@ -1415,25 +1393,25 @@
       "uncovered_denials": 7,
       "false_holds": 0,
       "misses": null,
-      "proposed": 13,
+      "proposed": 15,
       "promoted": 7,
-      "rejected": 6,
+      "rejected": 8,
       "revised": 0,
-      "n": 13,
-      "acceptance_rate": 0.538,
+      "n": 15,
+      "acceptance_rate": 0.467,
       "n_train": 19
     },
     {
       "iteration": 2,
       "uncovered_denials": 3,
-      "false_holds": 1,
+      "false_holds": 0,
       "misses": null,
-      "proposed": 5,
-      "promoted": 4,
-      "rejected": 1,
+      "proposed": 3,
+      "promoted": 3,
+      "rejected": 0,
       "revised": 0,
-      "n": 5,
-      "acceptance_rate": 0.8,
+      "n": 3,
+      "acceptance_rate": 1.0,
       "n_train": 24
     }
   ],
@@ -1456,25 +1434,25 @@
       "uncovered_denials": 7,
       "false_holds": 0,
       "misses": null,
-      "proposed": 13,
+      "proposed": 15,
       "promoted": 7,
-      "rejected": 6,
+      "rejected": 8,
       "revised": 0,
-      "n": 13,
-      "acceptance_rate": 0.538,
+      "n": 15,
+      "acceptance_rate": 0.467,
       "n_train": 19
     },
     {
       "iteration": 2,
       "uncovered_denials": 3,
-      "false_holds": 1,
+      "false_holds": 0,
       "misses": null,
-      "proposed": 5,
-      "promoted": 4,
-      "rejected": 1,
+      "proposed": 3,
+      "promoted": 3,
+      "rejected": 0,
       "revised": 0,
-      "n": 5,
-      "acceptance_rate": 0.8,
+      "n": 3,
+      "acceptance_rate": 1.0,
       "n_train": 24
     }
   ],
@@ -1650,11 +1628,11 @@
     {
       "rule_id": "R-013",
       "iteration": 1,
-      "verdict": "promote",
+      "verdict": "rejected",
       "kind": "denied",
-      "reason": "corrects 1 observed case(s), 0 regressions",
+      "reason": "corrects no observed case",
       "stage": "replay",
-      "fixes": 1,
+      "fixes": 0,
       "regressions": 0,
       "redundant": 0,
       "evidence_size": 19,
@@ -1672,21 +1650,21 @@
       "regressions": 0,
       "redundant": 0,
       "evidence_size": 19,
-      "baseline_version": 11,
+      "baseline_version": 10,
       "probe": false
     },
     {
       "rule_id": "R-015",
       "iteration": 1,
-      "verdict": "rejected",
+      "verdict": "promote",
       "kind": "denied",
-      "reason": "corrects no observed case",
+      "reason": "corrects 1 observed case(s), 0 regressions",
       "stage": "replay",
-      "fixes": 0,
+      "fixes": 1,
       "regressions": 0,
       "redundant": 0,
       "evidence_size": 19,
-      "baseline_version": 12,
+      "baseline_version": 11,
       "probe": false
     },
     {
@@ -1761,6 +1739,34 @@
     },
     {
       "rule_id": "R-021",
+      "iteration": 1,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 19,
+      "baseline_version": 12,
+      "probe": false
+    },
+    {
+      "rule_id": "R-022",
+      "iteration": 1,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 19,
+      "baseline_version": 12,
+      "probe": false
+    },
+    {
+      "rule_id": "R-023",
       "iteration": 1,
       "verdict": "promote",
       "kind": "denied",
@@ -1774,7 +1780,7 @@
       "probe": false
     },
     {
-      "rule_id": "R-022",
+      "rule_id": "R-024",
       "iteration": 2,
       "verdict": "promote",
       "kind": "denied",
@@ -1788,7 +1794,7 @@
       "probe": false
     },
     {
-      "rule_id": "R-023",
+      "rule_id": "R-025",
       "iteration": 2,
       "verdict": "promote",
       "kind": "denied",
@@ -1802,10 +1808,10 @@
       "probe": false
     },
     {
-      "rule_id": "R-024",
+      "rule_id": "R-026",
       "iteration": 2,
       "verdict": "promote",
-      "kind": "paid",
+      "kind": "denied",
       "reason": "corrects 1 observed case(s), 0 regressions",
       "stage": "replay",
       "fixes": 1,
@@ -1814,46 +1820,18 @@
       "evidence_size": 24,
       "baseline_version": 15,
       "probe": false
-    },
-    {
-      "rule_id": "R-025",
-      "iteration": 2,
-      "verdict": "promote",
-      "kind": "denied",
-      "reason": "corrects 1 observed case(s), 0 regressions",
-      "stage": "replay",
-      "fixes": 1,
-      "regressions": 0,
-      "redundant": 0,
-      "evidence_size": 24,
-      "baseline_version": 16,
-      "probe": false
-    },
-    {
-      "rule_id": "R-026",
-      "iteration": 2,
-      "verdict": "rejected",
-      "kind": "denied",
-      "reason": "corrects no observed case (already covered)",
-      "stage": "replay",
-      "fixes": 0,
-      "regressions": 0,
-      "redundant": 1,
-      "evidence_size": 24,
-      "baseline_version": 17,
-      "probe": false
     }
   ],
   "ledger": [
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:39:44.323000",
+      "created_at": "2026-10-11 22:22:00.538000",
       "iteration": 0,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "Rule 1 (CARC 5, M77): CLM-012 was billed with POS 02 although the patient was at home. I generalized it to any Bayview POS 02 claim because no paid claim uses POS 02. Rule 2 (CARC 29): the cutoff must sit above the largest paid value (4) and at or below the smallest CARC 29 denial (105). I chose more than 90 days because that is a common Medicaid managed care filing limit and fits inside that window. Rule 3 (exception): CLM-017 paid an E/M (99213) without modifier 25 alongside vaccine administration (90471). I generalized it to the office E/M range 99202-99215 plus the immunization administration family 90460-90474. Neither denied claim has an administration line, so the exception fires on no denials.",
+      "reason": "CARC 5 rule: CLM-012 was billed with POS 02 although the patient was at home, which conflicts with home telehealth (POS 10). No paid claim uses POS 02. CARC 29 rule: the cutoff must sit above the largest paid value (4) and at or below the smallest CARC 29 denial (105). I chose the common payer limit of 90 days, inside that window. Exception rule: CLM-017 paid an E/M billed with vaccine administration (90471) without modifier 25. I generalized to the office E/M range and the immunization administration code family (90460-90474). No denied claim matches.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -1861,11 +1839,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:39:45.074000",
+      "created_at": "2026-10-11 22:22:00.905000",
       "iteration": 0,
       "payer": "BAYVIEW",
       "rule_id": "R-001",
-      "description": "Bayview denies claims billed with POS 02 (telehealth other than the patient's home) as inconsistent with the place of service, since home telehealth must be reported with POS 10.",
+      "description": "Bayview denies telehealth claims billed with POS 02 when the patient was at home; home telehealth must be billed as POS 10.",
       "rule_kind": "denial",
       "reason": "insufficient evidence: only 1 distinct paid BAYVIEW claim(s) replayed, MIN_PAYER_PAID_SEEN=2 (pinned in harness/gate.py); retry when more arrive",
       "fixes": 1,
@@ -1875,11 +1853,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:39:45.970000",
+      "created_at": "2026-10-11 22:22:01.091000",
       "iteration": 0,
       "payer": "BAYVIEW",
       "rule_id": "R-002",
-      "description": "Bayview denies claims submitted more than 90 days after the date of service for an expired timely filing limit.",
+      "description": "Bayview denies claims submitted more than 90 days after the date of service as past the timely filing limit.",
       "rule_kind": "denial",
       "reason": "insufficient evidence: only 1 distinct paid BAYVIEW claim(s) replayed, MIN_PAYER_PAID_SEEN=2 (pinned in harness/gate.py); retry when more arrive",
       "fixes": 1,
@@ -1889,11 +1867,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:39:47.356000",
+      "created_at": "2026-10-11 22:22:01.400000",
       "iteration": 0,
       "payer": "BAYVIEW",
       "rule_id": "R-003",
-      "description": "Bayview does not require modifier 25 on an office/outpatient E/M billed on the same claim as immunization administration, and pays both.",
+      "description": "Bayview does not require modifier 25 on an office E/M billed on the same claim as immunization administration.",
       "rule_kind": "exception",
       "reason": null,
       "fixes": 1,
@@ -1903,13 +1881,13 @@
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:39:54.117000",
+      "created_at": "2026-10-11 22:22:08.106000",
       "iteration": 0,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "CLM-002 was denied with CO-16 and RARCs M76 (missing or incomplete diagnosis) and MA130. Line 2 (84443) points to no diagnosis. Every line on both paid CASCADE claims has at least one pointer, so the rule fires on no paid claim. Line 2 is a lab code, but the cause is the missing pointer, not the service, so the rule leaves out any CPT, place of service and timing condition. Days to submit is not the cause: the denial at 2 days sits below the paid maximum of 6.",
+      "reason": "CLM-002 was denied CO-16 with M76 (missing diagnosis) and MA130. Its 84443 line had an empty diagnosis pointer list. Both paid CASCADE claims point every line to at least one diagnosis, so no paid claim matches. The cause is the missing pointer, not the lab code or the E/M on the same claim, so the rule applies to any CPT. It sets no POS, plan or day-count condition. The days_to_submit evidence (denied at 2, paid up to 6) is unrelated to this cause.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -1917,7 +1895,7 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:39:55.542000",
+      "created_at": "2026-10-11 22:22:08.239000",
       "iteration": 0,
       "payer": "CASCADE",
       "rule_id": "R-004",
@@ -1931,13 +1909,13 @@
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:40:09.461000",
+      "created_at": "2026-10-11 22:22:23.061000",
       "iteration": 0,
       "payer": "NORTHSTAR",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "Timely filing: the cutoff must sit above 3 (largest paid value) and at or below 204 (smallest CARC 29 denial). I chose 180 because it is a common commercial filing limit within that range. Modifier rule: CLM-026 (59 on 97164) was denied CO-4/N823, while the otherwise identical CLM-020 (XU on 97164) was paid. That points to 59 itself as the trigger, so the rule covers modifier 59 on any line rather than only therapy codes. Exception rule: CLM-039 was an out-of-network commercial PPO claim and Northstar paid it. No denied claim is out-of-network, so the exception contradicts nothing observed.",
+      "reason": "Timely filing: the gate accepts any cutoff above 3 (max paid) and at or below 204 (min CARC-29 denial). I chose 90, a common commercial filing limit, rather than the bare minimum of 3, which would be implausible. Modifier: the claim with 59 on 97164 was denied CO-4/N823, while the same claim pattern with XU was paid. That points to a policy against 59 in favor of the X modifiers. No paid claim carries 59, so I kept the rule general rather than limiting it to therapy codes. Exception: the out-of-network 99203 was paid. Both denied claims are in-network, so the rule 'in_network false gives paid' contradicts no denial. I kept it general rather than limiting it to E/M codes.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -1945,11 +1923,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:40:12.025000",
+      "created_at": "2026-10-11 22:22:23.288000",
       "iteration": 0,
       "payer": "NORTHSTAR",
       "rule_id": "R-005",
-      "description": "Northstar denies claims submitted after its timely filing limit (CARC 29).",
+      "description": "Northstar denies claims submitted more than 90 days after the date of service as past its timely filing limit (CARC 29).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -1959,11 +1937,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:40:14.096000",
+      "created_at": "2026-10-11 22:22:23.434000",
       "iteration": 0,
       "payer": "NORTHSTAR",
       "rule_id": "R-006",
-      "description": "Northstar rejects modifier 59 as inconsistent with the procedure and requires the specific X{EPSU} modifiers instead (CARC 4, RARC N823).",
+      "description": "Northstar rejects modifier 59 as a distinct-service modifier and requires the X{EPSU} subset instead, denying any line billed with 59 under CARC 4 (N823).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -1973,11 +1951,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:40:15.686000",
+      "created_at": "2026-10-11 22:22:23.741000",
       "iteration": 0,
       "payer": "NORTHSTAR",
       "rule_id": "R-007",
-      "description": "Northstar does not deny claims from out-of-network providers and pays them under out-of-network benefits.",
+      "description": "Northstar commercial plans do not deny out-of-network providers outright; such claims are paid under out-of-network benefits.",
       "rule_kind": "exception",
       "reason": null,
       "fixes": 1,
@@ -1987,13 +1965,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:40:26.964000",
+      "created_at": "2026-10-11 22:22:30.930000",
       "iteration": 0,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "R-003 is the only active rule, so there is nothing to merge. It already uses family ranges: office/outpatient E/M 99202-99215 and immunization administration 90460-90474. It does not fire on either denied claim, because neither CLM-012 nor CLM-027 has an immunization administration line. Dropping more conditions would turn the rule into a blanket 'paid' exception that the single paid claim (CLM-017) does not support. Removing the E/M or no-modifier-25 condition would change the policy it describes. The denied claims are CARC 5 (POS mismatch) and CARC 29 (timely filing), which are unrelated causes, so no change is proposed.",
+      "reason": "R-003 is the only active rule, so there is nothing to merge. It is already about as general as the evidence allows. It covers the full office E/M range (99202-99215) and the full immunization administration range (90460-90474), and it does not require the vaccine product code or particular diagnoses. Both denied claims (CLM-012, CLM-027) have an E/M line but no immunization administration line, so the rule correctly does not fire on them. Dropping the E/M condition would also pass the replay check, but it would turn an E/M modifier-25 exception into a blanket 'paid' override for any claim with immunization administration. That goes beyond the policy the evidence supports, so I kept the rule unchanged.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2003,13 +1981,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:40:31.495000",
+      "created_at": "2026-10-11 22:22:35.766000",
       "iteration": 0,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "There is only one active rule. R-004 (CARC 16 when any line has dx_pointer_count < 1) already states the policy at its most general: it fires on any service line with no diagnosis pointer, regardless of CPT, POS, or plan. It has no code, threshold, or context conditions that could be widened or dropped. The payer=CASCADE condition is the minimal scoping condition. The rule explains CLM-002, where line 84443 has no pointer. It does not fire on paid claims CLM-010 or CLM-018, since every line on both has at least one pointer. No merge or generalization is warranted.",
+      "reason": "R-004 is the only active rule and is already as general as the evidence allows. Its single substantive condition is that some line has fewer than 1 diagnosis pointer. That describes the policy directly and has no code to widen into a family or range. It fires on denied CLM-002, whose line 84443 has no pointers. It does not fire on paid CLM-010 or CLM-018, where every line has pointers. The payer=CASCADE condition only matches the rule's payer scope, so removing it would not generalize anything. There are no other rules to merge.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2019,13 +1997,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:40:37.944000",
+      "created_at": "2026-10-11 22:22:41.047000",
       "iteration": 0,
       "payer": "NORTHSTAR",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "No changes proposed. The three active rules each describe a different policy: timely filing (CARC 29), modifier 59 rejected (CARC 4/N823), and the out-of-network paid exception. Rules with different outcomes or CARCs cannot be merged. Each rule is already minimal, with only a payer condition and one condition that carries the policy. R-006 already fires on any line carrying modifier 59, regardless of CPT, so there is no code family to widen. R-007 keys on in_network=false alone. For R-005 the evidence would allow a timely-filing threshold anywhere between 3 days (latest paid claim) and 204 days (earliest CARC 29 denial). Lowering it from 180 would be speculative and would not cover any additional observed claim, so it is left as is.",
+      "reason": "No replacement is proposed; each rule is already as general as the evidence allows. The three rules describe different policies (CARC 29 timely filing, CARC 4 modifier 59, and a paid exception for out-of-network claims), so none can be merged. R-006 and R-007 have only the payer condition plus one essential condition, with no code to widen. For R-005, the paid claims would technically allow a threshold as low as days_to_submit > 3, but the 90-day limit is the stated policy. Lowering it on such sparse evidence would wrongly deny timely claims.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2035,13 +2013,13 @@
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:41:42.641000",
+      "created_at": "2026-10-11 22:23:26.168000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "Two paid BAYVIEW claims are now available, so the POS 02 and timely filing rules are resubmitted. Both paid claims use POS 11, were submitted within 4 days, are in network and have positive line charges, so none of these rules fires on a paid claim. Timely filing: the cutoff must be above 4 (latest paid) and at or below 105 (only CARC 29 denial). I chose 90, the common Medicaid managed care limit, rather than the minimal 4, to avoid denying ordinary claims. Zero charge (RARC M79) is written as line charge lte 0 so it covers any procedure. Out-of-network is written on in_network alone; the referral on file did not prevent the denial.",
+      "reason": "There are now 2 paid BAYVIEW claims (CLM-017 and CLM-022), so I am retrying the two rules the gate previously rejected for insufficient evidence.\n\n1. **POS 02 at home (CARC 5):** I kept the POS 02 plus patient-at-home pairing. That pairing is the actual inconsistency; POS 02 alone is valid when the patient is not at home. Neither paid claim is POS 02.\n2. **Timely filing (CARC 29):** The cutoff is days_to_submit > 90. It sits above the largest paid value (4) and below the CARC 29 denial (105), and matches the usual 90-day limit.\n3. **Zero charge (CARC 16):** The rule fires on any line with charge <= 0. The lowest paid line charge is 30.\n4. **Out of network (CARC 242):** The rule fires when in_network is false. There are no paid out-of-network BAYVIEW claims. A referral on file did not prevent the denial, so the rule does not check referrals.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2049,11 +2027,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:41:43.899000",
+      "created_at": "2026-10-11 22:23:26.473000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": "R-008",
-      "description": "Bayview denies claims billed with POS 02 (telehealth not in the patient's home) as inconsistent with the place of service (CARC 5), because it requires home telehealth to be reported with POS 10.",
+      "description": "Bayview denies telehealth claims billed with POS 02 when the patient was at home, because home telehealth must be billed as POS 10 (CARC 5).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2063,11 +2041,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:41:45.296000",
+      "created_at": "2026-10-11 22:23:26.696000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": "R-009",
-      "description": "Bayview denies claims submitted after its 90-day timely filing limit (CARC 29).",
+      "description": "Bayview denies claims submitted more than 90 days after the date of service as past its timely filing limit (CARC 29).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2077,11 +2055,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:41:46.526000",
+      "created_at": "2026-10-11 22:23:27.085000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": "R-010",
-      "description": "Bayview denies claims with any service line billed at a zero charge as a billing error (CARC 16, RARC M79).",
+      "description": "Bayview denies claims with CARC 16 (missing or invalid information, M79) when any service line has a zero or missing charge.",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2091,11 +2069,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:41:47.985000",
+      "created_at": "2026-10-11 22:23:27.324000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": "R-011",
-      "description": "Bayview denies services from out-of-network providers (CARC 242), even when a referral is on file.",
+      "description": "Bayview Medicaid managed care denies services from out-of-network providers even when a referral is on file (CARC 242).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2105,13 +2083,13 @@
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:42:00.945000",
+      "created_at": "2026-10-11 22:23:45.062000",
       "iteration": 1,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "CLM-013 billed vitamin D 25-OH (82306) for fatigue (R5383). It was denied CARC 167 with N115, which indicates the medical necessity test of the vitamin D NCD/LCD failed. I generalized to the vitamin D assay family (82306, 82652) and required that the line point to no diagnosis on the covered list (deficiency, calcium/parathyroid disorders, osteoporosis/osteomalacia, CKD, malabsorption, long-term drug therapy, bariatric surgery or transplant status, sarcoidosis). The covered-diagnosis exclusion is inferred from the standard NCD rather than forced by an observed claim; it keeps the rule from denying covered vitamin D tests on unseen claims. Paid labs (80053 with 36415) use other CPTs, so the rule does not fire on them. The rule also does not fire on CLM-002, which has a separate missing-pointer cause (CARC 16, existing rule).",
+      "reason": "CLM-013 was 82306 (25-OH vitamin D) for R53.83 (fatigue) and was denied CARC 167 with N115, meaning the diagnosis does not meet the LCD/NCD. This matches Medicare-style vitamin D coverage, which is limited to specific indications. I generalized to the vitamin D test family (82306 and 82652), written as one rule per code because the two codes are far apart and a range would sweep in unrelated labs. Each rule fires when the line's diagnoses avoid the covered-indication families. No paid Cascade claim has a vitamin D line, so neither rule touches a paid claim. CLM-002's CARC 16 is already explained by R-004.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2119,11 +2097,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:42:02.408000",
+      "created_at": "2026-10-11 22:23:45.372000",
       "iteration": 1,
       "payer": "CASCADE",
       "rule_id": "R-012",
-      "description": "Cascade denies vitamin D assays (25-hydroxy 82306, 1,25-dihydroxy 82652) as a non-covered diagnosis (CARC 167, RARC N115 LCD/NCD) when the line points only to diagnoses outside the vitamin D NCD covered list, such as nonspecific symptoms like fatigue.",
+      "description": "Cascade (Medicare Advantage) denies 25-hydroxy vitamin D testing under CARC 167 when the line points to no covered indication, such as vitamin D deficiency, bone or mineral disorders, CKD, parathyroid disease or malabsorption; symptom codes like fatigue do not qualify.",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2132,14 +2110,28 @@
       "extra": {}
     },
     {
+      "kind": "rejection",
+      "created_at": "2026-10-11 22:23:45.514000",
+      "iteration": 1,
+      "payer": "CASCADE",
+      "rule_id": "R-013",
+      "description": "Cascade (Medicare Advantage) denies 1,25-dihydroxy vitamin D testing under CARC 167 when the line points to no covered indication, such as vitamin D deficiency, bone or mineral disorders, CKD, parathyroid disease or malabsorption; symptom codes like fatigue do not qualify.",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:42:26.520000",
+      "created_at": "2026-10-11 22:24:08.031000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "CLM-009: a repeat preventive visit 112 days after the last one was denied with CARC 119. I read this as a once-per-365-days frequency limit on the preventive E/M family 99381-99397. No paid claim carries days_since_last_preventive, so nothing conflicts with a cutoff below 365. CLM-030: MRI brain 70551 with no prior auth was denied with CARC 197. Paid CLM-028 (MRI lumbar 72148) had an auth number, so the rules require prior_auth to be missing and that claim does not match. I generalized the auth requirement to advanced imaging (CT/MRI/PET) as one rule per body-region range. I avoided the whole 70010-76499 radiology range because it would also catch plain x-rays, which typically need no auth.",
+      "reason": "CLM-009: repeat preventive visit 112 days after the prior one was denied PR-119/N130, which points to a once-per-12-months frequency limit. I generalized it to the whole preventive E/M family (99381-99397) with days_since_last_preventive under 365; no paid claim has a preventive history. CLM-030: MRI brain with no prior auth was denied CO-197. Paid CLM-028 (lumbar MRI) had an authorization on file, so I kept prior_auth missing as the deciding condition. I generalized to advanced imaging (CT/MRI by body region, plus PET), split into contiguous CPT segments so plain X-rays are left out.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2147,11 +2139,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:42:28.026000",
+      "created_at": "2026-10-11 22:24:08.590000",
       "iteration": 1,
       "payer": "NORTHSTAR",
-      "rule_id": "R-013",
-      "description": "Northstar limits preventive medicine visits to one per 365 days and denies a repeat preventive E/M within that period as benefit maximum reached (CARC 119, RARC N130).",
+      "rule_id": "R-014",
+      "description": "Northstar limits preventive medicine visits to one per 12 months and denies a repeat preventive visit within 365 days of the last one under CARC 119.",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2161,11 +2153,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:42:29.339000",
+      "created_at": "2026-10-11 22:24:09.140000",
       "iteration": 1,
       "payer": "NORTHSTAR",
-      "rule_id": "R-014",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): head/neck CT/MRI.",
+      "rule_id": "R-015",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (head/neck CT/MRI).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2175,25 +2167,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:42:30.457000",
-      "iteration": 1,
-      "payer": "NORTHSTAR",
-      "rule_id": "R-015",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): chest CT/MRI.",
-      "rule_kind": "denial",
-      "reason": "corrects no observed case",
-      "fixes": 0,
-      "regressions": 0,
-      "version": null,
-      "extra": {}
-    },
-    {
-      "kind": "rejection",
-      "created_at": "2026-10-11 21:42:31.375000",
+      "created_at": "2026-10-11 22:24:09.307000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": "R-016",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): spine and pelvis CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (chest CT/MRI).",
       "rule_kind": "denial",
       "reason": "corrects no observed case",
       "fixes": 0,
@@ -2203,11 +2181,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:42:32.518000",
+      "created_at": "2026-10-11 22:24:09.562000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": "R-017",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): upper extremity CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (spine CT/MRI).",
       "rule_kind": "denial",
       "reason": "corrects no observed case",
       "fixes": 0,
@@ -2217,11 +2195,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:42:33.626000",
+      "created_at": "2026-10-11 22:24:09.814000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": "R-018",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): lower extremity CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (pelvis CT/MRI).",
       "rule_kind": "denial",
       "reason": "corrects no observed case",
       "fixes": 0,
@@ -2231,11 +2209,11 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:42:34.767000",
+      "created_at": "2026-10-11 22:24:10.111000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": "R-019",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI) and denies it when no authorization is on the claim (CARC 197, RARC M62): abdomen CT/MRI.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (upper extremity CT/MRI).",
       "rule_kind": "denial",
       "reason": "corrects no observed case",
       "fixes": 0,
@@ -2245,11 +2223,39 @@
     },
     {
       "kind": "rejection",
-      "created_at": "2026-10-11 21:42:35.752000",
+      "created_at": "2026-10-11 22:24:10.287000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": "R-020",
-      "description": "Northstar requires prior authorization for advanced imaging and denies it when no authorization is on the claim (CARC 197, RARC M62): PET imaging.",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (lower extremity CT/MRI).",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 22:24:10.526000",
+      "iteration": 1,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-021",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (abdomen CT/MRI).",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 22:24:10.778000",
+      "iteration": 1,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-022",
+      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI/PET) and denies it under CARC 197 when no authorization is on file (PET imaging).",
       "rule_kind": "denial",
       "reason": "corrects no observed case",
       "fixes": 0,
@@ -2259,13 +2265,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:42:51.065000",
+      "created_at": "2026-10-11 22:24:18.544000",
       "iteration": 1,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "No replacements proposed. Each active rule covers a different policy: R-003 is the paid exception for E/M billed with immunization admin without modifier 25, R-008 is CARC 5 for POS 02, R-009 is CARC 29 for timely filing, R-010 is CARC 16 for zero-charge lines, and R-011 is CARC 242 for out-of-network. No two rules share a CARC and cause, so there is nothing to merge. The rules are also already as general as their policies. R-008, R-010 and R-011 each have one defining condition plus the payer. R-009's 90-day threshold is the stated filing limit; the evidence alone would allow anything above 4 days (max paid 4, min denied 105), but tightening it to the sparse data would contradict the documented policy. R-003 already uses the full E/M range (99202-99215) and immunization admin range (90460-90474). Its modifier-25 condition defines the exception, and widening an override rule could suppress real denials.",
+      "reason": "No replacements proposed. The five rules cover five separate policies (CARC 5, 16, 29, 242, plus the paid exception), so nothing can be merged. R-003: both the E/M and immunization-admin ranges are needed. Dropping the immunization condition would make the rule fire on denied E/M claims CLM-012, CLM-027 and CLM-029. Dropping the E/M condition would turn the modifier-25 exception into a different policy. R-008: POS 02 is valid when the patient is not at home, so the home-location condition is part of the policy. The evidence does not justify dropping it. R-009: the 90-day limit already sits between the highest paid value (4 days) and the lowest CARC 29 denial (105 days), and it matches the stated filing limit. R-010 and R-011 are already single-condition rules.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2275,13 +2281,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:43:02.437000",
+      "created_at": "2026-10-11 22:24:24.490000",
       "iteration": 1,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "There are only two active rules, and they cover different policies, so they cannot be merged. R-004 (CARC 16, a line with no diagnosis pointer) and R-012 (CARC 167, vitamin D assay with a non-covered diagnosis) have different CARCs and different causes. R-004 is already fully general: payer plus any line with dx_pointer_count < 1. R-012 already names both vitamin D assay codes (82306, 82652), and there is no wider code family to extend it to. Its none_startswith diagnosis condition is the actual cause of the CARC 167 denial (RARC N115, LCD/NCD covered-diagnosis list). No paid claim contains a vitamin D assay, so the replay gate would accept dropping that condition. But doing so would turn a medical-necessity policy into a blanket non-coverage rule and misstate why the payer denies. Neither rule can be safely generalized further on this evidence.",
+      "reason": "No replacements proposed. R-004 (CARC 16) and R-012 (CARC 167) predict different CARCs for unrelated causes, so they cannot be merged. R-004 already covers any line with no diagnosis pointer, which is as general as the policy allows. R-012 names a single code, 82306 (25-hydroxy vitamin D), but no wider range is safe. The nearby code 82652 (1,25-dihydroxy vitamin D) has different coverage indications, and nothing in the evidence supports widening to a range. R-012's covered-diagnosis exclusion list is what the policy itself turns on. Dropping it would deny 82306 claims with covered indications, so it stays.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2291,13 +2297,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:43:23.802000",
+      "created_at": "2026-10-11 22:24:48.830000",
       "iteration": 1,
       "payer": "NORTHSTAR",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "R-014 covered only head/neck CT/MRI (70450-70559), but its stated policy is all advanced imaging. I widened it to an explicit list of CT/MRI codes. A numeric range would have swept in plain x-rays, which need no auth. The list still covers CLM-030 (70551, no auth). It does not fire on paid CLM-028 (72148), because that claim carries a prior auth number. I left R-005, R-006, R-007 and R-013 unchanged. Each is a distinct policy with no merge partner, and each is already as broad as its single condition or code family allows.",
+      "reason": "R-015's description states a CT/MRI/PET prior-auth policy, but the rule only matches head/neck codes 70450-70559. The replacement widens it to CT/MRI/PET code prefixes across body regions. Prefixes that would catch plain-film x-rays are avoided: 72120-72124 and 72190 are excluded by listing exact codes instead. Coverage is kept: CLM-030 (70551, no auth) still matches. It does not fire on any paid claim: CLM-028 (72148) has prior auth on file. The other rules are a single example each, with no sibling rules to merge and no wider family the evidence supports. R-005, R-006, R-007 and R-014 are already minimal, so they are left unchanged.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2307,11 +2313,11 @@
     },
     {
       "kind": "consolidation",
-      "created_at": "2026-10-11 21:43:25.350000",
+      "created_at": "2026-10-11 22:24:49.824000",
       "iteration": 1,
       "payer": "NORTHSTAR",
-      "rule_id": "R-021",
-      "description": "Northstar requires prior authorization for advanced imaging (CT/MRI of head/neck, chest, spine, pelvis, extremities, abdomen) and denies it when no authorization is on the claim (CARC 197, RARC M62).",
+      "rule_id": "R-023",
+      "description": "Northstar requires prior authorization for advanced imaging (CT, MRI and PET of any body region) and denies it under CARC 197 when no authorization is on file.",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2319,21 +2325,21 @@
       "version": 13,
       "extra": {
         "replaces": [
-          "R-014"
+          "R-015"
         ],
-        "evaluation_id": "eval-a24548b1502e",
-        "note": "Northstar requires prior authorization for advanced imaging (CT/MRI of head/neck, chest, spine, pelvis, extremities, abdomen) and denies it when no authorization is on the claim (CARC 197, RARC M62)."
+        "evaluation_id": "eval-62e91f6b8f6c",
+        "note": "Northstar requires prior authorization for advanced imaging (CT, MRI and PET of any body region) and denies it under CARC 197 when no authorization is on file."
       }
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:44:33.523000",
+      "created_at": "2026-10-11 22:25:22.644000",
       "iteration": 2,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "CLM-016 was denied CO-97 with RARC M15, which means separately billed services or tests were bundled. The claim billed the routine venipuncture 36415 alongside the comprehensive metabolic panel 80053. I generalized each side to its code class: venipuncture and specimen collection 36400-36416, and pathology/laboratory 80047-89398. Neither paid Bayview claim (CLM-017 and CLM-022) has a venipuncture line or a lab line, so the rule fires on zero paid claims. I kept the lab-pairing condition because the denial is a bundling denial: CARC 97 requires another service to be included in, not simply the presence of 36415. I added no POS, diagnosis or modifier conditions, since no counterexample forces them.",
+      "reason": "CLM-016 billed venipuncture 36415 with a lab panel (80053) and was denied CO-97 with M15, meaning the collection was bundled into the lab test. The rule covers the specimen-collection family 36415-36416 billed with any clinical lab code in 80047-89398, not just the one panel shown. Neither BAYVIEW paid claim has a collection line, so the rule fires on no paid claim. The taxonomy also lists a surgery bundling denial, but no claim here shows it, so no rule is written for it.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2341,11 +2347,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:44:35.119000",
+      "created_at": "2026-10-11 22:25:23.025000",
       "iteration": 2,
       "payer": "BAYVIEW",
-      "rule_id": "R-022",
-      "description": "Bayview bundles venipuncture/specimen collection (36400-36416) into the payment for a clinical laboratory test billed on the same claim and denies the collection line as included in another service (CARC 97, RARC M15).",
+      "rule_id": "R-024",
+      "description": "Bayview bundles specimen collection (venipuncture/capillary collection) into clinical laboratory tests billed on the same claim and denies the collection under CARC 97 (M15).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2355,13 +2361,13 @@
     },
     {
       "kind": "proposal",
-      "created_at": "2026-10-11 21:44:52.436000",
+      "created_at": "2026-10-11 22:25:35.548000",
       "iteration": 2,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "CLM-036 billed E/M 99214 with no modifier 25 alongside injection administration 96372 and was denied CO-4/N822. The denial rule covers the whole E/M range 99202-99215 and the injection/infusion administration family 96360-96379. The paid counterexamples do not match it: CLM-040 has modifier 25 on its E/M, and CLM-014 has an E/M but no administration line. CLM-002 (E/M plus lab) was denied for CARC 16, not CARC 4, so a lab alone is not a trigger and the rule is not broadened to every second line. CLM-014 was paid at 262 days, so Cascade does not apply the usual timely-filing edit. The exception uses gt 90, the common filing-limit threshold where the scrubber starts to hold. It fires on no denied claim, since Cascade denials were submitted within 2-5 days, and Cascade has no CARC 29 denials in the taxonomy.",
+      "reason": "CLM-036 was denied with CO-4 and N822 (missing modifier). The office E/M 99214 had no modifier 25 and was billed with 96372 injection administration. Paid claims bound the rule: CLM-040 (E/M with modifier 25 plus a procedure) and CLM-014 (E/M alone) were both paid, so the rule needs an E/M line without 25 and a separate administration line. I generalized to the office E/M family 99202-99215 and the drug administration range 96360-96549. I did not extend the rule to labs or other procedures because there is no evidence for them. No paid claim matches this rule.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2369,11 +2375,11 @@
     },
     {
       "kind": "promotion",
-      "created_at": "2026-10-11 21:44:53.792000",
+      "created_at": "2026-10-11 22:25:36.005000",
       "iteration": 2,
       "payer": "CASCADE",
-      "rule_id": "R-023",
-      "description": "Cascade denies an office/outpatient E/M billed without modifier 25 on the same claim as a therapeutic, prophylactic or diagnostic injection or infusion administration, as the procedure code is inconsistent with the modifier (CARC 4, RARC N822).",
+      "rule_id": "R-025",
+      "description": "Cascade denies an office/outpatient E/M billed without modifier 25 on the same claim as a drug or injection administration service (hydration, therapeutic/diagnostic injection or infusion, chemotherapy administration) under CARC 4 (N822, missing procedure modifier).",
       "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
@@ -2382,13 +2388,27 @@
       "extra": {}
     },
     {
-      "kind": "promotion",
-      "created_at": "2026-10-11 21:44:55.262000",
+      "kind": "proposal",
+      "created_at": "2026-10-11 22:25:48.790000",
       "iteration": 2,
-      "payer": "CASCADE",
-      "rule_id": "R-024",
-      "description": "Cascade does not enforce a 90-180 day timely filing limit and pays claims submitted well after the date of service.",
-      "rule_kind": "exception",
+      "payer": "NORTHSTAR",
+      "rule_id": null,
+      "description": null,
+      "rule_kind": null,
+      "reason": "CLM-021 is a 97110 therapy claim denied with CARC 119 and N362 at visit_count_ytd 20. The only paid claim with a visit count is CLM-020 at 9, so any cutoff from 10 to 20 fits the evidence. I chose gte 20 because a 20-visit annual therapy cap is the usual plan design. Strictly, the most general cutoff the evidence allows is gte 10, so this choice is a judgement call. The CPT condition covers the whole physical medicine and rehab family (97010-97799) rather than just 97110. No GP modifier, place of service or diagnosis condition is added, because no paid counterexample requires one. CLM-026 is a therapy claim at visit 6, but it was denied under CARC 4 for modifier 59, which is a separate cause.",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 22:25:49.380000",
+      "iteration": 2,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-026",
+      "description": "Northstar caps outpatient physical medicine and rehabilitation therapy visits per plan year and denies therapy services once the year-to-date visit count reaches the benefit maximum (CARC 119, N362).",
+      "rule_kind": "denial",
       "reason": null,
       "fixes": 1,
       "regressions": 0,
@@ -2396,56 +2416,14 @@
       "extra": {}
     },
     {
-      "kind": "proposal",
-      "created_at": "2026-10-11 21:45:09.776000",
-      "iteration": 2,
-      "payer": "NORTHSTAR",
-      "rule_id": null,
-      "description": null,
-      "rule_kind": null,
-      "reason": "CLM-021 (97110 GP, visit_count_ytd 20) was denied 119/N362 (units/visits exceed maximum). The paid therapy claim CLM-020 had a count of 9, so the cutoff has to sit in (9, 20]. I chose >=20 because that matches the observed denial and the common 20-visit therapy cap. The class is generalised to the 97010-97799 physical medicine range. A second variant keys on the GP/GO/GN therapy modifiers so that therapy billed outside the 97xxx range is also covered. Neither rule fires on any paid claim.",
-      "fixes": 0,
-      "regressions": 0,
-      "version": null,
-      "extra": {}
-    },
-    {
-      "kind": "promotion",
-      "created_at": "2026-10-11 21:45:11.236000",
-      "iteration": 2,
-      "payer": "NORTHSTAR",
-      "rule_id": "R-025",
-      "description": "Northstar caps outpatient therapy visits per plan year and denies physical medicine/rehabilitation services once the year-to-date visit count reaches the limit, as benefit maximum reached (CARC 119, RARC N362): physical medicine CPT family.",
-      "rule_kind": "denial",
-      "reason": null,
-      "fixes": 1,
-      "regressions": 0,
-      "version": 17,
-      "extra": {}
-    },
-    {
-      "kind": "rejection",
-      "created_at": "2026-10-11 21:45:12.393000",
-      "iteration": 2,
-      "payer": "NORTHSTAR",
-      "rule_id": "R-026",
-      "description": "Northstar caps outpatient therapy visits per plan year and denies physical medicine/rehabilitation services once the year-to-date visit count reaches the limit, as benefit maximum reached (CARC 119, RARC N362): any line carrying a PT/OT/SLP therapy modifier.",
-      "rule_kind": "denial",
-      "reason": "corrects no observed case (already covered)",
-      "fixes": 0,
-      "regressions": 0,
-      "version": null,
-      "extra": {}
-    },
-    {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:45:24.433000",
+      "created_at": "2026-10-11 22:25:59.121000",
       "iteration": 2,
       "payer": "BAYVIEW",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "No replacements proposed. No two rules share both a CARC and a cause, so nothing can be merged. Each rule is already as general as the stated policy allows:\n- R-003 already covers the full office E/M range (99202-99215) and the full immunization administration range (90460-90474). Dropping the E/M condition would turn a modifier-25 exception into a blanket 'paid' rule for any claim with immunization admin, which the policy does not support.\n- R-008 (POS 02, CARC 5), R-010 (zero-charge line, CARC 16) and R-011 (out-of-network, CARC 242) each have a single substantive condition.\n- R-009 keeps the payer's stated 90-day filing limit. The evidence alone would allow a threshold as low as 5 days (highest paid claim was submitted at day 4), but lowering it would contradict the documented policy.\n- R-022 already spans the full collection range (36400-36416) and the full lab range (80047-89398). The lab condition is the reason for the CARC 97 bundling denial, so it stays.",
+      "reason": "No replacements proposed. Every active rule covers a different policy with a different CARC or outcome (5, 29, 16, 242, 97, and the paid exception), so nothing can be merged. Each rule is already at the right level of generality.\n\n- R-003 already uses full ranges: E/M 99202-99215 and immunization admin 90460-90474. Dropping the immunization condition would make it fire on denied claims CLM-012, CLM-027 and CLM-029. Dropping the E/M condition would no longer describe the modifier-25 policy.\n- R-008: patient_location=home is the cause of the denial, since POS 02 is valid for non-home telehealth. Keeping it is policy-justified.\n- R-009 uses the stated 90-day limit, which falls between the paid maximum (4 days) and the denied minimum (105 days).\n- R-010 and R-011 are single-condition rules.\n- R-024 already uses the specimen-collection range 36415-36416 and the clinical lab range 80047-89398.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2455,13 +2433,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:45:37.814000",
+      "created_at": "2026-10-11 22:26:13.643000",
       "iteration": 2,
       "payer": "CASCADE",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "Every rule is already as general as the evidence safely allows, so I propose no replacements.\n\n- **R-004:** Already a general policy: any line with no diagnosis pointer gets CARC 16.\n- **R-012:** 82306 and 82652 are the full vitamin D assay pair, so there is no wider code family. The covered-diagnosis list is the policy itself. Removing it would deny vitamin D tests with covered diagnoses, even though no paid vitamin D claim contradicts that today.\n- **R-023:** The E/M range 99202-99215 already covers the office/outpatient family. The 96360-96379 range already covers hydration and injection administration. The injection condition is required, because paid claim CLM-014 is a 99214 without modifier 25 and has no injection. Extending to other procedure families, such as the 11102 biopsy on CLM-040, has no supporting denial.\n- **R-024:** I kept the timely-filing exception at days_to_submit > 90. The replay gate would technically accept anything above 5, since the highest denied value is 5. But the only paid evidence is the 262-day claim, and the scrubber only holds claims for timely filing beyond about 90 days. A lower threshold would let this paid prediction fire on ordinary claims without adding real coverage.",
+      "reason": "No replacements proposed. The three active rules each have a different CARC and cause (16 missing diagnosis pointer, 167 non-covered vitamin D diagnosis, 4 missing modifier 25), so none can be merged.\n\n- **R-004:** It is already a single condition with no code restriction.\n- **R-012:** It stays limited to CPT 82306, the 25-hydroxy vitamin D test. 82652 (1,25-dihydroxy vitamin D) has different coverage indications, and no claim supports widening to it. The covered-diagnosis exclusion list is what defines the policy. Dropping it would replay cleanly, since no paid claim has a vitamin D line, but it would wrongly deny vitamin D tests that do have a covered indication.\n- **R-025:** It already spans the full office/outpatient E/M range (99202-99215) and the full drug/injection administration family (96360-96549). Both remaining conditions do real work. The missing-modifier-25 condition is the cause of the denial. The administration-code condition keeps the rule off paid CLM-014 (99214 alone, no modifier) and CLM-040 (E/M with modifier 25 plus a biopsy). Widening to minor procedures or other E/M families is not supported by any denial.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2471,13 +2449,13 @@
     },
     {
       "kind": "consolidation_proposal",
-      "created_at": "2026-10-11 21:45:46.573000",
+      "created_at": "2026-10-11 22:26:28.182000",
       "iteration": 2,
       "payer": "NORTHSTAR",
       "rule_id": null,
       "description": null,
       "rule_kind": null,
-      "reason": "No replacements proposed; every rule is already as general as the policy and evidence allow.\n- R-013 and R-025 both use CARC 119 but cover different causes. R-013 is the preventive frequency limit (N130) and R-025 is the therapy visit cap (N362), so merging them would be wrong.\n- R-021 already lists the full CT/MRI code set. A `between` range from 70450 to 74185 would also catch plain radiographs and other codes outside the prior-auth policy.\n- The thresholds in R-005 (180 days), R-013 (365 days) and R-025 (20 visits) match the stated policy limits. The gaps between paid and denied values do not justify moving them.\n- R-006 and R-007 have no conditions that can be dropped.",
+      "reason": "No replacement is proposed; each active rule already describes one distinct policy at the breadth the evidence supports. CARC 119 appears in two rules, but they have different causes and are not merged. R-014 is the preventive-visit frequency limit (CPT 99381-99397, fewer than 365 days since the last preventive visit). R-026 is the therapy visit cap (97010-97799, year-to-date visits of 20 or more). They also could not be written as one AND-only rule. R-005 (more than 90 days to submit), R-014 (fewer than 365 days) and R-026 (20 or more visits) use the payer's policy thresholds. The evidence would technically allow looser thresholds, such as more than 3 days or 10 or more visits, but those would be overfit guesses that hold valid claims. R-023 already covers the full CT/MRI/PET code families, and it needs its prior-auth-missing condition because paid claim CLM-028 is a 72148 MRI with an authorization on file. R-006 and R-007 are already minimal.",
       "fixes": 0,
       "regressions": 0,
       "version": null,
@@ -2506,7 +2484,7 @@
       },
       {
         "collection": "rulesets",
-        "count": 18
+        "count": 17
       }
     ],
     "taxonomic": [
@@ -2519,21 +2497,21 @@
   "counts": {
     "episodes": 165,
     "rules": 26,
-    "rulesets": 18,
+    "rulesets": 17,
     "evaluations": 26,
     "audits": 44,
     "semantic_kb": 24,
     "taxonomy": 16
   },
   "raindrop": {
-    "dashboard_url": null,
+    "dashboard_url": "https://app.raindrop.ai/dashboards/113732ca-d780-4201-9a41-36dcf6f4fb15?org=116965bc&project=default",
     "events_sent": {
-      "gate_verdict": 25,
       "payer_outcome": 165,
-      "claim_scrub": 165,
-      "ruleset_promotion": 16,
-      "rule_proposal": 25
+      "gate_verdict": 25,
+      "rule_proposal": 25,
+      "ruleset_promotion": 15,
+      "claim_scrub": 165
     },
-    "total": 396
+    "total": 395
   }
 }

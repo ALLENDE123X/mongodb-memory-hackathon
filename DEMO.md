@@ -8,7 +8,7 @@ Every beat is one command and prints big headings in plain English. The Driver n
 1. Terminal at the repo root, font large, dark background, venv active. Run `python -m harness.demo --run-id RUN --beat 5` once so imports are warm and you know the run id is right (RUN = `final`). Beat 5 only reads.
 2. Confirm Atlas answers: `python -m memory.atlas_schema` prints `ping` and the collection list (it is idempotent: it ensures indexes and ruleset v0 exist and does not touch existing documents). No Wi-Fi, no ping: use the fallback below now, not mid-talk.
 3. Have the demo page (issue #5, `python -m http.server -d demo`) open in a second tab as the closing visual, if it has merged.
-4. Know your numbers: final held-out balanced accuracy 0.818, baseline 0.636, rules learned 16, rules rejected 9, 1 consolidation. They come from beat 5, so read them off the screen rather than from memory.
+4. Know your numbers: final held-out balanced accuracy 0.818, baseline 0.636, 15 active rules (ruleset v16), 10 rejected by the gate, 1 consolidation. They come from beat 5, so read them off the screen rather than from memory.
 
 ## The three minutes
 Run the whole thing with `python -m harness.demo --run-id RUN`, or one beat at a time with `--beat N`. One beat at a time is better on stage: it gives the Narrator control of the pacing.
