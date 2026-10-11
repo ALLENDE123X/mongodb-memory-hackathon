@@ -10,7 +10,7 @@ All four memory types live in Atlas:
 
 Billing and coverage only, never clinical judgment. All data is synthetic, no PHI.
 
-Built at the SF Tech Week Harness Engineering hackathon (Shack15, Oct 11 2026) by Bruce Beckley, Arjun Prasad, Pranav Lende.
+Built at the SF Tech Week Harness Engineering hackathon (Shack15, Oct 11 2026) by Bruce Beckley, Xavier Huang, Arjun Prasad, Pranav Lende.
 
 ## Layout
 - `agents/` - `scrubber.py` (scrubs a claim, writes a trace), `watcher.py` (proposes rule updates from traces)
