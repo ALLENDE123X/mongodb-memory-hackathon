@@ -76,6 +76,9 @@ def complete_json(model: str, system: str, user: str, *, max_tokens: int = 2000)
 
     import litellm  # imported lazily so tests don't pay for it
 
+    # Some models reject temperature=0 or JSON mode; drop what a provider doesn't support.
+    # Run-to-run determinism comes from the cassette, not from sampling settings.
+    litellm.drop_params = True
     last_err = None
     for attempt in range(3):
         t0 = time.time()

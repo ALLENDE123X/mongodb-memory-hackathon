@@ -40,8 +40,8 @@
       "billing": {
         "npi": "9980588871",
         "employerId": "990588871",
-        "organizationName": "SYNTHETIC GASTROENTEROLOGY ASSOCIATES",
-        "taxonomyCode": "207RG0100X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -53,7 +53,7 @@
         "claimFilingCode": "CI",
         "patientControlNumber": "CLM-001",
         "claimChargeAmount": "2100.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -95,7 +95,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "commercial_ppo",
-      "ordering_reason": "persistent abdominal pain"
+      "ordering_reason": "persistent abdominal pain",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
@@ -774,8 +775,8 @@
       "billing": {
         "npi": "9918780175",
         "employerId": "998780175",
-        "organizationName": "SYNTHETIC GASTROENTEROLOGY ASSOCIATES",
-        "taxonomyCode": "207RG0100X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -787,7 +788,7 @@
         "claimFilingCode": "16",
         "patientControlNumber": "CLM-008",
         "claimChargeAmount": "2050.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -824,7 +825,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "medicare_advantage",
-      "ordering_reason": "persistent abdominal pain"
+      "ordering_reason": "persistent abdominal pain",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
@@ -960,8 +962,8 @@
       "billing": {
         "npi": "9960913909",
         "employerId": "990913909",
-        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
-        "taxonomyCode": "207X00000X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -973,7 +975,7 @@
         "claimFilingCode": "16",
         "patientControlNumber": "CLM-010",
         "claimChargeAmount": "1620.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -1015,7 +1017,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "medicare_advantage",
-      "ordering_reason": "lumbar radiculopathy, 8 weeks of PT without improvement"
+      "ordering_reason": "lumbar radiculopathy, 8 weeks of PT without improvement",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
@@ -2844,8 +2847,8 @@
       "billing": {
         "npi": "9924628194",
         "employerId": "994628194",
-        "organizationName": "SYNTHETIC ORTHOPEDIC SURGERY ASSOCIATES",
-        "taxonomyCode": "207X00000X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -2857,7 +2860,7 @@
         "claimFilingCode": "CI",
         "patientControlNumber": "CLM-028",
         "claimChargeAmount": "1580.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -2897,7 +2900,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "commercial_ppo",
-      "ordering_reason": "lumbar radiculopathy"
+      "ordering_reason": "lumbar radiculopathy",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
@@ -3034,8 +3038,8 @@
       "billing": {
         "npi": "9915908301",
         "employerId": "995908301",
-        "organizationName": "SYNTHETIC NEUROLOGY ASSOCIATES",
-        "taxonomyCode": "2084N0400X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -3047,7 +3051,7 @@
         "claimFilingCode": "CI",
         "patientControlNumber": "CLM-030",
         "claimChargeAmount": "1850.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -3089,7 +3093,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "commercial_ppo",
-      "ordering_reason": "persistent headaches, failed conservative treatment"
+      "ordering_reason": "persistent headaches, failed conservative treatment",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
@@ -4651,8 +4656,8 @@
       "billing": {
         "npi": "9958427103",
         "employerId": "998427103",
-        "organizationName": "SYNTHETIC RADIOLOGY ASSOCIATES",
-        "taxonomyCode": "2085R0202X",
+        "organizationName": "SYNTHETIC IMAGING CENTER",
+        "taxonomyCode": "261QR0200X",
         "address": {
           "address1": "100 SYNTHETIC WAY",
           "city": "TESTVILLE",
@@ -4664,7 +4669,7 @@
         "claimFilingCode": "MC",
         "patientControlNumber": "CLM-045",
         "claimChargeAmount": "1650.00",
-        "placeOfServiceCode": "22",
+        "placeOfServiceCode": "11",
         "claimFrequencyCode": "1",
         "signatureIndicator": "Y",
         "planParticipationCode": "A",
@@ -4706,7 +4711,8 @@
       "provider_in_network": true,
       "eligibility_active": true,
       "plan_type": "medicaid_managed_care",
-      "ordering_reason": "lumbar radiculopathy after 8 weeks of conservative care"
+      "ordering_reason": "lumbar radiculopathy after 8 weeks of conservative care",
+      "billing_note": "Freestanding imaging center billing the global service (technical + professional)."
     }
   },
   {
