@@ -58,14 +58,14 @@ These are tracked as issues and land independently, so check the commit history 
 All four are populated by the loop. Semantic retrieval uses Voyage embeddings and Atlas Vector Search when `VOYAGE_API_KEY` is set and the vector index exists; it falls back to a lexical CPT-overlap lookup over episodes otherwise (and on mongomock), and tops up a short vector result lexically while the index is still building. Only training episodes are ever embedded, counted or retrievable. The vector index is created once by an operator (`python -m memory.semantic --ensure-index`), never implicitly.
 
 ## Results
-Held-out set only (22 claims the watcher never saw). The table is filled in from the final recorded run; `TBD` means that run has not been recorded into this file yet.
+Held-out set only (22 claims the watcher never saw). Numbers below are from the recorded final run (`--run-id final`, 3 training slices of 10/19/24 claims, 3 learning rounds), exported to `demo/run.json`.
 
 | | Held-out balanced accuracy | Accuracy with right CARC | Denials caught (right reason) | Unnecessary holds | Learned rules |
 |---|---|---|---|---|---|
-| Baseline (ruleset v0, no learned rules) | TBD | TBD | TBD | TBD | 0 |
-| After learning (final ruleset) | TBD | TBD | TBD | TBD | TBD |
+| Baseline (ruleset v0, no learned rules) | 0.636 | 0.636 | 5/11 (5 right CARC) | 2/11 | 0 |
+| After learning (ruleset v17) | 0.818 | 0.818 | 10/11 (10 right CARC) | 3/11 | 16 |
 
-Final ruleset version: TBD. Gate: TBD proposals, TBD promoted, TBD rejected. Scrubber model: TBD. Watcher model: TBD.
+Curve: 0.636 (10 training claims seen) -> 0.636 (19) -> 0.681 (24) -> 0.818 (24). Final ruleset version: v17. Gate: 25 proposals, 16 promoted, 9 rejected (2 for insufficient evidence, later promoted once a second paid BAYVIEW claim arrived), plus 1 consolidation that merged narrow imaging-auth rules into one policy. Scrubber model: claude-sonnet-5-5. Watcher model: claude-opus-5-5. Unnecessary holds rose from 2 to 3: learned rules only ever deny or pay; the remaining over-holds are LLM judgment calls on claims no rule covers.
 
 With 22 held-out claims, one claim moves a percentage metric by about 4.5 points. Read the table as a trend, not a benchmark. We report balanced accuracy and unnecessary holds so a scrubber that denies everything cannot look good.
 

@@ -5,10 +5,10 @@ Three minutes on stage, one minute on video, then Q&A. Two people: the **Narrato
 Every beat is one command and prints big headings in plain English. The Driver never edits anything live.
 
 ## Before you walk on
-1. Terminal at the repo root, font large, dark background, venv active. Run `python -m harness.demo --run-id RUN --beat 5` once so imports are warm and you know the run id is right (RUN = final run id, TBD). Beat 5 only reads.
+1. Terminal at the repo root, font large, dark background, venv active. Run `python -m harness.demo --run-id RUN --beat 5` once so imports are warm and you know the run id is right (RUN = `final`). Beat 5 only reads.
 2. Confirm Atlas answers: `python -m memory.atlas_schema` prints `ping` and the collection list (it is idempotent: it ensures indexes and ruleset v0 exist and does not touch existing documents). No Wi-Fi, no ping: use the fallback below now, not mid-talk.
 3. Have the demo page (issue #5, `python -m http.server -d demo`) open in a second tab as the closing visual, if it has merged.
-4. Know your numbers: final held-out balanced accuracy TBD, baseline TBD, rules learned TBD, rules rejected TBD. They come from beat 5, so read them off the screen rather than from memory.
+4. Know your numbers: final held-out balanced accuracy 0.818, baseline 0.636, rules learned 16, rules rejected 9, 1 consolidation. They come from beat 5, so read them off the screen rather than from memory.
 
 ## The three minutes
 Run the whole thing with `python -m harness.demo --run-id RUN`, or one beat at a time with `--beat N`. One beat at a time is better on stage: it gives the Narrator control of the pacing.
@@ -49,7 +49,7 @@ Screen recording at 1080p with a voiceover, terminal text at least 28 pt.
 | 20-32 | Beat 2 output, highlight the training claims and the gate stats line | "The watcher learned a rule from training claims. The gate replayed it against real outcomes: one fix, zero regressions, computed by the harness." |
 | 32-42 | Beat 3 output, highlight `REJECTED` and `Active ruleset/head unchanged` | "An over-broad rule is rejected, and the active ruleset does not move." |
 | 42-50 | Beat 4 output, highlight `Loaded ruleset v... from the database` and `no model call` | "A fresh process loads the ruleset from MongoDB Atlas and scrubs by rule, no model call." |
-| 50-60 | Beat 5 table, then the Atlas collections or the demo page | "Held-out balanced accuracy goes from TBD to TBD. Everything is synthetic, and everything lives in Atlas." |
+| 50-60 | Beat 5 table, then the Atlas collections or the demo page | "Held-out balanced accuracy goes from 0.64 to 0.82. Everything is synthetic, and everything lives in Atlas." |
 
 ## Q&A crib
 **Why not fine-tune?** Rules are inspectable, versioned and revertible. A payer changes a policy and we add or retire one rule; fine-tuning bakes it into weights and we cannot show a judge, an auditor or a payer why a claim was held. There is also no gradient to compute here: the signal is a denial code, not a labeled dataset.
@@ -66,6 +66,6 @@ Screen recording at 1080p with a voiceover, terminal text at least 28 pt.
 
 **What about humans?** That is the v2 plan in the README roadmap (issues #7 to #11). A review queue lets a biller edit, override or hold a flagged claim. The semantics matter: if a human overrides a hold and the payer pays the claim, that is strong evidence the rule was wrong, and after two such confirmed false holds on distinct claims the harness automatically parks the rule through a new ruleset version. Held claims nobody resubmits are excluded as censored, because we never learn what would have happened. None of that is built yet.
 
-**How big is the improvement, really?** Read it off beat 5: baseline TBD, final TBD, on 22 held-out claims. One claim is about 4.5 points, so we call it a trend. We would need more claims and more payers before claiming a benchmark.
+**How big is the improvement, really?** Read it off beat 5: baseline 0.636, final 0.818, on 22 held-out claims. One claim is about 4.5 points, so we call it a trend. We would need more claims and more payers before claiming a benchmark.
 
 **What is real and what is simulated?** Claims, members and payers are synthetic and the payer is a simulator that returns 835-style remittances. The agent loop, the gate, the store, the Atlas persistence and the restart behavior are real code running against a real database.
