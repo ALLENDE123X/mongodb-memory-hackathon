@@ -69,3 +69,6 @@ Screen recording at 1080p with a voiceover, terminal text at least 28 pt.
 **How big is the improvement, really?** Read it off beat 5: baseline 0.636, final 0.818, on 22 held-out claims. One claim is about 4.5 points, so we call it a trend. We would need more claims and more payers before claiming a benchmark.
 
 **What is real and what is simulated?** Claims, members and payers are synthetic and the payer is a simulator that returns 835-style remittances. The agent loop, the gate, the store, the Atlas persistence and the restart behavior are real code running against a real database.
+
+**What does it still get wrong?** (own this if asked) In the final run, the learned BAYVIEW out-of-network rule also holds an out-of-network **emergency** visit (POS 23) that BAYVIEW pays. Training never contained an out-of-network ER claim, so the gate had no counterexample to narrow it. That is exactly what more evidence (or the v2 human override that the payer then pays) fixes: a confirmed false hold becomes a regression and the rule gets narrowed. Unnecessary holds went from 2 to 3 for this reason.
+

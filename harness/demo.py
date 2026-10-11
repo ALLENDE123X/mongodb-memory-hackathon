@@ -168,7 +168,7 @@ def beat2(store: Store, run_id: str, ep: dict) -> dict:
           f"{rule.get('proposed_in_iteration')})")
     print(f"  policy   : {rule['description']}")
     print(f"  predicts : {rule['predict']['outcome']} with {_carc(rule['predict']['carc'])}")
-    print(f"  when     : {json.dumps(_compact(rule['when']), separators=(',', ':'))}")
+    print(f"  when     : {json.dumps(_shorten(_compact(rule['when'])), separators=(',', ':'))}")
     taught = [store.db.episodes.find_one({"_id": i}) for i in rule.get("evidence_episode_ids", [])]
     taught = [t for t in taught if t]
     print(f"\nTraining claims that taught it ({len(taught)}):")
@@ -178,11 +178,25 @@ def beat2(store: Store, run_id: str, ep: dict) -> dict:
     held_out_clean = all(t["split"] == "train" for t in taught) and ep["claim_id"] not in {t["claim_id"] for t in taught}
     print(f"\nGate stats (computed by the harness, never reported by a model):")
     print(f"  replayed {ev['evidence_size']} observed training claims | fixes {len(ev['fixes'])} | "
-          f"regressions {len(ev['regressions'])} | already covered {len(ev['redundant'])}")
+          f"regressions {len(ev['regressions'])} | already covered {len(ev.get('redundant') or [])}")
+    if ev.get("replaces"):
+        print(f"  consolidation: replaced {', '.join(ev['replaces'])}, kept all "
+              f"{len(ev.get('preserved') or [])} claim(s) they explained, lost {len(ev.get('lost') or [])}")
     print(f"  pinned thresholds {ev['thresholds']} | verdict {ev['verdict'].upper()}: {ev['reason']}")
     print(f"  held-out claim {ep['claim_id']} absent from the evidence: {held_out_clean}")
     return {"rule_id": rule["_id"], "taught": [t["claim_id"] for t in taught], "evaluation": ev,
             "held_out_clean": held_out_clean, "head_version": head["version"]}
+
+
+def _shorten(x, keep: int = 6):
+    """Long code lists (e.g. a consolidated imaging family) print as the first few plus a count."""
+    if isinstance(x, list):
+        if len(x) > keep and all(not isinstance(v, (dict, list)) for v in x):
+            return x[:keep] + [f"... +{len(x) - keep} more"]
+        return [_shorten(v, keep) for v in x]
+    if isinstance(x, dict):
+        return {k: _shorten(v, keep) for k, v in x.items()}
+    return x
 
 
 def beat3(store: Store, run_id: str) -> dict:
@@ -241,7 +255,12 @@ def _fresh_claim(rules: list[dict], shown: dict) -> dict:
             if r["id"] != shown["claim_id"] and apply_rules(rules, features(public_view(r)))]
     if not pool:
         raise SystemExit("no other held-out claim is covered by a learned rule")
-    pool.sort(key=lambda r: (r["payer"] == shown["payer"], r["id"]))
+    from harness.payer_sim import adjudicate, outcome_summary
+
+    def agrees(r: dict) -> bool:  # the rule's call matches what the payer actually returned
+        hit = apply_rules(rules, features(public_view(r)))
+        return hit["carc"] in outcome_summary(adjudicate(r))["carcs"]
+    pool.sort(key=lambda r: (not agrees(r), r["payer"] == shown["payer"], r["id"]))
     return pool[0]
 
 
