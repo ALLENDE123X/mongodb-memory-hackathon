@@ -24,7 +24,9 @@ from harness.features import features
 from harness.gate import evaluate
 from harness.payer_sim import adjudicate, outcome_summary
 from harness.rules import apply_rules
+from memory.semantic import semantic_memory
 from memory.store import ConflictError, Store
+from memory.taxonomy import sync_taxonomy, taxonomy_summary
 
 MAX_REVISIONS = 1
 MAX_FEEDBACK_BRIEFS = 6  # keep the revision prompt small when a rule is badly over-broad
@@ -59,11 +61,33 @@ def similar_past(view: dict, evidence: list[dict], k: int = 3) -> list[dict]:
     return [ep for _, ep in scored[:k]]
 
 
+def retrieve_similar(view: dict, evidence: list[dict], sem, run_id: str) -> list[dict]:
+    """Vector retrieval when semantic memory is on; the lexical heuristic otherwise or on any failure."""
+    if sem is not None:
+        try:
+            return sem.similar(view, evidence, run_id)
+        except Exception as e:  # noqa: BLE001
+            log(f"  semantic retrieval failed, using lexical fallback: {e}")
+    return similar_past(view, evidence)
+
+
+def sync_memory(store: Store, run_id: str, sem) -> None:
+    """Taxonomic + semantic memory built from the same revealed-training evidence the gate uses."""
+    evidence = latest_train_evidence(store, run_id)
+    sync_taxonomy(store.db, run_id, evidence)
+    if sem is not None:
+        try:
+            sem.sync(run_id, evidence)
+        except Exception as e:  # noqa: BLE001
+            log(f"  semantic sync failed (retrieval falls back as needed): {e}")
+
+
 # -- one pass over the claims ------------------------------------------------------------
 
 def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     head, rules = store.active()
     memory = latest_train_evidence(store, run_id)
+    sem = semantic_memory(store.db)
     rows = defaultdict(list)
     todo = []
     for split in ("train", "heldout"):
@@ -78,7 +102,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     def work(item):
         split, rec, ep_id = item
         view = public_view(rec)
-        decision = scrub(view, rules=rules, similar=similar_past(view, memory))
+        decision = scrub(view, rules=rules, similar=retrieve_similar(view, memory, sem, run_id))
         remit = adjudicate(rec)  # the payer, standing in for a clearinghouse round-trip
         observed = outcome_summary(remit)
         feats = features(view)
@@ -93,6 +117,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
         for ep in pool.map(work, todo):
             store.append_episode(ep)
             rows[ep["split"]].append(ep)
+    sync_memory(store, run_id, sem)
     metrics = {split: score(eps) for split, eps in rows.items()}
     metrics["ruleset_version"] = head["version"]
     metrics["rule_count"] = len(rules)
@@ -153,7 +178,8 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
             try:
                 candidates, meta = propose(groups["uncovered"], groups["holds"], paid_examples=paid_examples,
                                            denied_examples=denied_examples, active_rules=active,
-                                           lessons=lessons, feedback=feedback)
+                                           lessons=lessons, feedback=feedback,
+                                           taxonomy=taxonomy_summary(evidence, payer))
             except Exception as e:  # noqa: BLE001
                 log(f"  watcher failed for {payer}: {e}")
                 break
@@ -251,6 +277,8 @@ def main() -> None:
     if args.reset:
         for c in ("episodes", "rules", "rulesets", "heads", "evaluations", "runs", "audits"):
             db[c].drop()
+        for c in ("semantic_kb", "taxonomy"):  # emptied, not dropped: dropping would remove the Atlas vector index
+            db[c].delete_many({})
     history = run(store, args.run_id, args.iterations)
     print("\niteration  heldout_bal_acc  heldout_acc_w_reason  unnecessary_holds  rules")
     for h in history:
