@@ -1,1 +1,359 @@
-<!doctype html><title>Recursive SDLC Harness</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursive Revenue-Cycle Harness: what it learned</title>
+<meta name="color-scheme" content="dark light">
+<style>
+/* Single static page: vanilla JS + inline SVG, no external resources. Loads run.json (or ?data=URL). */
+:root {
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#0d1420; --muted:#4a5668; --line:#d5dbe4;
+  --heldout:#0a7c6e; --train:#7a8aa0; --good:#11772f; --good-bg:#e3f4e8;
+  --bad:#b3261e; --bad-bg:#fbe9e7; --pays:#1b5fc4; --pays-bg:#e5eefb; --warn:#8a5a00; --warn-bg:#fdf1d8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#090d13; --panel:#121923; --ink:#f1f5f9; --muted:#a9b6c6; --line:#2a3647;
+    --heldout:#3fe0c8; --train:#8497ae; --good:#5fe388; --good-bg:#10301c;
+    --bad:#ff8a80; --bad-bg:#3a1714; --pays:#7db2ff; --pays-bg:#13264a; --warn:#ffcb66; --warn-bg:#3a2b0b;
+  }
+}
+* { box-sizing: border-box; }
+html { font-size: 20px; }
+body { margin:0; background:var(--bg); color:var(--ink); line-height:1.45;
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { max-width:1200px; margin:0 auto; padding:40px 24px 24px; }
+section { margin-top:56px; }
+h1 { font-size:clamp(2rem,5.2vw,3.6rem); line-height:1.08; margin:.2em 0 .35em; letter-spacing:-.02em; }
+h2 { font-size:1.55rem; margin:0 0 .15em; letter-spacing:-.01em; }
+.eyebrow { color:var(--heldout); font-weight:700; text-transform:uppercase; letter-spacing:.12em; font-size:.8rem; }
+.lede { font-size:1.2rem; color:var(--muted); max-width:62ch; margin:0; }
+.sub { color:var(--muted); margin:0 0 18px; font-size:.95rem; max-width:70ch; }
+.big { color:var(--heldout); white-space:nowrap; }
+.tiles { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:32px; }
+@media (min-width:1000px) { .tiles { grid-template-columns:repeat(4,1fr); } }
+@media (max-width:520px) { .tiles { grid-template-columns:1fr; } }
+.tile, .card, .panel { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
+.tile { padding:20px; }
+.tile .k { color:var(--muted); font-size:.85rem; font-weight:600; }
+.tile .v { font-size:1.9rem; white-space:nowrap; font-weight:800; letter-spacing:-.02em; margin:.1em 0; font-variant-numeric:tabular-nums; }
+.tile .n { color:var(--muted); font-size:.85rem; }
+.v.good { color:var(--good); } .v.bad { color:var(--bad); } .v.warn { color:var(--warn); }
+.panel { padding:20px; }
+svg { display:block; width:100%; height:auto; }
+svg text { fill:var(--muted); font-size:15px; font-family:inherit; }
+svg .lbl-h { fill:var(--heldout); font-weight:700; font-size:17px; }
+svg .lbl-t { fill:var(--train); font-weight:700; font-size:17px; }
+svg .val { fill:var(--ink); font-weight:700; font-size:16px; }
+.round { margin:28px 0 10px; font-weight:700; font-size:1.05rem; display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+.round span { color:var(--muted); font-weight:500; font-size:.9rem; }
+.cards { display:grid; gap:12px; }
+.card { padding:16px 18px; border-left:6px solid var(--good); }
+.card.rejected { border-left-color:var(--bad); background:var(--bad-bg); }
+.card.superseded { border-left-color:var(--muted); opacity:.85; }
+.card.superseded .desc { text-decoration:line-through; }
+.card.parked, .card.candidate { border-left-color:var(--warn); }
+.chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px; }
+.chip { font-size:.86rem; font-weight:700; padding:3px 10px; border-radius:999px; border:1px solid var(--line); }
+.chip.payer { background:var(--ink); color:var(--bg); border-color:var(--ink); letter-spacing:.04em; }
+.chip.denial { background:var(--bad-bg); color:var(--bad); border-color:transparent; }
+.chip.pays { background:var(--pays-bg); color:var(--pays); border-color:transparent; }
+.chip.gate { background:var(--good-bg); color:var(--good); border-color:transparent; }
+.chip.gate.fail { background:var(--panel); color:var(--bad); border-color:var(--bad); }
+.chip.ver { color:var(--muted); }
+.desc { font-size:1.05rem; margin:0 0 6px; }
+.meta { color:var(--muted); font-size:.9rem; }
+.reason { color:var(--bad); font-weight:600; font-size:.95rem; margin:4px 0; }
+.note { color:var(--muted); font-size:.9rem; padding:6px 0 0 4px; }
+.rsi { display:grid; gap:14px; }
+.rsi-row { display:grid; grid-template-columns:120px 1fr 170px; gap:14px; align-items:center; }
+.bar { height:26px; background:var(--line); border-radius:8px; overflow:hidden; }
+.bar > i { display:block; height:100%; background:var(--heldout); border-radius:8px; }
+.rsi-row b { font-variant-numeric:tabular-nums; font-size:1.15rem; }
+.mem { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; }
+.mem .panel .t { font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:.8rem; color:var(--heldout); }
+.mem .row { display:flex; justify-content:space-between; gap:10px; margin-top:8px; font-size:.95rem; }
+.mem code { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.9rem; }
+.mem .cnt { font-weight:800; font-variant-numeric:tabular-nums; }
+.mem .off { color:var(--warn); font-weight:700; }
+footer { margin:64px 0 24px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+#sample-banner { position:sticky; top:0; z-index:10; background:#ffb300; color:#1a1200; font-weight:900; text-align:center;
+  letter-spacing:.08em; padding:12px 16px; font-size:1.2rem; border-bottom:4px solid #7a5200; }
+#sample-banner[hidden] { display:none; }
+.mem a { color:var(--heldout); font-weight:700; word-break:break-all; }
+#err { display:none; background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad); padding:16px; border-radius:12px; margin-top:24px; }
+@media (max-width:640px) { html { font-size:17px; } .rsi-row { grid-template-columns:1fr; gap:4px; } }
+</style>
+</head>
+<body>
+<div id="sample-banner" role="alert" hidden>SAMPLE DATA, NOT A RESULT</div>
+<main>
+  <header>
+    <div class="eyebrow">Recursive revenue-cycle harness</div>
+    <h1 id="headline">Loading the run</h1>
+    <p class="lede" id="lede"></p>
+    <div id="err" role="alert"></div>
+    <div class="tiles" id="tiles"></div>
+  </header>
+
+  <section id="s-curve" hidden>
+    <h2>Accuracy on claims it never learned from</h2>
+    <p class="sub" id="curve-sub"></p>
+    <div class="panel"><svg id="curve" role="img" aria-label="Balanced accuracy per iteration"></svg></div>
+  </section>
+
+  <section id="s-rules" hidden>
+    <h2>What it learned, and what the gate refused</h2>
+    <p class="sub">Every candidate rule is replayed against observed payer outcomes by the harness itself. Zero regressions or it does not ship.</p>
+    <p class="sub">Rules learned in round N are first scored at iteration N+1.</p>
+    <div id="timeline"></div>
+  </section>
+
+  <section id="s-rsi" hidden>
+    <h2>Is the watcher getting better at proposing?</h2>
+    <p class="sub">Acceptance rate is promoted divided by proposed in each learning round. A revision after a rejection counts as a new proposal.</p>
+    <div class="panel rsi" id="rsi"></div>
+  </section>
+
+  <section id="s-mem" hidden>
+    <h2>Four kinds of memory, all in MongoDB Atlas</h2>
+    <p class="sub">A collection that is empty or missing shows "0 / not enabled".</p>
+    <div class="mem" id="mem"></div>
+  </section>
+
+  <footer>All claims synthetic. Payer simulator stands in for real 835 remittances. Built at SF Tech Week, Oct 11 2026.</footer>
+</main>
+
+<script>
+"use strict";
+// ---- tiny DOM helpers: all text goes through textContent, so model-written rule text cannot inject markup
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) if (v != null) el.setAttribute(k, v);
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return el;
+}
+const SVGNS = "http://www.w3.org/2000/svg";
+function s(tag, attrs, text) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  if (text != null) el.textContent = text;
+  return el;
+}
+const f2 = (x) => (x == null ? "n/a" : Number(x).toFixed(2));
+const pct = (x) => (x == null ? "n/a" : Math.round(x * 100) + "%");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+// ---- normalise: the page must work on old exports (no gate/ledger/rsi) and on newer ones
+function normalise(d) {
+  const curve = (d.curve || []).map((c) => ({
+    ...c, label: c.label || (c.rule_count ? `ruleset v${c.ruleset_version}` : "no learned rules")}));
+  const baseline = d.baseline || curve[0] || null;
+  const gateBy = Object.fromEntries((d.gate || []).map((g) => [g.rule_id, g]));
+  const rules = (d.rules || []).map((r) => {
+    const g = gateBy[r.rule_id] || {};
+    const learned = r.learned_from || (r.evidence || []).map((e) => String(e).split(":").pop());
+    const fixes = Array.isArray(r.fixes) && r.fixes.length ? r.fixes.length : (g.fixes ?? learned.length);
+    const regs = Array.isArray(r.regressions) ? r.regressions.length : (g.regressions ?? 0);
+    return { ...r, learned, fixCount: fixes, regCount: regs, gate: g,
+      kind: r.kind || (r.carc ? "denial" : "exception"),
+      superseded: r.status === "superseded" || !!r.superseded_by };
+  });
+  const rsi = (d.rsi || d.learning || []).map((l) => ({
+    ...l, n: l.n ?? l.proposed ?? 0,
+    acceptance_rate: l.acceptance_rate !== undefined ? l.acceptance_rate : (l.proposed ? l.promoted / l.proposed : null)}));
+  const mc = d.memory_counts || {
+    semantic: [{ collection: "semantic_kb", count: (d.counts || {}).semantic_kb }],
+    episodic: [{ collection: "episodes", count: (d.counts || {}).episodes }],
+    procedural: [{ collection: "rules", count: (d.counts || {}).rules }, { collection: "rulesets", count: (d.counts || {}).rulesets }],
+    taxonomic: [{ collection: "taxonomy", count: (d.counts || {}).taxonomy }] };
+  return { ...d, curve, baseline, rules, rsi, memory_counts: mc, ledger: d.ledger || [] };
+}
+
+// ---- header + tiles
+function renderHeader(d) {
+  const first = d.baseline, last = d.curve[d.curve.length - 1];
+  const real = d.rules.filter((r) => !r.probe);
+  const learned = real.filter((r) => r.status === "promoted" || r.superseded);
+  const rejected = d.rules.filter((r) => r.status === "rejected");
+  const probes = rejected.filter((r) => r.probe).length;
+  const superseded = real.filter((r) => r.superseded).length;
+  const b0 = first.heldout.balanced_accuracy, b1 = last.heldout.balanced_accuracy;
+  const hold0 = first.heldout.unnecessary_holds, hold1 = last.heldout.unnecessary_holds;
+  const base = first.label;
+
+  $("headline").replaceChildren(
+    "Held-out balanced accuracy ", h("span", { class: "big" }, `${f2(b0)} → ${f2(b1)}`));
+  const refusedClaims = rejected.reduce((a, r) => a + r.regCount, 0);
+  $("lede").textContent =
+    `That is what the harness gained by learning ${plural(learned.length, "payer rule")} from its own denials, ` +
+    `scored on ${first.heldout.n} claims it never learned from (starting point: ${base}). ` +
+    (rejected.length
+      ? `The gate refused ${plural(rejected.length, "candidate")}${refusedClaims ? `, which contradicted ${plural(refusedClaims, "observed outcome")}` : ""}.`
+      : "The gate refused nothing in this run.");
+
+  const tile = (k, v, n, cls) => h("div", { class: "tile" }, h("div", { class: "k" }, k),
+    h("div", { class: "v " + (cls || "") }, v), h("div", { class: "n" }, n));
+  $("tiles").replaceChildren(
+    tile("Held-out balanced accuracy", `${f2(b0)} → ${f2(b1)}`, `baseline (${base}) to final (${last.label})`,
+      b1 > b0 ? "good" : b1 < b0 ? "bad" : ""),
+    tile("Rules learned", String(learned.length), superseded ? `${superseded} later superseded by consolidation` : "each passed the replay gate"),
+    tile("Rejected by the gate", String(rejected.length),
+      rejected.length ? (probes ? `includes ${plural(probes, "deliberate probe")}` : "would have broken real outcomes") : "no candidate was refused",
+      rejected.length ? "bad" : ""),
+    tile("Unnecessary holds", `${hold0} → ${hold1}`, `paid held-out claims wrongly held, of ${first.heldout.n_paid}`,
+      hold1 < hold0 ? "good" : hold1 > hold0 ? "warn" : ""));
+}
+
+// ---- line chart (inline SVG)
+function renderCurve(d) {
+  const W = 960, H = 420, m = { l: 70, r: 130, t: 24, b: 78 };
+  const pts = d.curve;
+  const vals = pts.flatMap((p) => [p.heldout.balanced_accuracy, p.train.balanced_accuracy]);
+  const lo = Math.min(0.5, Math.floor(Math.min(...vals) * 10) / 10), hi = 1;
+  const x = (i) => m.l + (pts.length === 1 ? 0.5 : i / (pts.length - 1)) * (W - m.l - m.r);
+  const y = (v) => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+  const svg = $("curve");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const kids = [];
+  for (let v = Math.ceil(lo * 10) / 10; v <= hi + 1e-9; v += 0.1) {
+    kids.push(s("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 }));
+    kids.push(s("text", { x: m.l - 10, y: y(v) + 5, "text-anchor": "end" }, v.toFixed(1)));
+  }
+  kids.push(s("line", { x1: m.l, x2: W - m.r, y1: y(0.5), y2: y(0.5), stroke: "var(--muted)", "stroke-dasharray": "6 6", "stroke-width": 1.5 }));
+  kids.push(s("text", { x: W - m.r + 8, y: y(0.5) + 5 }, "chance"));
+  const line = (key, color, width) => {
+    kids.push(s("polyline", { fill: "none", stroke: color, "stroke-width": width, "stroke-linejoin": "round",
+      points: pts.map((p, i) => `${x(i)},${y(p[key].balanced_accuracy)}`).join(" ") }));
+    pts.forEach((p, i) => kids.push(s("circle", { cx: x(i), cy: y(p[key].balanced_accuracy), r: key === "heldout" ? 7 : 5, fill: color })));
+  };
+  line("train", "var(--train)", 3);
+  line("heldout", "var(--heldout)", 5);
+  const end = pts.length - 1;
+  kids.push(s("text", { class: "lbl-h", x: x(end) + 16, y: y(pts[end].heldout.balanced_accuracy) + 6 }, "held-out"));
+  kids.push(s("text", { class: "lbl-t", x: x(end) + 16, y: y(pts[end].train.balanced_accuracy) + 6 }, "train"));
+  pts.forEach((p, i) => {
+    kids.push(s("text", { class: "val", x: x(i), y: y(p.heldout.balanced_accuracy) + (p.heldout.balanced_accuracy <= p.train.balanced_accuracy ? 30 : -16), "text-anchor": "middle" }, f2(p.heldout.balanced_accuracy)));
+    kids.push(s("text", { x: x(i), y: H - 40, "text-anchor": "middle", style: "font-weight:700" }, `iteration ${p.iteration}`));
+    kids.push(s("text", { x: x(i), y: H - 16, "text-anchor": "middle" }, p.label));
+  });
+  svg.replaceChildren(...kids);
+  $("curve-sub").textContent =
+    `Balanced accuracy per iteration (n = ${pts[0].heldout.n} held-out, ${pts[0].train.n} train). ` +
+    "Held-out claims never become learning evidence. Train is what the watcher studies. " +
+    "Rules learned in round N are first scored at iteration N+1.";
+}
+
+// ---- rule timeline
+function ruleCard(r) {
+  const rejected = r.status === "rejected";
+  const cls = rejected ? "rejected" : r.superseded ? "superseded" : (r.status === "promoted" ? "" : r.status);
+  const chips = [h("span", { class: "chip payer" }, r.payer === "*" ? "ALL PAYERS" : r.payer)];
+  chips.push(r.kind === "exception"
+    ? h("span", { class: "chip pays" }, "pays")
+    : h("span", { class: "chip denial" }, r.carc ? `denial, CARC ${r.carc}` : "denial"));
+  if (r.probe) chips.push(h("span", { class: "chip ver" }, "probe"));
+  if (rejected) chips.push(h("span", { class: "chip gate fail" },
+    `fixes ${r.fixCount}, ${plural(r.regCount, "regression")}`));
+  else if (r.status === "promoted" || r.superseded)
+    chips.push(h("span", { class: "chip gate" }, `fixes ${r.fixCount}, 0 regressions`));
+  else chips.push(h("span", { class: "chip ver" }, r.status));
+  if (r.version != null) chips.push(h("span", { class: "chip ver" }, `v${r.version}`));
+  if (r.superseded) chips.push(h("span", { class: "chip ver" }, r.superseded_by ? `superseded by ${r.superseded_by}` : "superseded"));
+  const ids = r.learned.slice(0, 3).join(", ") + (r.learned.length > 3 ? ` +${r.learned.length - 3} more` : "");
+  return h("div", { class: "card " + cls },
+    h("div", { class: "chips" }, chips),
+    h("p", { class: "desc" }, r.description || r.rule_id),
+    rejected && r.rejection_reason ? h("p", { class: "reason" }, `Gate: ${r.rejection_reason}`) : null,
+    h("div", { class: "meta" }, `${r.rule_id}`, r.learned.length ? ` · learned from ${ids}` : "",
+      (r.gate.evidence_size ? ` · replayed on ${r.gate.evidence_size} observed claims` : "")));
+}
+function renderTimeline(d) {
+  const groups = new Map();
+  for (const r of d.rules) {
+    const k = r.iteration ?? 0;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(r);
+  }
+  const rsiBy = Object.fromEntries(d.rsi.map((l) => [l.iteration, l]));
+  const consol = d.ledger.filter((e) => e.kind === "consolidation");
+  const out = [];
+  for (const k of [...groups.keys()].sort((a, b) => a - b)) {
+    const rs = groups.get(k);
+    const l = rsiBy[k];
+    const title = k < 0 ? "Gate probe: a deliberately over-broad rule" : `Learning round ${k}`;
+    const tally = k < 0 ? "" : (l ? `${l.promoted} promoted, ${l.rejected} rejected of ${l.proposed} proposed` : "");
+    out.push(h("div", { class: "round" }, title, tally ? h("span", null, tally) : null));
+    out.push(h("div", { class: "cards" }, rs.map(ruleCard)));
+    for (const e of consol.filter((c) => c.iteration === k))
+      out.push(h("div", { class: "note" }, "Consolidation: ", e.description || e.reason || "rules merged",
+        e.extra && e.extra.superseded ? ` (superseded ${[].concat(e.extra.superseded).join(", ")})` : ""));
+  }
+  $("timeline").replaceChildren(...out);
+}
+
+// ---- RSI panel
+function renderRsi(d) {
+  const rows = d.rsi.map((l) => {
+    const r = l.acceptance_rate;
+    return h("div", { class: "rsi-row" },
+      h("div", null, h("b", null, `Round ${l.iteration}`)),
+      h("div", null, h("div", { class: "bar", title: `${l.promoted} of ${l.proposed} proposals promoted` },
+        h("i", { style: `width:${r == null ? 0 : Math.round(r * 100)}%` })),
+        h("div", { class: "meta" }, [["uncovered denials", l.uncovered_denials ?? l.misses], ["false holds", l.false_holds], ["revised", l.revised]]
+          .map(([k, v]) => `${v ?? "n/a"} ${k}`).join(", "))),
+      h("div", null, r == null ? h("b", null, "no proposals (n=0)") : h("b", null, `${pct(r)} `),
+        h("span", { class: "meta" }, r == null ? "" : `${l.promoted}/${l.proposed}, n=${l.n}`)));
+  });
+  $("rsi").replaceChildren(...rows);
+}
+
+// ---- memory panel
+const MEM_ORDER = [["semantic", "Semantic"], ["episodic", "Episodic"], ["procedural", "Procedural"], ["taxonomic", "Taxonomic"]];
+const MEM_HELP = { semantic: "past denials and payer notes", episodic: "every scrub attempt and remittance",
+  procedural: "learned rules and versioned rulesets", taxonomic: "payer, claim category, denial category" };
+function renderMemory(d) {
+  const cards = MEM_ORDER.map(([key, title]) => {
+    const cols = d.memory_counts[key] || [];
+    return h("div", { class: "panel" }, h("div", { class: "t" }, title), h("div", { class: "meta" }, MEM_HELP[key]),
+      cols.map((c) => h("div", { class: "row" }, h("code", null, c.collection),
+        c.count ? h("span", { class: "cnt" }, c.count) : h("span", { class: "off" }, "0 / not enabled"))));
+  });
+  const rd = d.raindrop;
+  if (rd && typeof rd === "object" && (rd.dashboard_url || rd.total)) {
+    const sent = Object.entries(rd.events_sent || {});
+    const url = /^https?:\/\//.test(rd.dashboard_url || "") ? rd.dashboard_url : null;
+    cards.push(h("div", { class: "panel" }, h("div", { class: "t" }, "Raindrop"), h("div", { class: "meta" }, "agent telemetry events sent"),
+      sent.map(([k, v]) => h("div", { class: "row" }, h("code", null, k), h("span", { class: "cnt" }, String(v)))),
+      h("div", { class: "row" }, h("code", null, "total"), h("span", { class: "cnt" }, String(rd.total ?? 0))),
+      url ? h("div", { class: "row" }, h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, "Open the Raindrop dashboard")) : null));
+  }
+  $("mem").replaceChildren(...cards);
+}
+
+// ---- boot
+async function main() {
+  const src = new URLSearchParams(location.search).get("data") || "run.json";
+  try {
+    const res = await fetch(src, { cache: "no-store" });
+    if (!res.ok) throw new Error(`${src}: HTTP ${res.status}`);
+    const d = normalise(await res.json());
+    if (!d.curve.length) throw new Error("run has no iterations yet");
+    renderHeader(d); renderCurve(d); renderTimeline(d); renderRsi(d); renderMemory(d);
+    for (const id of ["s-curve", "s-rules", "s-rsi", "s-mem"]) $(id).hidden = false;
+    if (!d.rsi.length) $("s-rsi").hidden = true;
+    const sample = d.run_id === "sample" || !!d.synthetic_sample;
+    $("sample-banner").hidden = !sample;
+    document.title = `${sample ? "SAMPLE " : ""}Held-out accuracy ${f2(d.baseline.heldout.balanced_accuracy)} to ${f2(d.curve[d.curve.length - 1].heldout.balanced_accuracy)}: Recursive Revenue-Cycle Harness`;
+  } catch (e) {
+    $("headline").textContent = "Could not load the run";
+    const box = $("err"); box.style.display = "block";
+    box.textContent = `${e.message}. Serve this folder (python -m http.server -d demo) so run.json can be fetched.`;
+  }
+}
+main();
+</script>
+</body>
+</html>
