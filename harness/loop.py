@@ -26,7 +26,7 @@ from agents.watcher import claim_brief, consolidate, propose
 from eval.metrics import score
 from eval.synthetic_claims import load_claims, public_view
 from harness.features import features
-from harness.gate import evaluate, evaluate_replacement
+from harness.gate import INSUFFICIENT, evaluate, evaluate_replacement
 from harness.payer_sim import adjudicate, outcome_summary
 from harness.rules import apply_rules
 from memory.semantic import semantic_memory
@@ -293,7 +293,8 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                     stats["rejected"] += 1
                     stats["rejected_rules"].append({"rule_id": cand["rule_id"], "kind": kind,
                                                     "description": cand.get("description"), "reason": verdict["reason"]})
-                    rejected_feedback.append(_rejection_feedback(cand, verdict, evidence))
+                    if not verdict["reason"].startswith(INSUFFICIENT):  # only more claims fix that, not a revision
+                        rejected_feedback.append(_rejection_feedback(cand, verdict, evidence))
                     log(f"  rejected {cand['rule_id']} [{kind}]: {cand.get('description')} -> {verdict['reason']}")
             _, active = store.active()
             groups = {"uncovered": [e for e in groups["uncovered"] if _uncovered_denial(active, e)],
@@ -384,6 +385,7 @@ def consolidate_rules(store: Store, run_id: str, iteration: int) -> dict:
 
 def run(store: Store, run_id: str, iterations: int, slices: int = DEFAULT_SLICES) -> list[dict]:
     store.bootstrap()
+    slices = max(1, slices)
     state = store.run_state(run_id) or {}
     history = state.get("history", [])
     if history and state.get("slices") and state["slices"] != slices:
@@ -419,7 +421,8 @@ def main() -> None:
     ap.add_argument("--run-id", default="demo")
     ap.add_argument("--iterations", type=int, default=3)
     ap.add_argument("--slices", type=int, default=DEFAULT_SLICES,
-                    help="stream training claims in N stratified slices (1 = all at iteration 0)")
+                    help="stream training claims in N stratified slices (1 = all at iteration 0); "
+                         "slices beyond iterations+1 are never revealed")
     ap.add_argument("--reset", action="store_true", help="drop all harness collections first")
     ap.add_argument("--mock", action="store_true", help="use an in-memory database instead of Atlas")
     args = ap.parse_args()

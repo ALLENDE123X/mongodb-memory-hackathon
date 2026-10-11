@@ -38,8 +38,9 @@ _slots = threading.BoundedSemaphore(int(os.environ.get("LLM_CONCURRENCY", "6")))
 
 
 def _rate_limited(e: Exception) -> bool:
+    """Rate limits and provider overload (Anthropic 529, ServiceUnavailable) both mean: wait longer."""
     text = f"{type(e).__name__} {e}".lower()
-    return "ratelimit" in text or "rate limit" in text or "429" in text
+    return any(k in text for k in ("ratelimit", "rate limit", "429", "529", "overloaded", "serviceunavailable"))
 
 
 def _backoff(attempt: int, e: Exception) -> float:

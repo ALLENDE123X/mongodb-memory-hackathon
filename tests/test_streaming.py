@@ -10,7 +10,7 @@ import agents.scrubber as scrubber_mod
 import agents.watcher as watcher_mod
 from eval.synthetic_claims import load_claims
 from harness import loop
-from harness.gate import MIN_PAYER_PAID_SEEN, evaluate
+from harness.gate import MIN_PAYER_PAID_SEEN, evaluate, evaluate_replacement
 from memory.store import Store
 from tests.test_loop import fake_scrub_llm, fake_watch_llm
 from tests.test_rules_gate_store import AUTH_RULE, EVIDENCE
@@ -57,6 +57,15 @@ def test_min_payer_paid_seen_counts_distinct_claims():
     assert evaluate(AUTH_RULE, [], EVIDENCE)["verdict"] == "promote"  # B and D: two distinct
 
 
+def test_min_payer_paid_seen_applies_to_denial_replacements():
+    wider = {**AUTH_RULE, "rule_id": "R-NS-5", "when": [
+        {"any_line": [{"field": "cpt", "op": "in", "value": ["70551", "70553", "72148", "74177"]}]},
+        {"field": "prior_auth", "op": "missing"}]}
+    thin = evaluate_replacement(wider, [AUTH_RULE], [AUTH_RULE], [EVIDENCE[0], EVIDENCE[1]])
+    assert thin["verdict"] == "rejected" and thin["reason"].startswith("insufficient evidence")
+    assert evaluate_replacement(wider, [AUTH_RULE], [AUTH_RULE], EVIDENCE)["verdict"] == "promote"
+
+
 class FakeRateLimit(Exception):
     pass
 
@@ -76,3 +85,4 @@ def test_rate_limits_back_off_exponentially_then_surface(monkeypatch):
     assert len(calls) == llm.MAX_TRIES == 3
     assert sleeps == [5.0, 10.0]  # exponential, nothing after the last try
     assert llm._slots._value == llm._slots._initial_value  # every slot released
+    assert llm._rate_limited(Exception("529 Overloaded")) and not llm._rate_limited(ValueError("bad json"))

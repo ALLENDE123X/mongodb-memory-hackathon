@@ -85,6 +85,8 @@ Environment (`.env.local`, never committed):
 - `RAINDROP_WRITE_KEY` - optional, enables Raindrop telemetry (`RAINDROP_SAMPLE`, `RAINDROP_DISABLE`, `RAINDROP_DASHBOARD_URL`). Without it telemetry is a no-op.
 - `LLM_CASSETTE=record|replay|off` - every model response is cached in `data/cassette.jsonl`; `replay` re-runs a known-good run byte for byte with no model calls.
 - `SCRUB_WORKERS` - parallel scrubbing threads (default 8).
+- `LLM_CONCURRENCY` - max in-flight model calls across all threads (default 6); rate-limit and overload errors back off exponentially, 3 tries.
+- `--slices N` (loop flag, default 3) - training claims stream in N stratified slices; iteration k sees slices 0..k. `--slices 1` shows all training claims at iteration 0. Use `--iterations` >= N-1 or later slices are never revealed.
 
 Run and present:
 ```

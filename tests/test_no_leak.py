@@ -1,6 +1,6 @@
 """The answer key never reaches a model prompt, and unrevealed training slices stay invisible.
 
-Every scrubber and watcher prompt of a fake-model mongomock run is captured and scanned for the
+Every scrubber, watcher-propose and watcher-consolidate prompt of a fake-model mongomock run is captured and scanned for the
 hidden fields (`ground_truth`, `violated_rules`, `split`, `category`), any hidden rule id
 (PR-01..PR-12), and held-out claim ids. `test_scanner_is_live` proves the scan would fail if
 `public_view` ever leaked `ground_truth`. The fake watcher replays the hidden ORACLE rules, whose
@@ -24,10 +24,13 @@ HIDDEN = ("ground_truth", "violated_rules", '"split"', '"category"')
 RULE_ID = re.compile(r"\bPR-(0[1-9]|1[0-2])\b")
 HELDOUT = {r["id"] for r in load_claims("heldout")}
 CLAIM_ID = re.compile(r"CLM-\d{3}")
+SUBJECT = re.compile(r'"patientControlNumber": "(CLM-\d{3})"')
 
 
 def renamed_watcher(model, system, user, **kw):
     out, meta = fake_watch_llm(model, system, user, **kw)
+    if "rules" not in out:  # consolidation reply
+        return out, meta
     rules = [{**r, "description": f"learned {r['payer']} rule {i}"} for i, r in enumerate(out["rules"])]
     return {**out, "rules": rules}, meta
 
@@ -38,7 +41,8 @@ def prompts(monkeypatch):
 
     def capture(who, fake):
         def call(model, system, user, **kw):
-            seen.append((who, system + "\n" + user))
+            kind = "consolidate" if system == watcher_mod.CONSOLIDATE_SYSTEM else who
+            seen.append((kind, system + "\n" + user))
             return fake(model, system, user, **kw)
         return call
 
@@ -49,16 +53,20 @@ def prompts(monkeypatch):
 
 def leaks(who: str, text: str) -> list[str]:
     found = [k for k in HIDDEN if k in text] + RULE_ID.findall(text)
-    heldout = set(CLAIM_ID.findall(text)) & HELDOUT
-    # a scrubber prompt for a held-out claim names that one claim; nothing else may be held-out
-    if (who == "watcher" and heldout) or len(heldout) > 1:
-        found.append(f"held-out ids {sorted(heldout)}")
+    ids = CLAIM_ID.findall(text)
+    heldout = set(ids) & HELDOUT
+    # only a held-out claim's own scrubber prompt may name a held-out id, and only its own:
+    # the claim under review is the last id in the prompt (its 837 patientControlNumber)
+    own = SUBJECT.findall(text)
+    allowed = {own[-1]} if who == "scrubber" and own and own[-1] in HELDOUT else set()
+    if heldout - allowed:
+        found.append(f"held-out ids {sorted(heldout - allowed)}")
     return found
 
 
 def test_no_prompt_carries_the_answer_key(prompts):
     loop.run(Store(mongomock.MongoClient().db), "leak", iterations=3)
-    assert {w for w, _ in prompts} == {"scrubber", "watcher"}
+    assert {w for w, _ in prompts} == {"scrubber", "watcher", "consolidate"}
     assert any(set(CLAIM_ID.findall(t)) & HELDOUT for w, t in prompts if w == "scrubber")  # held-out was scored
     bad = [(w, leaks(w, t)) for w, t in prompts if leaks(w, t)]
     assert not bad, bad[:3]
