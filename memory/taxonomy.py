@@ -55,7 +55,8 @@ def _keys(ep: dict) -> list[str]:
 
 def taxonomy_counts(evidence: list[dict]) -> dict[str, dict]:
     """{key: {"count": n, "claim_ids": [...]}} over distinct claims (latest observation each)."""
-    latest = {ep["claim_id"]: ep for ep in evidence if ep.get("split", "train") == "train"}
+    latest = {ep["claim_id"]: ep for ep in evidence
+              if ep.get("split") == "train" and ep.get("visible_to_learning", True)}
     claims: dict[str, list[str]] = defaultdict(list)
     for cid, ep in sorted(latest.items()):
         for key in _keys(ep):

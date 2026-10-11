@@ -61,20 +61,39 @@ def similar_past(view: dict, evidence: list[dict], k: int = 3) -> list[dict]:
     return [ep for _, ep in scored[:k]]
 
 
-def retrieve_similar(view: dict, evidence: list[dict], sem, run_id: str) -> list[dict]:
-    """Vector retrieval when semantic memory is on; the lexical heuristic otherwise or on any failure."""
-    if sem is not None:
-        try:
-            return sem.similar(view, evidence, run_id)
-        except Exception as e:  # noqa: BLE001
+def retrieve_similar(view: dict, evidence: list[dict], sem, run_id: str, notes: set | None = None,
+                     k: int = 3) -> list[dict]:
+    """Vector retrieval when semantic memory is on; the lexical heuristic otherwise or on any failure.
+    A short vector result (index still building, eventual consistency) is topped up lexically.
+    `notes` is a per-pass set so each warning is logged once."""
+    if sem is None:
+        return similar_past(view, evidence, k)
+    notes = notes if notes is not None else set()
+    try:
+        hits = sem.similar(view, evidence, run_id, k)
+    except Exception as e:  # noqa: BLE001
+        if "failed" not in notes:
+            notes.add("failed")
             log(f"  semantic retrieval failed, using lexical fallback: {e}")
-    return similar_past(view, evidence)
+        return similar_past(view, evidence, k)
+    if len(hits) < k:
+        if "short" not in notes:
+            notes.add("short")
+            log(f"  vector search returned {len(hits)}/{k} hits (index not ready?); topping up lexically")
+        seen = {h["claim_id"] for h in hits}
+        hits = hits + [ep for ep in similar_past(view, evidence, k + len(hits))
+                       if ep["claim_id"] not in seen and ep["claim_id"] != view["id"]][:k - len(hits)]
+    return hits
 
 
 def sync_memory(store: Store, run_id: str, sem) -> None:
-    """Taxonomic + semantic memory built from the same revealed-training evidence the gate uses."""
+    """Taxonomic + semantic memory built from the same revealed-training evidence the gate uses.
+    Best effort: neither may crash a scrub pass."""
     evidence = latest_train_evidence(store, run_id)
-    sync_taxonomy(store.db, run_id, evidence)
+    try:
+        sync_taxonomy(store.db, run_id, evidence)
+    except Exception as e:  # noqa: BLE001
+        log(f"  taxonomy sync failed: {e}")
     if sem is not None:
         try:
             sem.sync(run_id, evidence)
@@ -82,12 +101,21 @@ def sync_memory(store: Store, run_id: str, sem) -> None:
             log(f"  semantic sync failed (retrieval falls back as needed): {e}")
 
 
+def _semantic_or_none(db):
+    try:
+        return semantic_memory(db)
+    except Exception as e:  # noqa: BLE001
+        log(f"  semantic memory unavailable, using lexical fallback: {e}")
+        return None
+
+
 # -- one pass over the claims ------------------------------------------------------------
 
 def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     head, rules = store.active()
     memory = latest_train_evidence(store, run_id)
-    sem = semantic_memory(store.db)
+    sem = _semantic_or_none(store.db)
+    notes: set = set()
     rows = defaultdict(list)
     todo = []
     for split in ("train", "heldout"):
@@ -102,7 +130,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     def work(item):
         split, rec, ep_id = item
         view = public_view(rec)
-        decision = scrub(view, rules=rules, similar=retrieve_similar(view, memory, sem, run_id))
+        decision = scrub(view, rules=rules, similar=retrieve_similar(view, memory, sem, run_id, notes))
         remit = adjudicate(rec)  # the payer, standing in for a clearinghouse round-trip
         observed = outcome_summary(remit)
         feats = features(view)

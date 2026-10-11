@@ -164,13 +164,104 @@ class _FakeCol:
         self.created.append(model)
 
 
+class _FakeDb:
+    def __init__(self, with_collection=False):
+        self.col = _FakeCol()
+        self.made = ["semantic_kb"] if with_collection else []
+
+    def list_collection_names(self):
+        return list(self.made)
+
+    def create_collection(self, name):
+        self.made.append(name)
+
+    def __getitem__(self, name):
+        return self.col
+
+
 def test_ensure_vector_index_is_idempotent_and_matches_definition(monkeypatch):
     monkeypatch.setenv("VOYAGE_DIM", "1024")
-    col = _FakeCol()
-    db = {"semantic_kb": col}
+    db = _FakeDb()
     assert semantic.ensure_vector_index(db) is True and semantic.ensure_vector_index(db) is False
-    doc = col.created[0].document
+    assert db.made == ["semantic_kb"]  # collection created before the index
+    doc = db.col.created[0].document
     assert doc["type"] == "vectorSearch" and doc["name"] == "semantic_kb_vector"
     assert doc["definition"]["fields"] == [
         {"type": "vector", "path": "embedding", "numDimensions": 1024, "similarity": "cosine"},
         {"type": "filter", "path": "run_id"}]
+
+
+def test_short_vector_results_are_topped_up_lexically(monkeypatch):
+    store = _scrubbed(monkeypatch)
+    sem = LocalSemantic(store.db, FakeEmbedder())  # nothing synced: the vector path returns []
+    evidence = loop.latest_train_evidence(store, "t")
+    from eval.synthetic_claims import public_view
+    view = public_view(load_claims("train")[0])
+    notes = set()
+    got = loop.retrieve_similar(view, evidence, sem, "t", notes)
+    assert got == loop.similar_past(view, evidence) and got and "short" in notes
+    # partially filled: vector hit kept first, lexical fills the rest, no duplicates, never the claim itself
+    sem.sync("t", evidence[:1])
+    got = loop.retrieve_similar(view, evidence, sem, "t")
+    ids = [e["claim_id"] for e in got]
+    assert len(ids) == len(set(ids)) and view["id"] not in ids and len(ids) == 3
+
+
+def test_similar_ignores_non_train_evidence(monkeypatch):
+    store = _scrubbed(monkeypatch)
+    sem = LocalSemantic(store.db, FakeEmbedder())
+    evidence = loop.latest_train_evidence(store, "t")
+    sem.sync("t", evidence)
+    heldout = store.episodes({"run_id": "t", "split": "heldout"})
+    from eval.synthetic_claims import public_view
+    hits = sem.similar(public_view(load_claims("train")[0]), heldout, "t")
+    assert hits == []
+
+
+def test_memory_failures_never_crash_scrub_pass(monkeypatch):
+    class Boom:
+        model = "boom"
+
+        def embed(self, texts, input_type):
+            raise RuntimeError("voyage down")
+
+    monkeypatch.setattr(scrubber_mod, "complete_json", fake_scrub_llm)
+    monkeypatch.setattr(loop, "semantic_memory", lambda db: LocalSemantic(db, Boom()))
+    store = Store(mongomock.MongoClient().db)
+    store.bootstrap()
+    loop.scrub_pass(store, "t", 0)
+    loop.scrub_pass(store, "t", 1)  # second pass retrieves with an embedder that raises: lexical fallback
+    assert store.db.semantic_kb.count_documents({}) == 0
+
+    def no_construct(db):
+        raise RuntimeError("cannot build embedder")
+
+    monkeypatch.setattr(loop, "semantic_memory", no_construct)
+    monkeypatch.setattr(loop, "sync_taxonomy", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("tax")))
+    assert loop.scrub_pass(store, "t", 2)["train"]
+
+
+def test_voyage_embedder_retries_rate_limits(monkeypatch):
+    from voyageai.error import RateLimitError
+    monkeypatch.setattr(semantic.time, "sleep", lambda s: None)
+    emb = object.__new__(semantic.VoyageEmbedder)
+    emb.model = "m"
+
+    class Client:
+        def __init__(self, fails):
+            self.fails, self.n = fails, 0
+
+        def embed(self, batch, model, input_type):
+            self.n += 1
+            if self.n <= self.fails:
+                raise RateLimitError("slow down")
+            return type("R", (), {"embeddings": [[1.0] for _ in batch]})()
+
+    emb.client = Client(2)
+    assert emb.embed(["a", "b"], "document") == [[1.0], [1.0]] and emb.client.n == 3
+    emb.client = Client(3)
+    try:
+        emb.embed(["a"], "document")
+        raise AssertionError("should have raised after 3 attempts")
+    except RateLimitError:
+        assert emb.client.n == 3

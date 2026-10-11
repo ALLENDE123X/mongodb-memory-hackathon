@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import time
 from datetime import datetime, timezone
 from typing import Protocol
 
@@ -78,8 +79,20 @@ class VoyageEmbedder:
     def embed(self, texts: list[str], input_type: str) -> list[list[float]]:
         out: list[list[float]] = []
         for i in range(0, len(texts), EMBED_BATCH):
-            out += self.client.embed(texts[i:i + EMBED_BATCH], model=self.model, input_type=input_type).embeddings
+            out += self._embed_batch(texts[i:i + EMBED_BATCH], input_type)
         return out
+
+    def _embed_batch(self, batch: list[str], input_type: str, attempts: int = 3) -> list[list[float]]:
+        """Retry rate limits with exponential backoff (1s, 2s); other errors propagate."""
+        from voyageai.error import RateLimitError
+        for n in range(attempts):
+            try:
+                return self.client.embed(batch, model=self.model, input_type=input_type).embeddings
+            except RateLimitError:
+                if n == attempts - 1:
+                    raise
+                time.sleep(2 ** n)
+        raise AssertionError("unreachable")
 
 
 def _is_mongomock(db) -> bool:
@@ -137,7 +150,8 @@ class SemanticMemory:
     def similar(self, view: dict, evidence: list[dict], run_id: str, k: int = 3) -> list[dict]:
         """Top-k most similar past training outcomes, excluding the claim itself and any claim
         that is not in the given evidence list."""
-        by_claim = {ep["claim_id"]: ep for ep in evidence}
+        by_claim = {ep["claim_id"]: ep for ep in evidence
+                    if ep.get("split") == "train" and ep.get("visible_to_learning", True)}
         qvec = self.embedder.embed([query_text(view)], "query")[0]
         out = []
         for hit in self._vector_search(qvec, run_id, limit=k * 4 + 1):
@@ -164,6 +178,8 @@ def ensure_vector_index(db) -> bool:
     Atlas only: operators run this once; tests never call it against a real cluster."""
     from pymongo.operations import SearchIndexModel
     spec = vector_index_definition()
+    if COLLECTION not in db.list_collection_names():  # create_search_index needs the collection to exist
+        db.create_collection(COLLECTION)
     col = db[COLLECTION]
     if any(ix.get("name") == spec["name"] for ix in col.list_search_indexes()):
         return False
@@ -182,5 +198,6 @@ if __name__ == "__main__":
     if args.ensure_index:
         from memory.atlas_schema import get_db
         print("created" if ensure_vector_index(get_db()) else "already exists")
+        print("Atlas builds the index asynchronously: wait for status READY before running the loop.")
     else:
         print(json.dumps(vector_index_definition(), indent=2))
