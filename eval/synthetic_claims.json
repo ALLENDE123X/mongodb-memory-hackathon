@@ -2170,5 +2170,344 @@
       "violated_rules": []
     },
     "split": "train"
+  },
+  {
+    "id": "CLM-041",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 48,
+      "sex": "F",
+      "member_id": "SYN-318406"
+    },
+    "provider": {
+      "npi": "9947205136",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-03-02",
+    "submission_date": "2026-07-30",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E11.9",
+      "I10"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 21000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "resubmission_note": "held in billing queue after clearinghouse rejection"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Submitted 150 days after DOS, which looks late (PR-02), but NORTHSTAR's timely filing window is 180 days.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-042",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 35,
+      "sex": "M",
+      "member_id": "SYN-659832"
+    },
+    "provider": {
+      "npi": "9973118460",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-21",
+    "submission_date": "2026-09-24",
+    "place_of_service": "11",
+    "diagnoses": [
+      "J06.9",
+      "Z23"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      },
+      {
+        "line": 2,
+        "cpt": "90686",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3500
+      },
+      {
+        "line": 3,
+        "cpt": "90471",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 2800
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "same_day_services": "office visit with influenza vaccine"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. E/M billed with same-day vaccine admin (90471) and no modifier 25 looks like a PR-03 error, but only CASCADE requires 25 there; NORTHSTAR pays it.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-043",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "procedure",
+    "patient": {
+      "age": 70,
+      "sex": "M",
+      "member_id": "SYN-275164"
+    },
+    "provider": {
+      "npi": "9932650718",
+      "specialty": "Dermatology",
+      "in_network": true
+    },
+    "date_of_service": "2026-06-10",
+    "submission_date": "2026-06-15",
+    "place_of_service": "11",
+    "diagnoses": [
+      "B07.8",
+      "D48.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "17110",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 16000
+      },
+      {
+        "line": 2,
+        "cpt": "11102",
+        "modifiers": [
+          "59"
+        ],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 18000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Modifier 59 on the 17110/11102 NCCI pair looks like a PR-04 error, but only NORTHSTAR rejects 59 in favor of X{EPSU}; CASCADE accepts 59.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-044",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 69,
+      "sex": "F",
+      "member_id": "SYN-904417"
+    },
+    "provider": {
+      "npi": "9986034572",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-08",
+    "submission_date": "2026-07-10",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M17.11",
+      "R26.89"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97110",
+        "modifiers": [
+          "GP",
+          "KX"
+        ],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 2,
+        "charge_cents": 9500
+      },
+      {
+        "line": 2,
+        "cpt": "97112",
+        "modifiers": [
+          "GP",
+          "KX"
+        ],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 9000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_count_ytd": 23,
+      "plan_year_start": "2026-01-01"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. This is PT visit 24, which would exceed a 20-visit cap (PR-07), but only NORTHSTAR caps PT visits; CASCADE has no hard cap and KX attests continued necessity.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-045",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 39,
+      "sex": "F",
+      "member_id": "SYN-583029"
+    },
+    "provider": {
+      "npi": "9958427103",
+      "specialty": "Radiology",
+      "in_network": true
+    },
+    "date_of_service": "2026-05-19",
+    "submission_date": "2026-05-22",
+    "place_of_service": "22",
+    "diagnoses": [
+      "M54.16",
+      "M51.26"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "72148",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 165000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "ordering_reason": "lumbar radiculopathy after 8 weeks of conservative care"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. MRI lumbar spine (72148) with no prior auth number looks like a PR-01 error, but only NORTHSTAR requires imaging auth; BAYVIEW does not.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-046",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "preventive",
+    "patient": {
+      "age": 31,
+      "sex": "M",
+      "member_id": "SYN-736150"
+    },
+    "provider": {
+      "npi": "9921574386",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-12",
+    "submission_date": "2026-08-17",
+    "place_of_service": "11",
+    "diagnoses": [
+      "Z00.00"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99395",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 26000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "last_preventive_dos": "2025-09-15",
+      "last_preventive_cpt": "99395"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Preventive visit only 331 days after the last one looks like a PR-06 frequency error, but the rolling-365-day limit is NORTHSTAR-only; BAYVIEW pays it.",
+      "violated_rules": []
+    },
+    "split": "heldout"
   }
 ]

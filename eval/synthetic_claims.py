@@ -61,8 +61,8 @@ def public_view(claim: dict) -> dict:
 
 def _validate(claims: list[dict]) -> list[str]:
     errs: list[str] = []
-    if len(claims) != 40:
-        errs.append(f"expected 40 claims, got {len(claims)}")
+    if len(claims) != 46:
+        errs.append(f"expected 46 claims, got {len(claims)}")
     ids = [c.get("id") for c in claims]
     if len(set(ids)) != len(ids):
         errs.append(f"duplicate ids: {[i for i, n in Counter(ids).items() if n > 1]}")
@@ -130,8 +130,11 @@ def _validate(claims: list[dict]) -> list[str]:
             errs.append(f"{cid}: public_view leaks hidden keys")
 
     splits = Counter(c.get("split") for c in claims)
-    if splits["train"] != 24 or splits["heldout"] != 16:
-        errs.append(f"split counts {dict(splits)} != train 24 / heldout 16")
+    if splits["train"] != 24 or splits["heldout"] != 22:
+        errs.append(f"split counts {dict(splits)} != train 24 / heldout 22")
+    held = Counter(c["ground_truth"].get("outcome") for c in claims if c.get("split") == "heldout")
+    if held["paid"] != held["denied"]:
+        errs.append(f"heldout must be balanced paid/denied, got {dict(held)}")
     cats = {c.get("category") for c in claims}
     if set(CATEGORIES) - cats:
         errs.append(f"categories not represented: {set(CATEGORIES) - cats}")
@@ -164,6 +167,11 @@ def _summary(claims: list[dict]) -> None:
         carcs = "/".join(sorted({c["ground_truth"]["carc"] for c in hits}))
         tr = sum(c["split"] == "train" for c in hits)
         print(f"{r:<6} {carcs:<6} {tr:>6} {len(hits) - tr:>8}  {', '.join(c['id'] for c in hits)}")
+
+    print("\nPaid traps by split (paid claims; each looks risky but is clean for its payer)")
+    for split in SPLITS:
+        traps = [c["id"] for c in claims if c["split"] == split and c["ground_truth"]["outcome"] == "paid"]
+        print(f"{split:<8} {len(traps):>3}  {', '.join(traps)}")
 
     print("\nCategory counts:", dict(Counter(c["category"] for c in claims)))
 

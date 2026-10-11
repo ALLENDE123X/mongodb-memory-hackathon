@@ -54,3 +54,11 @@ Paid "trap" claims (look risky, are clean under that payer):
 - CASCADE telehealth POS 02 without 95 (PR-09 contrast)
 - NORTHSTAR out-of-network office visit; BAYVIEW out-of-network emergency visit POS 23 (PR-10 contrast)
 - NORTHSTAR imaging with an auth number on file (PR-01 done right)
+- CLM-041: NORTHSTAR office visit submitted 150 days after DOS (PR-02 contrast; inside the 180-day window), heldout
+- CLM-042: NORTHSTAR 99213 + flu vaccine + 90471 without modifier 25 (PR-03 contrast), heldout
+- CLM-043: CASCADE 17110 + 11102-59 (PR-04 contrast; only NORTHSTAR rejects 59), heldout
+- CLM-044: CASCADE PT visit 24 with GP/KX (PR-07 contrast; no CASCADE cap), heldout
+- CLM-045: BAYVIEW MRI lumbar 72148 with no prior auth (PR-01 contrast), heldout
+- CLM-046: BAYVIEW preventive 99395 331 days after the last one (PR-06 contrast; rolling-365 limit is NORTHSTAR-only), heldout
+
+Split balance: train 24 (11 paid / 13 denied), heldout 22 (11 paid / 11 denied), 46 claims total.
