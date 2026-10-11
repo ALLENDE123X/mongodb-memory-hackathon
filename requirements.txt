@@ -4,4 +4,5 @@ voyageai>=0.3
 python-dotenv>=1.0
 mongomock>=4.3
 pytest>=8
+raindrop-ai==0.0.75
 litellm>=1.50

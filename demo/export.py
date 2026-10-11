@@ -6,9 +6,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from memory.atlas_schema import get_db
+
+load_dotenv(".env.local")
 
 
 def export(db, run_id: str) -> dict:
@@ -30,6 +35,9 @@ def export(db, run_id: str) -> dict:
                 for h in history if "learning" in h]
     return {"run_id": run_id, "scrubber_model": history[0].get("scrubber_model") if history else None,
             "watcher_model": history[0].get("watcher_model") if history else None,
+            "raindrop": {"dashboard_url": os.environ.get("RAINDROP_DASHBOARD_URL"),
+                         "events_sent": (run.get("telemetry") or {}).get("events_sent", {}),
+                         "total": (run.get("telemetry") or {}).get("total", 0)},
             "curve": curve, "rules": rules, "learning": learning,
             "counts": {c: db[c].count_documents({}) for c in
                        ("episodes", "rules", "rulesets", "evaluations", "audits")}}

@@ -16,6 +16,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
+from agents import telemetry
 from agents.scrubber import scrub
 from agents.watcher import claim_brief, propose
 from eval.metrics import score
@@ -92,6 +93,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     with ThreadPoolExecutor(max_workers=int(os.environ.get("SCRUB_WORKERS", "8"))) as pool:
         for ep in pool.map(work, todo):
             store.append_episode(ep)
+            telemetry.scrub_event(ep)  # write-only observability; no-op without a key
             rows[ep["split"]].append(ep)
     metrics = {split: score(eps) for split, eps in rows.items()}
     metrics["ruleset_version"] = head["version"]
@@ -169,6 +171,9 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                 stats["revised"] += attempt > 0
                 head, active = store.active()
                 verdict = evaluate(cand, active, evidence)
+                telemetry.rule_proposal(run_id, iteration, payer, cand,
+                                        [e["_id"] for e in groups["uncovered"] + groups["holds"]], meta["model"])
+                telemetry.gate_verdict(run_id, cand["rule_id"], verdict, verdict["verdict"] == "promote")
                 ev_id = store.insert_evaluation({"run_id": run_id, "iteration": iteration, "rule_id": cand["rule_id"],
                                                  "baseline_version": head["version"], **verdict})
                 evid = [f"{run_id}:{iteration}:{c}" for c in verdict["fixes"]]
@@ -187,6 +192,7 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                     store.set_rule_status(cand["rule_id"], "promoted", promoted_version=v)
                     store.audit("promotion", run_id=run_id, iteration=iteration, rule_id=cand["rule_id"],
                                 version=v, fixes=verdict["fixes"], description=cand.get("description"), rule_kind=kind)
+                    telemetry.ruleset_promotion(run_id, iteration, payer, cand["rule_id"], v)
                     stats["promoted"] += 1
                     stats["promoted_rules"].append({"rule_id": cand["rule_id"], "version": v, "kind": kind,
                                                     "description": cand.get("description"), "fixes": verdict["fixes"]})
@@ -217,6 +223,7 @@ def run(store: Store, run_id: str, iterations: int) -> list[dict]:
     state = store.run_state(run_id) or {}
     history = state.get("history", [])
     start = len(history)
+    prior_sent = (state.get("telemetry") or {}).get("events_sent")
     if start:
         log(f"resuming {run_id} at iteration {start} (ruleset v{store.active()[0]['version']} loaded from the database)")
     for it in range(start, iterations + 1):
@@ -230,7 +237,9 @@ def run(store: Store, run_id: str, iterations: int) -> list[dict]:
             log(f"iteration {it}: watcher learning from training misses")
             entry["learning"] = learn(store, run_id, it)
         history.append(entry)
-        store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running")
+        store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running",
+                         telemetry=telemetry.summary(prior_sent))
+    telemetry.flush()
     return history
 
 
@@ -252,6 +261,7 @@ def main() -> None:
         for c in ("episodes", "rules", "rulesets", "heads", "evaluations", "runs", "audits"):
             db[c].drop()
     history = run(store, args.run_id, args.iterations)
+    telemetry.shutdown()
     print("\niteration  heldout_bal_acc  heldout_acc_w_reason  unnecessary_holds  rules")
     for h in history:
         m = h["metrics"]["heldout"]
