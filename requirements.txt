@@ -1,0 +1,4 @@
+pymongo[srv]>=4.10
+anthropic>=0.60
+voyageai>=0.3
+python-dotenv>=1.0

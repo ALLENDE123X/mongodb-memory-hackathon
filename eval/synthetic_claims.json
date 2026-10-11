@@ -1,0 +1,2174 @@
+[
+  {
+    "id": "CLM-001",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 61,
+      "sex": "M",
+      "member_id": "SYN-222791"
+    },
+    "provider": {
+      "npi": "9980588871",
+      "specialty": "Gastroenterology",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-07",
+    "submission_date": "2026-07-09",
+    "place_of_service": "22",
+    "diagnoses": [
+      "R10.9",
+      "K57.30"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "74177",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 210000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "persistent abdominal pain"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "197",
+      "reason": "NORTHSTAR requires prior authorization for CT abdomen/pelvis with contrast (74177); none on claim.",
+      "violated_rules": [
+        "PR-01"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-002",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 66,
+      "sex": "F",
+      "member_id": "SYN-434839"
+    },
+    "provider": {
+      "npi": "9954862057",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-02",
+    "submission_date": "2026-09-04",
+    "place_of_service": "11",
+    "diagnoses": [
+      "K21.9",
+      "E03.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      },
+      {
+        "line": 2,
+        "cpt": "84443",
+        "modifiers": [],
+        "dx_pointers": [],
+        "units": 1,
+        "charge_cents": 3800
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "16",
+      "reason": "Line 2 has no diagnosis pointer; claim lacks required information.",
+      "violated_rules": [
+        "PR-11"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-003",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 52,
+      "sex": "F",
+      "member_id": "SYN-770658"
+    },
+    "provider": {
+      "npi": "9994811311",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-11",
+    "submission_date": "2026-08-13",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E78.5",
+      "E03.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "80061",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 5500
+      },
+      {
+        "line": 2,
+        "cpt": "84443",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3800
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. BAYVIEW lab claim with no separately billed venipuncture.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-004",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "telehealth",
+    "patient": {
+      "age": 78,
+      "sex": "M",
+      "member_id": "SYN-167868"
+    },
+    "provider": {
+      "npi": "9943353265",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-09",
+    "submission_date": "2026-09-11",
+    "place_of_service": "02",
+    "diagnoses": [
+      "I10",
+      "E11.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. CASCADE accepts telehealth E/M on POS 02 without modifier 95.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-005",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 67,
+      "sex": "M",
+      "member_id": "SYN-837261"
+    },
+    "provider": {
+      "npi": "9967513613",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-29",
+    "submission_date": "2026-10-01",
+    "place_of_service": "11",
+    "diagnoses": [
+      "I10",
+      "Z23"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      },
+      {
+        "line": 2,
+        "cpt": "90686",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3500
+      },
+      {
+        "line": 3,
+        "cpt": "G0008",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "same_day_services": "office visit with influenza vaccine"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "4",
+      "reason": "CASCADE requires modifier 25 on an E/M billed the same day as vaccine administration (G0008).",
+      "violated_rules": [
+        "PR-03"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-006",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 22,
+      "sex": "M",
+      "member_id": "SYN-407224"
+    },
+    "provider": {
+      "npi": "9970455853",
+      "specialty": "Emergency Medicine",
+      "in_network": false
+    },
+    "date_of_service": "2026-08-30",
+    "submission_date": "2026-09-02",
+    "place_of_service": "23",
+    "diagnoses": [
+      "S93.401A"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99284",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 65000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "emergency": true
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Emergency department services (POS 23) are covered out-of-network at BAYVIEW.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-007",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 58,
+      "sex": "M",
+      "member_id": "SYN-786579"
+    },
+    "provider": {
+      "npi": "9975432319",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-01-12",
+    "submission_date": "2026-08-04",
+    "place_of_service": "11",
+    "diagnoses": [
+      "I10",
+      "E78.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 22000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "resubmission": false,
+      "delay_note": "coordination of benefits lookup delayed submission"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "29",
+      "reason": "NORTHSTAR timely filing limit is 180 days from DOS; submitted 204 days after DOS.",
+      "violated_rules": [
+        "PR-02"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-008",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 72,
+      "sex": "F",
+      "member_id": "SYN-803340"
+    },
+    "provider": {
+      "npi": "9918780175",
+      "specialty": "Gastroenterology",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-14",
+    "submission_date": "2026-07-16",
+    "place_of_service": "22",
+    "diagnoses": [
+      "R10.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "74177",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 205000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "ordering_reason": "persistent abdominal pain"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. CASCADE does not require prior authorization for advanced outpatient imaging.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-009",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "preventive",
+    "patient": {
+      "age": 46,
+      "sex": "F",
+      "member_id": "SYN-092815"
+    },
+    "provider": {
+      "npi": "9990139624",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-03-10",
+    "submission_date": "2026-03-13",
+    "place_of_service": "11",
+    "diagnoses": [
+      "Z00.00"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99396",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 30000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-11-18",
+      "last_preventive_cpt": "99396"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "119",
+      "reason": "NORTHSTAR allows one preventive visit per rolling 365 days; last preventive visit was 2025-11-18 (112 days earlier).",
+      "violated_rules": [
+        "PR-06"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-010",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 71,
+      "sex": "M",
+      "member_id": "SYN-661318"
+    },
+    "provider": {
+      "npi": "9960913909",
+      "specialty": "Orthopedic Surgery",
+      "in_network": true
+    },
+    "date_of_service": "2026-05-06",
+    "submission_date": "2026-05-12",
+    "place_of_service": "22",
+    "diagnoses": [
+      "M54.16",
+      "M54.50"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "72148",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 162000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "ordering_reason": "lumbar radiculopathy, 8 weeks of PT without improvement"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. CASCADE does not require prior authorization for advanced outpatient imaging.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-011",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 74,
+      "sex": "M",
+      "member_id": "SYN-148525"
+    },
+    "provider": {
+      "npi": "9938885393",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-20",
+    "submission_date": "2026-08-24",
+    "place_of_service": "11",
+    "diagnoses": [
+      "Z96.651",
+      "M62.81"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97110",
+        "modifiers": [
+          "GP",
+          "KX"
+        ],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 3,
+        "charge_cents": 9500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "visit_count_ytd": 26,
+      "plan_year_start": "2026-01-01"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. CASCADE has no hard PT visit cap; KX attests continued necessity.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-012",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "telehealth",
+    "patient": {
+      "age": 38,
+      "sex": "M",
+      "member_id": "SYN-575513"
+    },
+    "provider": {
+      "npi": "9913735379",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-05-13",
+    "submission_date": "2026-05-15",
+    "place_of_service": "02",
+    "diagnoses": [
+      "F41.1"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [
+          "95"
+        ],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "5",
+      "reason": "BAYVIEW requires telehealth E/M to be billed with POS 10 (not 02) plus modifier 95.",
+      "violated_rules": [
+        "PR-09"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-013",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 70,
+      "sex": "F",
+      "member_id": "SYN-363387"
+    },
+    "provider": {
+      "npi": "9950047439",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-04-07",
+    "submission_date": "2026-04-09",
+    "place_of_service": "11",
+    "diagnoses": [
+      "R53.83"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "82306",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 6500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "167",
+      "reason": "CASCADE covers 25-OH vitamin D (82306) only with deficiency/osteoporosis/CKD/malabsorption diagnoses; fatigue (R53.83) is not covered.",
+      "violated_rules": [
+        "PR-08"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-014",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 76,
+      "sex": "F",
+      "member_id": "SYN-487574"
+    },
+    "provider": {
+      "npi": "9991186252",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-01-20",
+    "submission_date": "2026-10-09",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E11.9",
+      "I10"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 21500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "resubmission": false,
+      "delay_note": "credentialing hold released late"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Submitted 262 days after DOS, inside CASCADE's 365-day filing window.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-015",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "procedure",
+    "patient": {
+      "age": 31,
+      "sex": "M",
+      "member_id": "SYN-986828"
+    },
+    "provider": {
+      "npi": "9928807290",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-21",
+    "submission_date": "2026-07-23",
+    "place_of_service": "11",
+    "diagnoses": [
+      "B07.8"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "17110",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 0
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "16",
+      "reason": "Line billed with a $0.00 charge; claim lacks required information.",
+      "violated_rules": [
+        "PR-12"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-016",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 41,
+      "sex": "M",
+      "member_id": "SYN-599528"
+    },
+    "provider": {
+      "npi": "9990786666",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-08",
+    "submission_date": "2026-07-10",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E11.9",
+      "E78.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "80053",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 4500
+      },
+      {
+        "line": 2,
+        "cpt": "36415",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 1500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "97",
+      "reason": "BAYVIEW bundles venipuncture (36415) into lab panels; separately billed 36415 is denied.",
+      "violated_rules": [
+        "PR-05"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-017",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 29,
+      "sex": "F",
+      "member_id": "SYN-291703"
+    },
+    "provider": {
+      "npi": "9942366712",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-10-02",
+    "submission_date": "2026-10-06",
+    "place_of_service": "11",
+    "diagnoses": [
+      "J02.9",
+      "Z23"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      },
+      {
+        "line": 2,
+        "cpt": "90686",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3500
+      },
+      {
+        "line": 3,
+        "cpt": "90471",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. BAYVIEW does not require modifier 25 on an E/M billed with vaccine administration.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-018",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 69,
+      "sex": "F",
+      "member_id": "SYN-176031"
+    },
+    "provider": {
+      "npi": "9937215901",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-07-15",
+    "submission_date": "2026-07-17",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E11.9",
+      "N18.30"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "80053",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 4500
+      },
+      {
+        "line": 2,
+        "cpt": "36415",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 1500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. CASCADE pays venipuncture separately from the lab panel.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-019",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "telehealth",
+    "patient": {
+      "age": 26,
+      "sex": "F",
+      "member_id": "SYN-450400"
+    },
+    "provider": {
+      "npi": "9908838737",
+      "specialty": "Psychiatry",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-08",
+    "submission_date": "2026-09-10",
+    "place_of_service": "10",
+    "diagnoses": [
+      "F41.1",
+      "F32.A"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [
+          "GT"
+        ],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 22000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "visit_mode": "synchronous audio-video",
+      "patient_location": "home"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "4",
+      "reason": "BAYVIEW requires modifier 95 on telehealth E/M; GT is not accepted.",
+      "violated_rules": [
+        "PR-09"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-020",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 39,
+      "sex": "F",
+      "member_id": "SYN-223307"
+    },
+    "provider": {
+      "npi": "9992440268",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-05-19",
+    "submission_date": "2026-05-21",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M25.561",
+      "M62.81"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97530",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 2,
+        "charge_cents": 10000
+      },
+      {
+        "line": 2,
+        "cpt": "97140",
+        "modifiers": [
+          "XU",
+          "GP"
+        ],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 8500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 9
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. NCCI pair billed with XU, which NORTHSTAR accepts; visit count under the annual limit.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-021",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 55,
+      "sex": "F",
+      "member_id": "SYN-547280"
+    },
+    "provider": {
+      "npi": "9938528084",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-12",
+    "submission_date": "2026-08-14",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M54.50",
+      "M62.81"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97110",
+        "modifiers": [
+          "GP"
+        ],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 2,
+        "charge_cents": 9500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 20,
+      "plan_year_start": "2026-01-01"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "119",
+      "reason": "NORTHSTAR caps physical therapy at 20 visits per plan year; this is visit 21.",
+      "violated_rules": [
+        "PR-07"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-022",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 45,
+      "sex": "M",
+      "member_id": "SYN-528820"
+    },
+    "provider": {
+      "npi": "9901826330",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-25",
+    "submission_date": "2026-08-28",
+    "place_of_service": "11",
+    "diagnoses": [
+      "I10",
+      "E11.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 22000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Clean in-network BAYVIEW office visit submitted within filing window.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-023",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 48,
+      "sex": "M",
+      "member_id": "SYN-268656"
+    },
+    "provider": {
+      "npi": "9935515058",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-08-05",
+    "submission_date": "2026-08-07",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E11.9",
+      "D64.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "85025",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 3000
+      },
+      {
+        "line": 2,
+        "cpt": "80061",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 5500
+      },
+      {
+        "line": 3,
+        "cpt": "36415",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 1500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "97",
+      "reason": "BAYVIEW bundles venipuncture (36415) into lab panels; separately billed 36415 is denied.",
+      "violated_rules": [
+        "PR-05"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-024",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 40,
+      "sex": "F",
+      "member_id": "SYN-124023"
+    },
+    "provider": {
+      "npi": "9944834782",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-06-30",
+    "submission_date": "2026-07-02",
+    "place_of_service": "11",
+    "diagnoses": [
+      "R53.83"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "82306",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 6500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. NORTHSTAR has no diagnosis restriction on vitamin D testing.",
+      "violated_rules": []
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-025",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 75,
+      "sex": "M",
+      "member_id": "SYN-141705"
+    },
+    "provider": {
+      "npi": "9986492083",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-06-23",
+    "submission_date": "2026-06-25",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E66.9",
+      "R53.83"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "82306",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 6500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "167",
+      "reason": "CASCADE covers 82306 only with deficiency/osteoporosis/CKD/malabsorption diagnoses; obesity and fatigue are not covered.",
+      "violated_rules": [
+        "PR-08"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-026",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 44,
+      "sex": "M",
+      "member_id": "SYN-768426"
+    },
+    "provider": {
+      "npi": "9984656321",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-04-22",
+    "submission_date": "2026-04-24",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M62.81",
+      "M25.561"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97530",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 2,
+        "charge_cents": 10000
+      },
+      {
+        "line": 2,
+        "cpt": "97140",
+        "modifiers": [
+          "59",
+          "GP"
+        ],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 8500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 6
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "4",
+      "reason": "NORTHSTAR does not accept modifier 59 on NCCI pair edits; requires XS/XU (here 97140 needed XU).",
+      "violated_rules": [
+        "PR-04"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-027",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 34,
+      "sex": "F",
+      "member_id": "SYN-821993"
+    },
+    "provider": {
+      "npi": "9951819093",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-03-02",
+    "submission_date": "2026-06-15",
+    "place_of_service": "11",
+    "diagnoses": [
+      "J45.909",
+      "J06.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 22000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "resubmission": false,
+      "delay_note": "claim held in billing work queue"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "29",
+      "reason": "BAYVIEW timely filing limit is 90 days from DOS; submitted 105 days after DOS.",
+      "violated_rules": [
+        "PR-02"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-028",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 52,
+      "sex": "M",
+      "member_id": "SYN-960308"
+    },
+    "provider": {
+      "npi": "9924628194",
+      "specialty": "Orthopedic Surgery",
+      "in_network": true
+    },
+    "date_of_service": "2026-06-02",
+    "submission_date": "2026-06-05",
+    "place_of_service": "22",
+    "diagnoses": [
+      "M54.16"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "72148",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 158000
+      }
+    ],
+    "prior_auth_number": "NS-PA-26-004417",
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "lumbar radiculopathy"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Advanced imaging with a valid NORTHSTAR prior authorization on file.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-029",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 27,
+      "sex": "F",
+      "member_id": "SYN-907511"
+    },
+    "provider": {
+      "npi": "9963726516",
+      "specialty": "Dermatology",
+      "in_network": false
+    },
+    "date_of_service": "2026-06-09",
+    "submission_date": "2026-06-12",
+    "place_of_service": "11",
+    "diagnoses": [
+      "L70.0"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99203",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 20000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "referral_on_file": true
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "242",
+      "reason": "BAYVIEW does not cover non-emergency services from out-of-network providers.",
+      "violated_rules": [
+        "PR-10"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-030",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "imaging",
+    "patient": {
+      "age": 47,
+      "sex": "F",
+      "member_id": "SYN-526018"
+    },
+    "provider": {
+      "npi": "9915908301",
+      "specialty": "Neurology",
+      "in_network": true
+    },
+    "date_of_service": "2026-04-14",
+    "submission_date": "2026-04-20",
+    "place_of_service": "22",
+    "diagnoses": [
+      "G43.909",
+      "R51.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "70551",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 185000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "ordering_reason": "persistent headaches, failed conservative treatment"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "197",
+      "reason": "NORTHSTAR requires prior authorization for MRI brain (70551); no auth number on claim.",
+      "violated_rules": [
+        "PR-01"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-031",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "procedure",
+    "patient": {
+      "age": 80,
+      "sex": "F",
+      "member_id": "SYN-043520"
+    },
+    "provider": {
+      "npi": "9956174833",
+      "specialty": "Orthopedic Surgery",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-22",
+    "submission_date": "2026-09-24",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M17.11"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "20610",
+        "modifiers": [
+          "RT"
+        ],
+        "dx_pointers": [],
+        "units": 1,
+        "charge_cents": 21000
+      },
+      {
+        "line": 2,
+        "cpt": "J3301",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 40,
+        "charge_cents": 0
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "16",
+      "reason": "Line 1 has no diagnosis pointer and line 2 has a $0.00 charge; claim lacks required information.",
+      "violated_rules": [
+        "PR-11",
+        "PR-12"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-032",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "procedure",
+    "patient": {
+      "age": 42,
+      "sex": "F",
+      "member_id": "SYN-412524"
+    },
+    "provider": {
+      "npi": "9927316723",
+      "specialty": "Dermatology",
+      "in_network": true
+    },
+    "date_of_service": "2026-05-27",
+    "submission_date": "2026-05-29",
+    "place_of_service": "11",
+    "diagnoses": [
+      "B07.8",
+      "D48.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "17110",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 16000
+      },
+      {
+        "line": 2,
+        "cpt": "11102",
+        "modifiers": [
+          "59"
+        ],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 18000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "4",
+      "reason": "NORTHSTAR does not accept modifier 59 on NCCI pair edits; 11102 needed XS.",
+      "violated_rules": [
+        "PR-04"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-033",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "preventive",
+    "patient": {
+      "age": 29,
+      "sex": "M",
+      "member_id": "SYN-440242"
+    },
+    "provider": {
+      "npi": "9964628897",
+      "specialty": "Internal Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-02-05",
+    "submission_date": "2026-02-09",
+    "place_of_service": "11",
+    "diagnoses": [
+      "Z00.00"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99395",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 28000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-12-01",
+      "last_preventive_cpt": "99395"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "119",
+      "reason": "NORTHSTAR allows one preventive visit per rolling 365 days; last preventive visit was 2025-12-01 (66 days earlier).",
+      "violated_rules": [
+        "PR-06"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-034",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "lab",
+    "patient": {
+      "age": 36,
+      "sex": "F",
+      "member_id": "SYN-989834"
+    },
+    "provider": {
+      "npi": "9978878384",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-04-01",
+    "submission_date": "2026-07-28",
+    "place_of_service": "11",
+    "diagnoses": [
+      "E66.9",
+      "E78.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "80061",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 5500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "resubmission": false,
+      "delay_note": "lab result reconciliation"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "29",
+      "reason": "BAYVIEW timely filing limit is 90 days from DOS; submitted 118 days after DOS.",
+      "violated_rules": [
+        "PR-02"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-035",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "preventive",
+    "patient": {
+      "age": 33,
+      "sex": "M",
+      "member_id": "SYN-595711"
+    },
+    "provider": {
+      "npi": "9977774121",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-02-10",
+    "submission_date": "2026-02-12",
+    "place_of_service": "11",
+    "diagnoses": [
+      "Z00.00"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99395",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 28000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "last_preventive_dos": "2025-01-15",
+      "last_preventive_cpt": "99395"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. Last preventive visit 2025-01-15 is more than 365 days before DOS.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-036",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 68,
+      "sex": "M",
+      "member_id": "SYN-760189"
+    },
+    "provider": {
+      "npi": "9955597971",
+      "specialty": "Family Medicine",
+      "in_network": true
+    },
+    "date_of_service": "2026-02-18",
+    "submission_date": "2026-02-23",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M17.11",
+      "I10"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99214",
+        "modifiers": [],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 1,
+        "charge_cents": 22000
+      },
+      {
+        "line": 2,
+        "cpt": "96372",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 4500
+      },
+      {
+        "line": 3,
+        "cpt": "J1100",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 10,
+        "charge_cents": 800
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage",
+      "same_day_services": "office visit with therapeutic injection"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "4",
+      "reason": "CASCADE requires modifier 25 on an E/M billed the same day as an injection/administration code (96372).",
+      "violated_rules": [
+        "PR-03"
+      ]
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-037",
+    "payer": "BAYVIEW",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 55,
+      "sex": "M",
+      "member_id": "SYN-020146"
+    },
+    "provider": {
+      "npi": "9920168493",
+      "specialty": "Orthopedic Surgery",
+      "in_network": false
+    },
+    "date_of_service": "2026-05-05",
+    "submission_date": "2026-05-08",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M17.11"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99204",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 31000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicaid_managed_care",
+      "referral_on_file": true
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "242",
+      "reason": "BAYVIEW does not cover non-emergency services from out-of-network providers.",
+      "violated_rules": [
+        "PR-10"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-038",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "therapy",
+    "patient": {
+      "age": 63,
+      "sex": "M",
+      "member_id": "SYN-514026"
+    },
+    "provider": {
+      "npi": "9914014193",
+      "specialty": "Physical Therapy",
+      "in_network": true
+    },
+    "date_of_service": "2026-09-15",
+    "submission_date": "2026-09-17",
+    "place_of_service": "11",
+    "diagnoses": [
+      "M54.16",
+      "M62.81"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "97110",
+        "modifiers": [
+          "GP"
+        ],
+        "dx_pointers": [
+          1,
+          2
+        ],
+        "units": 2,
+        "charge_cents": 9500
+      },
+      {
+        "line": 2,
+        "cpt": "97112",
+        "modifiers": [
+          "GP"
+        ],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 9500
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo",
+      "visit_count_ytd": 23,
+      "plan_year_start": "2026-01-01"
+    },
+    "ground_truth": {
+      "outcome": "denied",
+      "carc": "119",
+      "reason": "NORTHSTAR caps physical therapy at 20 visits per plan year; this is visit 24.",
+      "violated_rules": [
+        "PR-07"
+      ]
+    },
+    "split": "heldout"
+  },
+  {
+    "id": "CLM-039",
+    "payer": "NORTHSTAR",
+    "claim_type": "professional",
+    "category": "e_and_m",
+    "patient": {
+      "age": 50,
+      "sex": "M",
+      "member_id": "SYN-761222"
+    },
+    "provider": {
+      "npi": "9902972997",
+      "specialty": "Dermatology",
+      "in_network": false
+    },
+    "date_of_service": "2026-06-16",
+    "submission_date": "2026-06-19",
+    "place_of_service": "11",
+    "diagnoses": [
+      "L30.9"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99203",
+        "modifiers": [],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 20000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "commercial_ppo"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. NORTHSTAR PPO pays out-of-network office visits at the out-of-network benefit level.",
+      "violated_rules": []
+    },
+    "split": "train"
+  },
+  {
+    "id": "CLM-040",
+    "payer": "CASCADE",
+    "claim_type": "professional",
+    "category": "procedure",
+    "patient": {
+      "age": 73,
+      "sex": "F",
+      "member_id": "SYN-147104"
+    },
+    "provider": {
+      "npi": "9997465075",
+      "specialty": "Dermatology",
+      "in_network": true
+    },
+    "date_of_service": "2026-03-11",
+    "submission_date": "2026-03-16",
+    "place_of_service": "11",
+    "diagnoses": [
+      "L57.0",
+      "D48.5"
+    ],
+    "lines": [
+      {
+        "line": 1,
+        "cpt": "99213",
+        "modifiers": [
+          "25"
+        ],
+        "dx_pointers": [
+          1
+        ],
+        "units": 1,
+        "charge_cents": 15000
+      },
+      {
+        "line": 2,
+        "cpt": "11102",
+        "modifiers": [],
+        "dx_pointers": [
+          2
+        ],
+        "units": 1,
+        "charge_cents": 18000
+      }
+    ],
+    "prior_auth_number": null,
+    "context": {
+      "eligibility_active": true,
+      "plan_type": "medicare_advantage"
+    },
+    "ground_truth": {
+      "outcome": "paid",
+      "carc": null,
+      "reason": "Paid. E/M correctly carries modifier 25 alongside the same-day biopsy.",
+      "violated_rules": []
+    },
+    "split": "train"
+  }
+]
