@@ -27,6 +27,7 @@ from harness.rules import apply_rules
 from memory.store import ConflictError, Store
 
 MAX_REVISIONS = 1
+MAX_FEEDBACK_BRIEFS = 6  # keep the revision prompt small when a rule is badly over-broad
 
 
 def log(msg: str) -> None:
@@ -117,11 +118,14 @@ def _false_hold(active: list[dict], ep: dict) -> bool:
 def _rejection_feedback(cand: dict, verdict: dict, evidence: list[dict]) -> str:
     """Tell the watcher why a rule failed, with the regressing claims in full, not just their ids."""
     by_id = {e["claim_id"]: e for e in evidence}
-    briefs = [claim_brief(by_id[c]) for c in verdict.get("regressions", []) if c in by_id]
+    ids = [c for c in verdict.get("regressions", []) if c in by_id]
+    briefs = [claim_brief(by_id[c]) for c in ids[:MAX_FEEDBACK_BRIEFS]]
     text = f"{cand.get('description')!r}: {verdict['reason']}"
     if briefs:
         text += ("\n  Claims it wrongly matched (the real outcome contradicts the rule, so narrow it "
                  "to exclude what distinguishes them):\n  " + json.dumps(briefs, default=str))
+        if len(ids) > len(briefs):
+            text += f"\n  ...and {len(ids) - len(briefs)} more"
     return text
 
 

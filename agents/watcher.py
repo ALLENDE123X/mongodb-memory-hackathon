@@ -22,9 +22,9 @@ kinds of cases for one payer:
    DENIAL rule:   "predict": {"outcome": "denied", "carc": "<code>"}
 2. "false_holds": the payer PAID these, but the scrubber wrongly predicted a denial (see
    scrubber_said). Infer what this payer does NOT enforce and write an EXCEPTION rule:
-   "predict": {"outcome": "paid"}   e.g. "CASCADE does not require prior auth for imaging".
+   "predict": {"outcome": "paid"}   e.g. "this payer does not enforce its usual edit on this service class".
 
-Write ONE rule per distinct cause, in this JSON rule language:
+Write ONE rule per variant of each distinct cause, in this JSON rule language:
 {"rule_id": "", "payer": "<PAYER>" or "*",
  "description": "<one sentence policy>",
  "when": [<condition>, ...],            # ALL must hold
@@ -47,16 +47,19 @@ ZERO denied claims.
 Write the MOST GENERAL rule that contradicts no observed claim. Rules are scored on claims
 you have never seen, and a rule that names one example code will miss its siblings. So:
 - Prefer code ranges (`between`, `startswith_any`) and code families over single codes: if two
-  denied lab codes are 80048 and 80053, write the lab-panel range, not either one.
-- Prefer "any line pair" or "any line with modifier X" conditions over naming the second code
-  of one observed pair; describe the CLASS of procedure, not the example you were shown.
+  denied codes are 99213 and 99214, write the E/M family range 99202-99215, not either code.
+- Describe the CLASS of procedure, not the example you were shown, rather than naming the
+  second code of one observed pair. Express a code pair as two any_line conditions (or
+  claim-level cpts with contains / contains_any); use between on line cpt, not on cpts.
 - Drop every condition the evidence does not force. Keep the payer; add a narrower condition
   (a specific code, a modifier, a place of service) only when a paid counterexample in
   "paid_claims" (or a denied one in "denied_claims", for exceptions) would otherwise match.
 - For numeric fields use the thresholds in "threshold_evidence": a cutoff must sit above the
-  largest value seen on a paid claim and at or below the smallest value seen on a denied one.
+  largest value on a paid claim and at or below the smallest value among denials WITH THE SAME
+  CARC ("min_on_denied_by_carc"); denials with other CARCs have other causes, so ignore them.
 - Cover every variant of the same cause (for example every place of service or modifier
-  pattern that triggers the same denial), not just the variant in the first claim you see.
+  pattern that triggers the same denial) with one rule per variant: "when" is AND-only, so
+  variants of one cause are separate rules sharing the description stem and the CARC.
 Do not memorise individual claims. Learn from previously rejected rules and their reasons; do
 not repeat them. When told a rule was too broad, narrow it only as far as the named claims
 require, keeping everything else general.
@@ -87,18 +90,26 @@ def _numeric(ev: dict, field: str):
 
 
 def threshold_evidence(paid: list[dict], denied: list[dict]) -> dict:
-    """Per numeric field seen in evidence: the max on a paid claim and the min on a denied one.
+    """Per numeric field seen in evidence: the max on a paid claim, and the min on a denied
+    claim per CARC.
 
-    A cutoff rule is only safe above the paid max and at or below the denied min, so handing
-    the watcher both numbers stops it guessing a limit from a single example.
+    A cutoff rule for one CARC is only safe above the paid max and at or below the smallest
+    value among denials with that same CARC. Denials with other CARCs have other causes, so
+    pooling them would pull the bound below the paid max and make every cutoff look impossible.
     """
     out = {}
     for field in THRESHOLD_FIELDS:
         paid_vals = [v for v in (_numeric(e, field) for e in paid) if v is not None]
-        denied_vals = [v for v in (_numeric(e, field) for e in denied) if v is not None]
-        if paid_vals or denied_vals:
+        by_carc: dict[str, float] = {}
+        for e in denied:
+            v = _numeric(e, field)
+            if v is None:
+                continue
+            for carc in e["observed"]["carcs"]:
+                by_carc[carc] = min(v, by_carc.get(carc, v))
+        if paid_vals or by_carc:
             out[field] = {"max_on_paid_claim": max(paid_vals, default=None),
-                          "min_on_denied_claim": min(denied_vals, default=None)}
+                          "min_on_denied_by_carc": dict(sorted(by_carc.items()))}
     return out
 
 

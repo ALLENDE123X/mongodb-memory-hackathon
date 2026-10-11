@@ -18,16 +18,32 @@ def _ev(claim_id, outcome, **feats):
             "observed": {"outcome": outcome, "carcs": [], "rarcs": []}}
 
 
-def test_threshold_evidence_max_paid_min_denied():
+def _den(claim_id, carc, **feats):
+    ev = _ev(claim_id, "denied", **feats)
+    ev["observed"]["carcs"] = [carc]
+    return ev
+
+
+def test_threshold_evidence_min_denied_is_per_carc():
     paid = [_ev("p1", "paid", days_to_submit=20, context={"visit_count_ytd": 3}),
             _ev("p2", "paid", days_to_submit=45)]
-    denied = [_ev("d1", "denied", days_to_submit=90, days_since_last_preventive=200,
-                  context={"visit_count_ytd": 13}),
-              _ev("d2", "denied", days_to_submit=120)]
+    denied = [_den("d1", "29", days_to_submit=90, days_since_last_preventive=200, context={"visit_count_ytd": 13}),
+              _den("d2", "29", days_to_submit=120),
+              _den("d3", "197", days_to_submit=2)]  # different cause: must not lower the CARC 29 bound
     out = watcher_mod.threshold_evidence(paid, denied)
-    assert out["days_to_submit"] == {"max_on_paid_claim": 45, "min_on_denied_claim": 90}
-    assert out["context.visit_count_ytd"] == {"max_on_paid_claim": 3, "min_on_denied_claim": 13}
-    assert out["days_since_last_preventive"] == {"max_on_paid_claim": None, "min_on_denied_claim": 200}
+    assert out["days_to_submit"] == {"max_on_paid_claim": 45, "min_on_denied_by_carc": {"197": 2, "29": 90}}
+    assert out["context.visit_count_ytd"] == {"max_on_paid_claim": 3, "min_on_denied_by_carc": {"29": 13}}
+    assert out["days_since_last_preventive"] == {"max_on_paid_claim": None, "min_on_denied_by_carc": {"29": 200}}
+
+
+def test_threshold_evidence_omits_carc_without_field():
+    out = watcher_mod.threshold_evidence([], [_den("d1", "16", days_to_submit=None, context={"visit_count_ytd": 9})])
+    assert out == {"context.visit_count_ytd": {"max_on_paid_claim": None, "min_on_denied_by_carc": {"16": 9}}}
+
+
+def test_watcher_prompt_does_not_leak_answer_key():
+    for needle in ("80048", "80053", "36415", "96372", "17000", "11102", "82306", "70551", "72148"):
+        assert needle not in watcher_mod.SYSTEM, needle
 
 
 def test_watcher_payload_contains_threshold_summary(monkeypatch):
@@ -39,10 +55,11 @@ def test_watcher_payload_contains_threshold_summary(monkeypatch):
 
     monkeypatch.setattr(watcher_mod, "complete_json", fake)
     watcher_mod.propose([], [], paid_examples=[_ev("p1", "paid", days_to_submit=30)],
-                        denied_examples=[_ev("d1", "denied", days_to_submit=95)],
+                        denied_examples=[_den("d1", "29", days_to_submit=95)],
                         active_rules=[], lessons=[])
     payload = json.loads(seen["user"])
-    assert payload["threshold_evidence"]["days_to_submit"] == {"max_on_paid_claim": 30, "min_on_denied_claim": 95}
+    assert payload["threshold_evidence"]["days_to_submit"] == {"max_on_paid_claim": 30,
+                                                                "min_on_denied_by_carc": {"29": 95}}
     assert "as narrow as" not in seen["system"]
     assert "MOST GENERAL" in seen["system"]
 
@@ -83,3 +100,20 @@ def test_payer_notes_frame_rules_as_examples_not_limits():
     assert notes.startswith("Learned payer policy (examples, not exhaustive")
     assert "P bundles 36415 with 80053 (denies with CARC 97)" in notes
     assert _payer_notes("Q", rules) == "No payer-specific rules learned yet."
+
+
+def test_payer_notes_separate_exceptions_from_denials():
+    rules = [{"payer": "P", "description": "P denies X", "predict": {"outcome": "denied", "carc": "97"}},
+             {"payer": "P", "description": "P pays Y", "predict": {"outcome": "paid"}}]
+    notes = _payer_notes("P", rules)
+    policy, exceptions = notes.split("\n\n")
+    assert "not exhaustive" in policy and "P denies X" in policy and "P pays Y" not in policy
+    assert exceptions.startswith("Learned exceptions (apply only as stated):") and "P pays Y (pays)" in exceptions
+    assert "not exhaustive" not in exceptions
+
+
+def test_rejection_feedback_caps_briefs():
+    evidence = [_ev(f"c{i}", "paid") for i in range(9)]
+    verdict = {"reason": "too broad", "regressions": [e["claim_id"] for e in evidence]}
+    text = loop._rejection_feedback({"description": "r"}, verdict, evidence)
+    assert text.count('"claim_id"') == loop.MAX_FEEDBACK_BRIEFS and "and 3 more" in text
