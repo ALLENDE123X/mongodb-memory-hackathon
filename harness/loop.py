@@ -25,7 +25,9 @@ from harness.features import features
 from harness.gate import evaluate
 from harness.payer_sim import adjudicate, outcome_summary
 from harness.rules import apply_rules
+from memory.semantic import semantic_memory
 from memory.store import ConflictError, Store
+from memory.taxonomy import sync_taxonomy, taxonomy_summary
 
 MAX_REVISIONS = 1
 MAX_FEEDBACK_BRIEFS = 6  # keep the revision prompt small when a rule is badly over-broad
@@ -60,11 +62,61 @@ def similar_past(view: dict, evidence: list[dict], k: int = 3) -> list[dict]:
     return [ep for _, ep in scored[:k]]
 
 
+def retrieve_similar(view: dict, evidence: list[dict], sem, run_id: str, notes: set | None = None,
+                     k: int = 3) -> list[dict]:
+    """Vector retrieval when semantic memory is on; the lexical heuristic otherwise or on any failure.
+    A short vector result (index still building, eventual consistency) is topped up lexically.
+    `notes` is a per-pass set so each warning is logged once."""
+    if sem is None:
+        return similar_past(view, evidence, k)
+    notes = notes if notes is not None else set()
+    try:
+        hits = sem.similar(view, evidence, run_id, k)
+    except Exception as e:  # noqa: BLE001
+        if "failed" not in notes:
+            notes.add("failed")
+            log(f"  semantic retrieval failed, using lexical fallback: {e}")
+        return similar_past(view, evidence, k)
+    if len(hits) < k:
+        if "short" not in notes:
+            notes.add("short")
+            log(f"  vector search returned {len(hits)}/{k} hits (index not ready?); topping up lexically")
+        seen = {h["claim_id"] for h in hits}
+        hits = hits + [ep for ep in similar_past(view, evidence, k + len(hits))
+                       if ep["claim_id"] not in seen and ep["claim_id"] != view["id"]][:k - len(hits)]
+    return hits
+
+
+def sync_memory(store: Store, run_id: str, sem) -> None:
+    """Taxonomic + semantic memory built from the same revealed-training evidence the gate uses.
+    Best effort: neither may crash a scrub pass."""
+    evidence = latest_train_evidence(store, run_id)
+    try:
+        sync_taxonomy(store.db, run_id, evidence)
+    except Exception as e:  # noqa: BLE001
+        log(f"  taxonomy sync failed: {e}")
+    if sem is not None:
+        try:
+            sem.sync(run_id, evidence)
+        except Exception as e:  # noqa: BLE001
+            log(f"  semantic sync failed (retrieval falls back as needed): {e}")
+
+
+def _semantic_or_none(db):
+    try:
+        return semantic_memory(db)
+    except Exception as e:  # noqa: BLE001
+        log(f"  semantic memory unavailable, using lexical fallback: {e}")
+        return None
+
+
 # -- one pass over the claims ------------------------------------------------------------
 
 def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     head, rules = store.active()
     memory = latest_train_evidence(store, run_id)
+    sem = _semantic_or_none(store.db)
+    notes: set = set()
     rows = defaultdict(list)
     todo = []
     for split in ("train", "heldout"):
@@ -79,7 +131,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     def work(item):
         split, rec, ep_id = item
         view = public_view(rec)
-        decision = scrub(view, rules=rules, similar=similar_past(view, memory))
+        decision = scrub(view, rules=rules, similar=retrieve_similar(view, memory, sem, run_id, notes))
         remit = adjudicate(rec)  # the payer, standing in for a clearinghouse round-trip
         observed = outcome_summary(remit)
         feats = features(view)
@@ -95,6 +147,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
             store.append_episode(ep)
             telemetry.scrub_event(ep)  # write-only observability; no-op without a key
             rows[ep["split"]].append(ep)
+    sync_memory(store, run_id, sem)
     metrics = {split: score(eps) for split, eps in rows.items()}
     metrics["ruleset_version"] = head["version"]
     metrics["rule_count"] = len(rules)
@@ -155,7 +208,8 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
             try:
                 candidates, meta = propose(groups["uncovered"], groups["holds"], paid_examples=paid_examples,
                                            denied_examples=denied_examples, active_rules=active,
-                                           lessons=lessons, feedback=feedback)
+                                           lessons=lessons, feedback=feedback,
+                                           taxonomy=taxonomy_summary(evidence, payer))
             except Exception as e:  # noqa: BLE001
                 log(f"  watcher failed for {payer}: {e}")
                 break
@@ -260,6 +314,8 @@ def main() -> None:
     if args.reset:
         for c in ("episodes", "rules", "rulesets", "heads", "evaluations", "runs", "audits"):
             db[c].drop()
+        for c in ("semantic_kb", "taxonomy"):  # emptied, not dropped: dropping would remove the Atlas vector index
+            db[c].delete_many({})
     history = run(store, args.run_id, args.iterations)
     telemetry.shutdown()
     print("\niteration  heldout_bal_acc  heldout_acc_w_reason  unnecessary_holds  rules")

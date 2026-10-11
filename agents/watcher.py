@@ -117,7 +117,8 @@ def threshold_evidence(paid: list[dict], denied: list[dict]) -> dict:
 
 def propose(uncovered: list[dict], false_holds: list[dict], *, paid_examples: list[dict],
             denied_examples: list[dict], active_rules: list[dict], lessons: list[dict],
-            model: str | None = None, feedback: str | None = None) -> tuple[list[dict], dict]:
+            model: str | None = None, feedback: str | None = None,
+            taxonomy: str | None = None) -> tuple[list[dict], dict]:
     model = model or os.environ.get("WATCHER_MODEL", "")
     payload = {
         "uncovered_denials": [claim_brief(m) for m in uncovered],
@@ -129,6 +130,8 @@ def propose(uncovered: list[dict], false_holds: list[dict], *, paid_examples: li
         "previously_rejected_rules": [{"description": r["description"], "when": r["when"], "predict": r["predict"],
                                        "rejected_because": r.get("rejection_reason")} for r in lessons],
     }
+    if taxonomy:  # taxonomic memory: denial categories seen so far for this payer (training evidence only)
+        payload["payer_denial_taxonomy"] = taxonomy
     user = json.dumps(payload, indent=1, default=str)
     if feedback:
         user += f"\n\nYour previous proposal was rejected by the replay gate: {feedback}\nRevise it."
