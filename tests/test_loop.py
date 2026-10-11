@@ -15,6 +15,8 @@ def fake_scrub_llm(model, system, user, **kw):
 
 def fake_watch_llm(model, system, user, **kw):
     import json
+    if system == watcher_mod.CONSOLIDATE_SYSTEM:
+        return {"replacements": [], "notes": "fake"}, {"model": "fake", "latency_s": 0, "cached": False}
     payload = json.loads(user.split("\n\nYour previous")[0])
     payers = {m["payer"] for m in payload["uncovered_denials"] + payload["false_holds"]}
     rules = [dict(r, rule_id="") for r in ORACLE if r["payer"] in payers or r["payer"] == "*"]

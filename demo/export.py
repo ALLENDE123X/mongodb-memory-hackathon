@@ -59,15 +59,15 @@ def export(db, run_id: str) -> dict:
     rules = []
     for r in db.rules.find({}).sort("created_at", 1):
         ev = eval_by_rule.get(r["_id"], {})
-        rules.append({"rule_id": r["_id"], "payer": r["payer"], "description": r.get("description"),
-                      "status": r["status"], "iteration": r.get("proposed_in_iteration"),
+        rules.append({"rule_id": r["_id"], "payer": r.get("payer"), "description": r.get("description"),
+                      "status": r.get("status"), "iteration": r.get("proposed_in_iteration"),
                       "version": r.get("promoted_version"), "kind": _rule_kind(r),
                       "carc": (r.get("predict") or {}).get("carc"),  # exception rules have no carc
-                      "when": r["when"], "evidence": r.get("evidence_episode_ids", []),
+                      "when": r.get("when") or [], "evidence": r.get("evidence_episode_ids", []),
                       "learned_from": _claim_ids(r.get("evidence_episode_ids")),
                       "fixes": _lst(ev.get("fixes")), "regressions": _lst(r.get("regressions")) or _lst(ev.get("regressions")),
                       "rejection_reason": r.get("rejection_reason"),
-                      "superseded_by": r.get("superseded_by"),
+                      "replaces": _lst(r.get("replaces")), "superseded_by": r.get("superseded_by"),
                       "probe": bool(ev.get("probe")) or r.get("proposed_in_iteration") == -1})
 
     gate = [{"rule_id": e["rule_id"], "iteration": e.get("iteration"), "verdict": e.get("verdict"),

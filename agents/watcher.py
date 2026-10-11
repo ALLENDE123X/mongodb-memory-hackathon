@@ -137,3 +137,59 @@ def propose(uncovered: list[dict], false_holds: list[dict], *, paid_examples: li
         user += f"\n\nYour previous proposal was rejected by the replay gate: {feedback}\nRevise it."
     out, meta = complete_json(model, SYSTEM, user, max_tokens=4000)
     return out.get("rules", []) or [], {**meta, "notes": out.get("notes")}
+
+
+CONSOLIDATE_SYSTEM = """You maintain the learned rule set of a medical claim scrubber for ONE payer.
+Each active rule was promoted because it explained real payer denials (or, for exception rules
+with "predict": {"outcome": "paid"}, real payments the scrubber wrongly held). Rules learned
+one denial at a time are often narrow: several rules that describe one policy, or one rule
+that names a single example code where the policy covers a whole code family.
+
+Propose replacements that make the rule set more general without losing anything:
+- Merge rules that describe the same policy (same CARC, same cause) into the MOST GENERAL
+  single rule consistent with every claim in "paid_claims" and "denied_claims".
+- Generalize a single narrow rule: widen a single code to its family or range (`between`,
+  `startswith_any`), and drop every condition the evidence does not force.
+- A replacement must still explain every claim the replaced rules explained, and must fire on
+  NO paid claim (for a denial rule) or NO denied claim (for an exception rule). A replay gate
+  checks this against every claim; anything that loses coverage or contradicts a claim is
+  rejected. A replacement must predict the same outcome (and CARC) as the rules it replaces.
+- Only replace rules listed in "active_rules", by their rule_id. Propose nothing if the rules
+  are already as general as the evidence allows; returning no replacements is fine.
+Do not repeat a replacement listed in "previously_rejected_replacements".
+
+Rules use the same JSON rule language as the active rules shown:
+Claim-level condition: {"field": F, "op": OP, "value": V}
+  F in: payer, pos, claim_filing_code, days_to_submit, prior_auth, dx_codes, in_network,
+        line_count, total_charge, cpts, days_since_last_preventive, context.<key>
+Line-level condition (true if ANY single line matches all): {"any_line": [{"field": F, "op": OP, "value": V}, ...]}
+  line F in: cpt, modifiers, units, charge, dx_pointer_count, dx_codes
+OP: eq, ne, in, not_in, gt, gte, lt, lte, missing, present, contains, not_contains,
+    contains_any, contains_none, startswith_any, none_startswith, between ([lo, hi] numeric)
+"when" is AND-only. Diagnosis codes have no decimal point. Dates are not allowed as values.
+
+Respond with JSON only:
+{"replacements": [{"op": "replace", "replaces": ["<rule_id>", ...],
+                   "rule": {"rule_id": "", "payer": "<PAYER>", "description": "<one sentence policy>",
+                            "when": [...], "predict": {...}}}],
+ "notes": "<short reasoning>"}"""
+
+
+def consolidate(payer: str, active_rules: list[dict], *, paid_examples: list[dict], denied_examples: list[dict],
+                lessons: list[dict], model: str | None = None) -> tuple[list[dict], dict]:
+    """Ask for replacements of this payer's active rules. Training evidence only."""
+    model = model or os.environ.get("WATCHER_MODEL", "")
+    payload = {
+        "payer": payer,
+        "active_rules": [{k: r[k] for k in ("rule_id", "payer", "description", "when", "predict")}
+                         for r in active_rules],
+        "paid_claims": [claim_brief(p) for p in paid_examples],
+        "denied_claims": [claim_brief(d) for d in denied_examples],
+        "threshold_evidence": threshold_evidence(paid_examples, denied_examples),
+        "previously_rejected_replacements": [
+            {"replaces": r.get("replaces"), "description": r["description"], "when": r["when"],
+             "predict": r["predict"], "rejected_because": r.get("rejection_reason")} for r in lessons],
+    }
+    out, meta = complete_json(model, CONSOLIDATE_SYSTEM, json.dumps(payload, indent=1, default=str), max_tokens=4000)
+    reps = [r for r in (out.get("replacements") or []) if isinstance(r, dict) and isinstance(r.get("rule"), dict)]
+    return reps, {**meta, "notes": out.get("notes")}
