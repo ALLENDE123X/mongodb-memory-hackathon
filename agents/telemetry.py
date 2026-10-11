@@ -23,7 +23,9 @@ import hashlib
 import json
 import os
 import re
+import sys
 import threading
+from functools import wraps
 
 from dotenv import load_dotenv
 
@@ -54,7 +56,7 @@ def _client():
     global _sdk, _tried
     if _sdk is not None:
         return _sdk
-    if _tried or "PYTEST_CURRENT_TEST" in os.environ:
+    if _tried or "PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules:
         return None
     with _lock:
         _tried = True
@@ -63,7 +65,7 @@ def _client():
             return None
         try:
             import raindrop.analytics as raindrop
-            raindrop.init(key, tracing_enabled=False, auto_instrument=False)
+            raindrop.init(key, tracing_enabled=False, auto_instrument=False, app_git=False, local_workshop_url=None)
             _sdk = raindrop
         except Exception:  # noqa: BLE001
             _sdk = None
@@ -134,9 +136,21 @@ def _dump(obj) -> str:
     return json.dumps(clean(obj), sort_keys=True, default=str)
 
 
-def _send(kind: str, key: str, call: str, /, **kw) -> None:
+def _never_raises(fn):
+    """Telemetry must never break the loop: payload building is guarded as well as the SDK call."""
+    @wraps(fn)
+    def wrapper(*args, **kw):
+        try:
+            return fn(*args, **kw)
+        except Exception:  # noqa: BLE001
+            return None
+    return wrapper
+
+
+def _send(kind: str, key: str, call: str, /, parent: str | None = None, **kw) -> None:
+    """parent: the event kind a Signal hangs off; the Signal is sent only if that was sent too."""
     sdk = _client()
-    if not sdk or not _on(kind, key):
+    if not sdk or not _on(kind, key) or (parent and not _on(parent, key)):
         return
     try:
         getattr(sdk, call)(**kw)
@@ -165,6 +179,7 @@ def error_type(ep: dict) -> str:
     return "wrong_reason"
 
 
+@_never_raises
 def scrub_event(ep: dict) -> None:
     """One claim_scrub event plus its payer_outcome Signal, from a finished episode."""
     if not enabled():
@@ -179,7 +194,7 @@ def scrub_event(ep: dict) -> None:
     carcs = list(obs.get("carcs") or [])
     etype = error_type(ep)
     comment = f"denied CO-{', CO-'.join(carcs)}" if obs["outcome"] == "denied" and carcs else obs["outcome"]
-    _send("payer_outcome", eid, "track_signal", event_id=eid, name="payer_outcome", signal_type="feedback",
+    _send("payer_outcome", eid, "track_signal", parent="claim_scrub", event_id=eid, name="payer_outcome", signal_type="feedback",
           sentiment="POSITIVE" if ep.get("correct") else "NEGATIVE", comment=comment,
           properties={"outcome": obs["outcome"], "carcs": ",".join(carcs), "error_type": etype})
 
@@ -190,6 +205,7 @@ def _rule_event_id(run_id: str, rule_id: str) -> str:
     return f"{run_id}:{rule_id}"
 
 
+@_never_raises
 def rule_proposal(run_id: str, iteration: int, payer: str, rule: dict, evidence_ids: list[str], model: str | None) -> None:
     if not enabled():
         return
@@ -199,16 +215,18 @@ def rule_proposal(run_id: str, iteration: int, payer: str, rule: dict, evidence_
           convo_id=f"{run_id}:{iteration}", properties={"iteration": iteration})
 
 
+@_never_raises
 def gate_verdict(run_id: str, rule_id: str, verdict: dict, promoted: bool) -> None:
     if not enabled():
         return
     eid = _rule_event_id(run_id, rule_id)
-    _send("gate_verdict", eid, "track_signal", event_id=eid, name="gate_verdict", signal_type="feedback",
+    _send("gate_verdict", eid, "track_signal", parent="rule_proposal", event_id=eid, name="gate_verdict", signal_type="feedback",
           sentiment="POSITIVE" if promoted else "NEGATIVE", comment=clean(str(verdict.get("reason") or verdict.get("verdict"))),
           properties={"verdict": verdict.get("verdict"), "fixes": len(verdict.get("fixes") or []),
                       "regressions": len(verdict.get("regressions") or [])})
 
 
+@_never_raises
 def ruleset_promotion(run_id: str, iteration: int, payer: str, rule_id: str, version: int) -> None:
     if not enabled():
         return

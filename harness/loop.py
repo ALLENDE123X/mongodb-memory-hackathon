@@ -237,8 +237,8 @@ def run(store: Store, run_id: str, iterations: int) -> list[dict]:
             log(f"iteration {it}: watcher learning from training misses")
             entry["learning"] = learn(store, run_id, it)
         history.append(entry)
-        store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running",
-                         telemetry=telemetry.summary(prior_sent))
+        extra = {"telemetry": telemetry.summary(prior_sent)} if telemetry.enabled() else {}
+        store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running", **extra)
     telemetry.flush()
     return history
 

@@ -153,3 +153,34 @@ def test_export_has_raindrop_block(monkeypatch):
     telemetry.set_sdk(None)
     assert export(mongomock.MongoClient().db, "none")["raindrop"] == {
         "dashboard_url": "https://app.raindrop.ai/example", "events_sent": {}, "total": 0}
+
+
+def test_malformed_inputs_never_raise():
+    telemetry.set_sdk(FakeSDK())
+    ep = {"_id": "t:0:X", "run_id": "t", "iteration": 0, "split": "train", "payer": "NORTHSTAR",
+          "ruleset_version": 0, "correct": False,
+          "predicted": {"predicted_outcome": "paid"}, "observed": {"outcome": "denied", "carcs": ["197"]},
+          "features": {"pos": "11", "dx_codes": [], "lines": [{"cpt": "74177"}]}}  # line missing "modifiers"
+    telemetry.scrub_event(ep)
+    telemetry.scrub_event({})
+    telemetry.rule_proposal("t", 0, "NORTHSTAR", {}, [], None)       # no rule_id
+    telemetry.gate_verdict("t", "R-1", None, True)                    # verdict not a dict
+    telemetry.ruleset_promotion("t", 0, "NORTHSTAR", "R-1", object())  # unserialisable version is fine too
+
+
+def test_signal_requires_its_parent_event(monkeypatch):
+    monkeypatch.setenv("RAINDROP_DISABLE", "claim_scrub,rule_proposal")
+    sdk = FakeSDK()
+    _run(sdk)
+    assert not [1 for n, _ in sdk.calls if n == "track_signal"]  # no orphan Signals
+    assert [1 for n, kw in sdk.calls if n == "track" and kw["event"] == "ruleset_promotion"]
+
+
+def test_run_doc_telemetry_only_when_enabled():
+    db = mongomock.MongoClient().db
+    loop.run(Store(db), "t", iterations=1)
+    assert "telemetry" not in db.runs.find_one({"_id": "t"})
+    db2 = mongomock.MongoClient().db
+    telemetry.set_sdk(FakeSDK())
+    loop.run(Store(db2), "t", iterations=1)
+    assert db2.runs.find_one({"_id": "t"})["telemetry"]["total"] > 0
