@@ -8,7 +8,14 @@ policy, and returns an 835 ERA in the shape of Stedi's 835 report JSON
 claimPaymentInfo, serviceLines[].servicePaymentInformation, serviceLines[].serviceAdjustments
 and serviceLines[].healthCareCheckRemarkCodes.
 
-`outcome_summary(remit)` collapses an 835 into {"outcome", "carcs", "rarcs"}.
+`outcome_summary(remit)` collapses an 835 into {"outcome", "carcs", "rarcs", "adjustments"}.
+
+Remittance realism: adjustment groups follow convention (PR for benefit-maximum and
+coverage-terminated denials, CO for the rest), NORTHSTAR and CASCADE lines carry patient cost
+share (PR-2 coinsurance / PR-3 copay) so CLP05 is non-zero, and the header fields real payers
+always send (payer address, technical contact, facility code) are present. The group never
+decides denied vs paid: a line is denied when it paid 0 and carries a CARC outside the cost
+share / contractual set {1, 2, 3, 45}.
 
 The simulator is self-contained: it never reads the answer key (ground_truth / split /
 category) or any rules document. Same input -> same output, no randomness, no clock.
@@ -26,11 +33,23 @@ PAYER_BY_ID = {"SYNNS": "NORTHSTAR", "SYNCA": "CASCADE", "SYNBV": "BAYVIEW"}
 
 PAYER_PROFILE = {
     # allowed amount as a fraction of billed charge (before a small per-code offset)
+    # copay_em: fixed copay on an E/M visit; coinsurance: share of allowed on everything else.
+    # BAYVIEW (Medicaid-style) has no cost share. Addresses / phones are fictional (555-01xx).
     "NORTHSTAR": {"allowed_pct": Decimal("0.80"), "oon_allowed_pct": Decimal("0.70"),
-                  "tax_id": "990000001"},
-    "CASCADE": {"allowed_pct": Decimal("0.74"), "tax_id": "990000002"},
-    "BAYVIEW": {"allowed_pct": Decimal("0.70"), "tax_id": "990000003"},
+                  "tax_id": "990000001", "copay_em": Decimal("25.00"), "coinsurance": Decimal("0.20"),
+                  "address": {"address1": "100 NORTHSTAR PLAZA", "city": "MINNEAPOLIS",
+                              "state": "MN", "postalCode": "55401"}, "phone": "8005550101"},
+    "CASCADE": {"allowed_pct": Decimal("0.74"), "tax_id": "990000002",
+                "copay_em": Decimal("20.00"), "coinsurance": Decimal("0.20"),
+                "address": {"address1": "200 CASCADE WAY", "city": "SEATTLE",
+                            "state": "WA", "postalCode": "98101"}, "phone": "8005550102"},
+    "BAYVIEW": {"allowed_pct": Decimal("0.70"), "tax_id": "990000003",
+                "address": {"address1": "300 BAYVIEW BLVD", "city": "OAKLAND",
+                            "state": "CA", "postalCode": "94607"}, "phone": "8005550103"},
 }
+
+# CARCs that are cost share or a contractual write-down, never a denial reason by themselves.
+NON_DENIAL_CARCS = frozenset({"1", "2", "3", "45"})
 
 # Timely filing. CASCADE follows Medicare's 12-month / 1-calendar-year rule (42 CFR 424.44);
 # NORTHSTAR and BAYVIEW use contract windows in days.
@@ -113,6 +132,11 @@ CARC_TEXT = {
 GROUP_TEXT = {"CO": "Contractual Obligations", "PR": "Patient Responsibility",
               "OA": "Other Adjustments"}
 
+# Denials the patient owes (PR); every other denial is the provider's to fix (CO). 119 is a
+# benefit maximum, which is a plan-design limit at the commercial payer only; 27 is coverage
+# terminated at any payer.
+PR_DENIAL_CARCS = {"27": None, "119": {"NORTHSTAR"}}  # carc -> payers (None = every payer)
+
 CENT = Decimal("0.01")
 
 
@@ -120,6 +144,29 @@ CENT = Decimal("0.01")
 
 def _money(d: Decimal) -> str:
     return str(d.quantize(CENT, rounding=ROUND_HALF_UP))
+
+
+def _denial_group(payer: str, carc: str) -> str:
+    payers = PR_DENIAL_CARCS.get(carc, ())
+    return "PR" if payers is None or payer in payers else "CO"
+
+
+def _cost_share(payer: str, ln: "_Line", allowed: Decimal) -> list[tuple[str, Decimal]]:
+    """Deterministic patient cost share on a paid line: [(carc, amount)], paid = allowed - sum.
+
+    E/M visits get a fixed copay (PR-3), preventive visits none (ACA), everything else
+    coinsurance on the allowed amount (PR-2). CASCADE waives cost share on lab tests (MA
+    Part B). The copay is capped at half the allowed amount so a paid line never rounds to 0.
+    """
+    profile = PAYER_PROFILE[payer]
+    if "coinsurance" not in profile or ln.code in PREVENTIVE_EM:
+        return []
+    if _is_em(ln.code):
+        copay = min(profile["copay_em"], (allowed / 2).quantize(CENT, rounding=ROUND_HALF_UP))
+        return [("3", copay)]
+    if payer == "CASCADE" and LAB_PANEL_OR_TEST(ln.code):
+        return []
+    return [("2", (allowed * profile["coinsurance"]).quantize(CENT, rounding=ROUND_HALF_UP))]
 
 
 def _ymd(s: str) -> date:
@@ -272,6 +319,7 @@ def adjudicate(record: dict) -> dict:
 
     out_lines = []
     total_paid = Decimal("0")
+    total_pr = Decimal("0")
     for ln in lines:
         ps = ln.sl.get("professionalService", {})
         adjustments, remarks = [], []
@@ -279,14 +327,21 @@ def adjudicate(record: dict) -> dict:
             carc, rarcs = ln.denial
             paid = Decimal("0")
             allowed = Decimal("0")
-            adjustments.append(_adj("CO", carc, ln.charge))
+            group = _denial_group(payer, carc)
+            adjustments.append(_adj(group, carc, ln.charge))
+            if group == "PR":
+                total_pr += ln.charge
             remarks = rarcs
         else:
             offset = Decimal(zlib.crc32(ln.code.encode()) % 5) / 100  # 0.00-0.04, deterministic
             allowed = (ln.charge * (pct + offset)).quantize(CENT, rounding=ROUND_HALF_UP)
-            paid = allowed
             if ln.charge - allowed > 0:
                 adjustments.append(_adj("CO", "45", ln.charge - allowed))
+            share = _cost_share(payer, ln, allowed)
+            for carc, amount in share:
+                adjustments.append(_adj("PR", carc, amount))
+            paid = allowed - sum((a for _, a in share), Decimal("0"))
+            total_pr += allowed - paid
         total_paid += paid
         spi = {
             "adjudicatedProcedureCode": ln.code,
@@ -295,7 +350,7 @@ def adjudicate(record: dict) -> dict:
             "productOrServiceIDQualifier": "HC",
             "productOrServiceIDQualifierValue": "Health Care Financing Administration Common "
                                                 "Procedural Coding System (HCPCS) Codes",
-            "unitsOfServicePaidCount": ln.units if paid > 0 else "0",
+            "unitsOfServicePaidCount": "0" if ln.denial else ln.units,
         }
         if ps.get("procedureModifiers"):
             spi["adjudicatedProcedureModifierCodes"] = list(ps["procedureModifiers"])
@@ -326,7 +381,8 @@ def adjudicate(record: dict) -> dict:
             "claimStatusCode": "4" if all_denied else "1",  # 4 = denied, 1 = processed as primary
             "totalClaimChargeAmount": _money(total_charge),
             "claimPaymentAmount": _money(total_paid),
-            "patientResponsibilityAmount": "0.00",
+            "patientResponsibilityAmount": _money(total_pr),  # CLP05 = sum of PR adjustments
+            "facilityTypeCode": ci.get("placeOfServiceCode", ""),  # CLP08
             "claimFilingIndicatorCode": ci.get("claimFilingCode", ""),
             "payerClaimControlNumber": icn,
             "claimFrequencyCode": ci.get("claimFrequencyCode", "1"),
@@ -347,7 +403,8 @@ def adjudicate(record: dict) -> dict:
                 "transactionHandlingCode": "I" if total_paid > 0 else "H",
                 "totalActualProviderPaymentAmount": _money(total_paid),
                 "creditOrDebitFlagCode": "C",
-                "paymentMethodCode": "ACH" if total_paid > 0 else "NON",
+                "paymentMethodCode": "ACH" if total_paid > 0 else "NON",  # NON: nothing to pay
+                **({"paymentFormatCode": "CCP"} if total_paid > 0 else {}),
                 "checkIssueOrEFTEffectiveDate": produced.strftime("%Y%m%d"),
                 "payerIdentifier": "1" + profile["tax_id"],
             },
@@ -356,8 +413,15 @@ def adjudicate(record: dict) -> dict:
                 "checkOrEFTTraceNumber": icn,
                 "originatingCompanyIdentifier": "1" + profile["tax_id"],
             },
-            "payer": {"name": payer, "payerIdentificationNumber": clm.get("tradingPartnerServiceId", "")},
-            "payee": {"name": billing.get("organizationName", ""), "npi": billing.get("npi", "")},
+            "payer": {
+                "name": payer, "payerIdentificationNumber": clm.get("tradingPartnerServiceId", ""),
+                "address": dict(profile["address"]),
+                "technicalContactInformation": [{"contactName": "ERA SUPPORT",
+                                                 "contactMethods": [{"phone": profile["phone"]}]}],
+            },
+            # Stedi has no separate qualifier field: the `npi` key is the XX-qualified payee id.
+            "payee": {"name": billing.get("organizationName", ""), "npi": billing.get("npi", ""),
+                      "payeeIdentification": billing.get("npi", "")},
             "detailInfo": [{"assignedNumber": "1", "paymentInfo": [payment_info]}],
         }],
     }
@@ -374,24 +438,34 @@ def _adj(group: str, carc: str, amount: Decimal) -> dict:
 
 
 def outcome_summary(remit: dict) -> dict:
-    """{"outcome": "paid"|"denied", "carcs": [...], "rarcs": [...]} from an 835 ERA.
+    """{"outcome": "paid"|"denied", "carcs": [...], "rarcs": [...], "adjustments": [...]} from an 835.
 
-    A claim is denied when any service line is denied (paid 0 with a non-CO-45 adjustment).
-    `carcs` / `rarcs` list the denial codes in line order, de-duplicated; CO-45 contractual
-    write-downs on paid lines are not denials and are excluded."""
+    A line is denied when it paid 0 and carries a CARC outside {1, 2, 3, 45} (cost share and
+    contractual write-downs); a claim is denied when any line is denied. The adjustment group
+    never decides that: a PR-119 benefit-maximum line is a denial, a paid line with CO-45 and
+    PR-2 is paid. `carcs` lists CARCs outside that set (any group) and `rarcs` their remarks,
+    in line order, de-duplicated. `adjustments` is the same list with the group attached
+    ("PR-119", "CO-197") as extra context; CARCs stay the learning signal."""
     carcs: list[str] = []
     rarcs: list[str] = []
+    adjustments: list[str] = []
     denied = False
     for tx in remit.get("transactions", []):
         for detail in tx.get("detailInfo", []):
             for pi in detail.get("paymentInfo", []):
                 for sl in pi.get("serviceLines", []):
-                    codes = [a["adjustmentReasonCode1"] for a in sl.get("serviceAdjustments", [])
-                             if a.get("adjustmentReasonCode1") != "45"]
-                    if not codes:
+                    flagged = [a for a in sl.get("serviceAdjustments", [])
+                               if a.get("adjustmentReasonCode1") not in NON_DENIAL_CARCS]
+                    if not flagged:
                         continue
-                    denied = True
-                    carcs += [c for c in codes if c not in carcs]
+                    paid = Decimal(sl["servicePaymentInformation"]["lineItemProviderPaymentAmount"])
+                    denied = denied or paid == 0
+                    for a in flagged:
+                        carc = a["adjustmentReasonCode1"]
+                        tag = f"{a['claimAdjustmentGroupCode']}-{carc}"
+                        carcs += [carc] if carc not in carcs else []
+                        adjustments += [tag] if tag not in adjustments else []
                     rarcs += [r["remarkCode"] for r in sl.get("healthCareCheckRemarkCodes", [])
                               if r["remarkCode"] not in rarcs]
-    return {"outcome": "denied" if denied else "paid", "carcs": carcs, "rarcs": rarcs}
+    return {"outcome": "denied" if denied else "paid", "carcs": carcs, "rarcs": rarcs,
+            "adjustments": adjustments}
