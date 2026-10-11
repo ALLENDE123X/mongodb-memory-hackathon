@@ -22,6 +22,7 @@ from eval.synthetic_claims import load_claims, public_view
 from harness.features import features
 from harness.gate import evaluate
 from harness.payer_sim import adjudicate, outcome_summary
+from harness.rules import apply_rules
 from memory.store import ConflictError, Store
 
 MAX_REVISIONS = 1
@@ -98,29 +99,44 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
 
 # -- learning -----------------------------------------------------------------------------
 
-def _is_miss(ep: dict) -> bool:
-    obs, pred = ep["observed"], ep["predicted"]
-    return obs["outcome"] == "denied" and not (pred["predicted_outcome"] == "denied" and pred.get("carc") in obs["carcs"])
+def _uncovered_denial(active: list[dict], ep: dict) -> bool:
+    """Denied, and no promoted denial rule explains it (an LLM guess is not knowledge)."""
+    if ep["observed"]["outcome"] != "denied":
+        return False
+    hit = apply_rules(active, ep["features"], "denied")
+    return not (hit and hit["carc"] in ep["observed"]["carcs"])
+
+
+def _false_hold(active: list[dict], ep: dict) -> bool:
+    """Paid, but the scrubber held it, and no exception rule covers it yet."""
+    return (ep["observed"]["outcome"] == "paid" and ep["predicted"]["predicted_outcome"] == "denied"
+            and not apply_rules(active, ep["features"], "paid"))
 
 
 def learn(store: Store, run_id: str, iteration: int) -> dict:
     evidence = latest_train_evidence(store, run_id)
-    misses = [e for e in evidence if _is_miss(e)]
-    by_payer = defaultdict(list)
-    for m in misses:
-        by_payer[m["payer"]].append(m)
-    stats = {"misses": len(misses), "proposed": 0, "promoted": 0, "rejected": 0, "revised": 0,
-             "promoted_rules": [], "rejected_rules": []}
+    _, active = store.active()
+    uncovered = [e for e in evidence if _uncovered_denial(active, e)]
+    holds = [e for e in evidence if _false_hold(active, e)]
+    by_payer: dict[str, dict[str, list]] = defaultdict(lambda: {"uncovered": [], "holds": []})
+    for e in uncovered:
+        by_payer[e["payer"]]["uncovered"].append(e)
+    for e in holds:
+        by_payer[e["payer"]]["holds"].append(e)
+    stats = {"uncovered_denials": len(uncovered), "false_holds": len(holds), "proposed": 0, "promoted": 0,
+             "rejected": 0, "revised": 0, "promoted_rules": [], "rejected_rules": []}
     seq = store.db.rules.count_documents({}) + 1
 
-    for payer, group in sorted(by_payer.items()):
+    for payer, groups in sorted(by_payer.items()):
         paid_examples = [e for e in evidence if e["payer"] == payer and e["observed"]["outcome"] == "paid"]
+        denied_examples = [e for e in evidence if e["payer"] == payer and e["observed"]["outcome"] == "denied"]
         feedback = None
         for attempt in range(MAX_REVISIONS + 1):
             head, active = store.active()
             lessons = store.rejected_rules()
             try:
-                candidates, meta = propose(group, paid_examples=paid_examples, active_rules=active,
+                candidates, meta = propose(groups["uncovered"], groups["holds"], paid_examples=paid_examples,
+                                           denied_examples=denied_examples, active_rules=active,
                                            lessons=lessons, feedback=feedback)
             except Exception as e:  # noqa: BLE001
                 log(f"  watcher failed for {payer}: {e}")
@@ -129,6 +145,8 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                         n_rules=len(candidates), notes=meta.get("notes"), model=meta["model"])
             rejected_feedback = []
             for cand in candidates:
+                if not isinstance(cand, dict):
+                    continue
                 cand = {**cand, "rule_id": f"R-{seq:03d}", "payer": cand.get("payer") or payer}
                 seq += 1
                 stats["proposed"] += 1
@@ -142,6 +160,7 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                     store.insert_rule(cand, status="candidate", iteration=iteration, evidence=evid)
                 except Exception:  # duplicate id after resume
                     continue
+                kind = "exception" if (cand.get("predict") or {}).get("outcome") == "paid" else "denial"
                 if verdict["verdict"] == "promote":
                     try:
                         v = store.promote([cand["rule_id"]], expected_version=head["version"],
@@ -151,33 +170,28 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
                         continue
                     store.set_rule_status(cand["rule_id"], "promoted", promoted_version=v)
                     store.audit("promotion", run_id=run_id, iteration=iteration, rule_id=cand["rule_id"],
-                                version=v, fixes=verdict["fixes"], description=cand.get("description"))
+                                version=v, fixes=verdict["fixes"], description=cand.get("description"), rule_kind=kind)
                     stats["promoted"] += 1
-                    stats["promoted_rules"].append({"rule_id": cand["rule_id"], "version": v,
+                    stats["promoted_rules"].append({"rule_id": cand["rule_id"], "version": v, "kind": kind,
                                                     "description": cand.get("description"), "fixes": verdict["fixes"]})
-                    log(f"  PROMOTED v{v} {cand['rule_id']}: {cand.get('description')} (fixes {verdict['fixes']})")
+                    log(f"  PROMOTED v{v} {cand['rule_id']} [{kind}]: {cand.get('description')} (fixes {verdict['fixes']})")
                 else:
                     store.set_rule_status(cand["rule_id"], "rejected", rejection_reason=verdict["reason"],
                                           regressions=verdict.get("regressions", []))
                     store.audit("rejection", run_id=run_id, iteration=iteration, rule_id=cand["rule_id"],
-                                reason=verdict["reason"], description=cand.get("description"))
+                                reason=verdict["reason"], description=cand.get("description"), rule_kind=kind)
                     stats["rejected"] += 1
-                    stats["rejected_rules"].append({"rule_id": cand["rule_id"], "description": cand.get("description"),
-                                                    "reason": verdict["reason"]})
+                    stats["rejected_rules"].append({"rule_id": cand["rule_id"], "kind": kind,
+                                                    "description": cand.get("description"), "reason": verdict["reason"]})
                     rejected_feedback.append(f"{cand.get('description')!r}: {verdict['reason']}")
-                    log(f"  rejected {cand['rule_id']}: {cand.get('description')} -> {verdict['reason']}")
-            remaining = [m for m in group if _is_miss_after(store, m)]
-            if not rejected_feedback or not remaining:
+                    log(f"  rejected {cand['rule_id']} [{kind}]: {cand.get('description')} -> {verdict['reason']}")
+            _, active = store.active()
+            groups = {"uncovered": [e for e in groups["uncovered"] if _uncovered_denial(active, e)],
+                      "holds": [e for e in groups["holds"] if _false_hold(active, e)]}
+            if not rejected_feedback or not (groups["uncovered"] or groups["holds"]):
                 break
-            group, feedback = remaining, "; ".join(rejected_feedback)
+            feedback = "; ".join(rejected_feedback)
     return stats
-
-
-def _is_miss_after(store: Store, ep: dict) -> bool:
-    from harness.rules import apply_rules
-    _, active = store.active()
-    hit = apply_rules(active, ep["features"])
-    return not (hit and hit["carc"] in ep["observed"]["carcs"])
 
 
 # -- driver -------------------------------------------------------------------------------

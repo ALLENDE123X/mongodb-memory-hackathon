@@ -13,14 +13,22 @@ from agents.llm import complete_json
 from harness.payer_sim import CARC_TEXT
 
 SYSTEM = """You improve a medical claim scrubber by writing executable payer rules.
-You are given claims the scrubber got WRONG: the payer denied them but the scrubber predicted
-"paid" (or the wrong reason). From the denial codes and the claim details, infer the payer's
-hidden policy and write ONE precise rule per distinct cause, in this JSON rule language:
+Every training claim was really submitted and the payer's remittance is attached. You get two
+kinds of cases for one payer:
 
+1. "uncovered_denials": the payer DENIED these and no learned rule explains them yet (the
+   scrubber may have guessed some of them right, but a guess is not knowledge). From the
+   denial codes (CARC/RARC) and the claim details, infer the payer's hidden policy and write a
+   DENIAL rule:   "predict": {"outcome": "denied", "carc": "<code>"}
+2. "false_holds": the payer PAID these, but the scrubber wrongly predicted a denial (see
+   scrubber_said). Infer what this payer does NOT enforce and write an EXCEPTION rule:
+   "predict": {"outcome": "paid"}   e.g. "CASCADE does not require prior auth for imaging".
+
+Write ONE precise rule per distinct cause, in this JSON rule language:
 {"rule_id": "", "payer": "<PAYER>" or "*",
- "description": "<one sentence policy, e.g. 'NORTHSTAR requires prior auth for MRI/CT 70551, 72148, 74177'>",
+ "description": "<one sentence policy>",
  "when": [<condition>, ...],            # ALL must hold
- "predict": {"outcome": "denied", "carc": "<code>"}}
+ "predict": {...}}
 
 Claim-level condition: {"field": F, "op": OP, "value": V}
   F in: payer, pos, claim_filing_code, days_to_submit, prior_auth, dx_codes, in_network,
@@ -31,12 +39,14 @@ OP: eq, ne, in, not_in, gt, gte, lt, lte, missing, present, contains, not_contai
     contains_any, contains_none, startswith_any, none_startswith, between ([lo, hi] numeric)
 Diagnosis codes have no decimal point (E559, not E55.9). Dates are not allowed as values.
 
-A rule is promoted only if, replayed on every claim seen so far, it fixes at least one miss
-and fires on ZERO claims the payer paid. So make rules as narrow as the evidence requires:
-use the payer, the specific codes, and the distinguishing condition (missing auth, modifier,
-threshold, place of service). Do not memorise individual claims.
-Use the paid claims you are shown as counter-examples: your rule must not match them.
-Learn from previously rejected rules and their reasons; do not repeat their mistakes.
+A replay gate checks every rule against every claim seen so far. A denial rule is promoted
+only if it explains at least one uncovered denial with the right CARC and fires on ZERO paid
+claims. An exception rule is promoted only if it fixes at least one false hold and fires on
+ZERO denied claims. So make rules as narrow as the evidence requires: use the payer, the
+specific codes, and the distinguishing condition (missing auth, modifier, threshold, place of
+service, diagnosis list). Do not memorise individual claims. Use the counter-examples you are
+shown: denial rules must not match "paid_claims", exception rules must not match
+"denied_claims". Learn from previously rejected rules and their reasons; do not repeat them.
 
 Respond with JSON only: {"rules": [<rule>, ...], "notes": "<short reasoning>"}"""
 
@@ -54,18 +64,21 @@ def claim_brief(ev: dict) -> dict:
             "scrubber_said": ev.get("predicted")}
 
 
-def propose(misses: list[dict], *, paid_examples: list[dict], active_rules: list[dict],
-            lessons: list[dict], model: str | None = None, feedback: str | None = None) -> tuple[list[dict], dict]:
+def propose(uncovered: list[dict], false_holds: list[dict], *, paid_examples: list[dict],
+            denied_examples: list[dict], active_rules: list[dict], lessons: list[dict],
+            model: str | None = None, feedback: str | None = None) -> tuple[list[dict], dict]:
     model = model or os.environ.get("WATCHER_MODEL", "")
     payload = {
-        "missed_denials": [claim_brief(m) for m in misses],
-        "paid_claims_same_payer": [claim_brief(p) for p in paid_examples],
+        "uncovered_denials": [claim_brief(m) for m in uncovered],
+        "false_holds": [claim_brief(m) for m in false_holds],
+        "paid_claims": [claim_brief(p) for p in paid_examples],
+        "denied_claims": [claim_brief(d) for d in denied_examples],
         "active_rules": [{k: r[k] for k in ("payer", "description", "when", "predict")} for r in active_rules],
-        "previously_rejected_rules": [{"description": r["description"], "when": r["when"],
+        "previously_rejected_rules": [{"description": r["description"], "when": r["when"], "predict": r["predict"],
                                        "rejected_because": r.get("rejection_reason")} for r in lessons],
     }
     user = json.dumps(payload, indent=1, default=str)
     if feedback:
         user += f"\n\nYour previous proposal was rejected by the replay gate: {feedback}\nRevise it."
-    out, meta = complete_json(model, SYSTEM, user, max_tokens=3000)
+    out, meta = complete_json(model, SYSTEM, user, max_tokens=4000)
     return out.get("rules", []) or [], {**meta, "notes": out.get("notes")}

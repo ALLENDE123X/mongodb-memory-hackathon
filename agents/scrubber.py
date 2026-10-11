@@ -1,8 +1,9 @@
 """Claim scrubber: predicts whether the payer will pay or deny a claim before submission.
 
 Decision order:
-  1. Learned payer rules (procedural memory, executable). If one fires, hold with its reason.
-  2. Otherwise the LLM judges the claim, given the payer's learned rules as context and the
+  1. Learned denial rules (procedural memory, executable). If one fires, hold with its reason.
+  2. Learned exception rules. If one fires, submit: this payer is known to pay this pattern.
+  3. Otherwise the LLM judges the claim, given the payer's learned rules as context and the
      most similar past outcomes (episodic memory).
 The scrubber only ever sees `public_view(record)`: never the answer key.
 """
@@ -35,7 +36,9 @@ def _payer_notes(payer: str, rules: list[dict]) -> str:
     own = [r for r in rules if r["payer"] in (payer, "*")]
     if not own:
         return "No payer-specific rules learned yet."
-    return "\n".join(f"- {r['description']} (denies with CARC {r['predict']['carc']})" for r in own)
+    return "\n".join(f"- {r['description']}" + (f" (denies with CARC {r['predict']['carc']})"
+                                                 if r["predict"]["outcome"] == "denied" else " (pays)")
+                     for r in own)
 
 
 def _memories(similar: list[dict]) -> str:
@@ -58,6 +61,11 @@ def scrub(view: dict, *, rules: list[dict], similar: list[dict] | None = None,
         return {"predicted_outcome": "denied", "carc": hit["carc"], "confidence": 1.0,
                 "reasons": [hit["description"]], "source": f"rule:{hit['rule_id']}",
                 "action": "hold", "model": None}
+    allow = apply_rules(rules, feats, "paid")
+    if allow:
+        return {"predicted_outcome": "paid", "carc": None, "confidence": 1.0,
+                "reasons": [allow["description"]], "source": f"rule:{allow['rule_id']}",
+                "action": "submit", "model": None}
 
     model = model or os.environ.get("SCRUBBER_MODEL", "")
     user = (f"Payer: {view['payer']}\n\nWhat we have learned about this payer:\n"

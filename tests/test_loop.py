@@ -16,7 +16,7 @@ def fake_scrub_llm(model, system, user, **kw):
 def fake_watch_llm(model, system, user, **kw):
     import json
     payload = json.loads(user.split("\n\nYour previous")[0])
-    payers = {m["payer"] for m in payload["missed_denials"]}
+    payers = {m["payer"] for m in payload["uncovered_denials"] + payload["false_holds"]}
     rules = [dict(r, rule_id="") for r in ORACLE if r["payer"] in payers or r["payer"] == "*"]
     # plus one over-broad rule the gate must reject
     rules.append({"rule_id": "", "payer": sorted(payers)[0], "description": "deny everything",

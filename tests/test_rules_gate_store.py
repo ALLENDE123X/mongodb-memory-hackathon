@@ -80,3 +80,22 @@ def test_restart_recovers_rules_from_db_alone():
     fresh = Store(client.db)  # new process, same database
     head, rules = fresh.active()
     assert head["version"] == 1 and rules[0]["predict"]["carc"] == "197"
+
+
+CASCADE_IMAGING_OK = {
+    "rule_id": "R-CA-1", "payer": "CASCADE", "description": "CASCADE does not require auth for imaging",
+    "when": [{"any_line": [{"field": "cpt", "op": "in", "value": ["70551", "72148", "74177"]}]}],
+    "predict": {"outcome": "paid"},
+}
+
+
+def test_exception_rule_promoted_only_for_false_holds_and_never_over_a_denial():
+    held = dict(EVIDENCE[2], predicted={"predicted_outcome": "denied"})
+    ok = evaluate(CASCADE_IMAGING_OK, [], [EVIDENCE[0], EVIDENCE[1], held])
+    assert ok["verdict"] == "promote" and ok["fixes"] == ["C"]
+    everything_ns = {**CASCADE_IMAGING_OK, "rule_id": "R-NS-9", "payer": "NORTHSTAR",
+                     "description": "NORTHSTAR pays all imaging"}
+    bad = evaluate(everything_ns, [], [EVIDENCE[0], dict(EVIDENCE[1], predicted={"predicted_outcome": "denied"})])
+    assert bad["verdict"] == "rejected" and bad["regressions"] == ["A"]
+    assert apply_rules([CASCADE_IMAGING_OK], EVIDENCE[2]["features"], "paid")["rule_id"] == "R-CA-1"
+    assert apply_rules([CASCADE_IMAGING_OK], EVIDENCE[2]["features"]) is None

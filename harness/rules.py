@@ -12,6 +12,9 @@ A rule:
       "predict": {"outcome": "denied", "carc": "197"}
     }
 
+Exception rules use {"outcome": "paid"} and stop the scrubber from holding claims a payer
+actually pays (e.g. "CASCADE does not require auth for imaging").
+
 Conditions read from the flattened claim features (see `harness.features`):
     {"field": "days_to_submit", "op": "gt", "value": 180}
     {"field": "prior_auth", "op": "missing"}
@@ -119,8 +122,11 @@ def validate(rule: dict) -> None:
             raise RuleError(f"missing {key}")
     if not rule["when"]:
         raise RuleError("rule has no conditions")
-    if rule["predict"].get("outcome") != "denied" or not rule["predict"].get("carc"):
-        raise RuleError("predict must be {'outcome': 'denied', 'carc': <code>}")
+    outcome = rule["predict"].get("outcome")
+    if outcome == "denied" and not rule["predict"].get("carc"):
+        raise RuleError("a denial rule must name a carc")
+    if outcome not in ("denied", "paid"):
+        raise RuleError("predict.outcome must be 'denied' or 'paid' (exception rule)")
 
     def check(cond: dict, line_level: bool) -> None:
         if "any_line" in cond or "all_lines" in cond:
@@ -147,10 +153,18 @@ def specificity(rule: dict) -> int:
     return sum(count(c) for c in rule["when"]) + (0 if rule["payer"] == "*" else 1)
 
 
-def apply_rules(rules: list[dict], feats: dict) -> dict | None:
-    """Most specific firing rule wins. Returns {'rule_id', 'carc'} or None."""
-    hits = [r for r in rules if fires(r, feats)]
+def outcome_of(rule: dict) -> str:
+    return rule.get("predict", {}).get("outcome", "denied")
+
+
+def apply_rules(rules: list[dict], feats: dict, outcome: str = "denied") -> dict | None:
+    """Most specific firing rule of the given kind wins.
+
+    outcome="denied": denial rules, returns {'rule_id', 'carc', 'description'}.
+    outcome="paid":   exception rules ("this payer does NOT deny this"), carc is None.
+    """
+    hits = [r for r in rules if outcome_of(r) == outcome and fires(r, feats)]
     if not hits:
         return None
     best = max(hits, key=specificity)
-    return {"rule_id": best["rule_id"], "carc": best["predict"]["carc"], "description": best["description"]}
+    return {"rule_id": best["rule_id"], "carc": best["predict"].get("carc"), "description": best["description"]}
