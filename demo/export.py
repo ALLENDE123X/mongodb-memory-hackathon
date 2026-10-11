@@ -21,11 +21,12 @@ def export(db, run_id: str) -> dict:
     for r in db.rules.find({}).sort("created_at", 1):
         rules.append({"rule_id": r["_id"], "payer": r["payer"], "description": r.get("description"),
                       "status": r["status"], "iteration": r.get("proposed_in_iteration"),
-                      "version": r.get("promoted_version"), "carc": r["predict"]["carc"],
+                      "version": r.get("promoted_version"), "kind": "exception" if r["predict"].get("outcome") == "paid" else "denial",
+                      "carc": r["predict"].get("carc"),
                       "when": r["when"], "evidence": r.get("evidence_episode_ids", []),
                       "rejection_reason": r.get("rejection_reason")})
     learning = [{"iteration": h["iteration"], **{k: v for k, v in h.get("learning", {}).items()
-                                                 if k in ("misses", "proposed", "promoted", "rejected", "revised")}}
+                                                 if k in ("uncovered_denials", "false_holds", "misses", "proposed", "promoted", "rejected", "revised")}}
                 for h in history if "learning" in h]
     return {"run_id": run_id, "scrubber_model": history[0].get("scrubber_model") if history else None,
             "watcher_model": history[0].get("watcher_model") if history else None,
