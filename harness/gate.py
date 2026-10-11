@@ -71,10 +71,50 @@ def evaluate(candidate: dict, active_rules: list[dict], evidence: list[dict]) ->
             "evidence_size": len(evidence)}
 
 
+LIST_OPS = {"in", "not_in", "contains_any", "contains_none", "startswith_any", "none_startswith"}
+
+
+def _key(x) -> str:
+    return json.dumps(x, sort_keys=True, default=str)
+
+
+def _norm_cond(cond: dict):
+    """Canonical form of one condition: line groups sorted and deduped, list values sorted and
+    deduped, and a one-element `in` written as `eq`. Two conditions that always agree on every
+    claim because of ordering or duplication normalise to the same value."""
+    for group in ("any_line", "all_lines"):
+        if group in cond:
+            return {group: sorted({_key(_norm_cond(c)) for c in cond[group]})}
+    op, value = cond.get("op"), cond.get("value")
+    if op in LIST_OPS and isinstance(value, (list, tuple)):
+        value = [json.loads(k) for k in sorted({_key(v) for v in value})]
+        if op == "in" and len(value) == 1:
+            op, value = "eq", value[0]
+    return {"field": cond.get("field"), "op": op, "value": value}
+
+
+def _repeats(conds: list) -> bool:
+    """True if a rule's `when` (or one of its line groups) lists the same condition twice."""
+    keys = [_key(_norm_cond(c)) for c in conds]
+    if len(keys) != len(set(keys)):
+        return True
+    return any(_repeats(c.get("any_line") or c.get("all_lines")) for c in conds
+               if c.get("any_line") or c.get("all_lines"))
+
+
 def _canon(rule: dict) -> tuple:
-    """Order-insensitive identity of a rule's scope + conditions + prediction."""
-    return (rule.get("payer"), sorted(json.dumps(c, sort_keys=True) for c in rule.get("when", [])),
-            json.dumps(rule.get("predict", {}), sort_keys=True))
+    """Identity of a rule's scope + conditions + prediction, insensitive to ordering anywhere."""
+    return (rule.get("payer"), sorted({_key(_norm_cond(c)) for c in rule.get("when") or []}),
+            _key(rule.get("predict") or {}))
+
+
+def _correct(rule: dict, ev: dict, kind: str) -> bool:
+    """Does this single rule fire on the claim and agree with the observed outcome (and CARC)?"""
+    if not fires(rule, ev["features"]):
+        return False
+    if kind == "denied":
+        return ev["observed"]["outcome"] == "denied" and rule["predict"].get("carc") in ev["observed"]["carcs"]
+    return ev["observed"]["outcome"] == "paid"
 
 
 def _explained(rules: list[dict], ev: dict, kind: str) -> bool:
@@ -90,14 +130,18 @@ def evaluate_replacement(new_rule: dict, replaced_rules: list[dict], active_rule
                          evidence: list[dict]) -> dict:
     """Consolidation gate: may `new_rule` take the place of `replaced_rules` in the active set?
 
-    Promote only if (a) every claim the active set explained before is still explained after the
-    swap (so nothing the replaced rules fixed is lost), (b) the new rule contradicts zero observed
-    outcomes, and (c) it replaces >= 1 active rule of its own kind and is not condition-identical
-    to any active rule. Equal observed coverage is fine: a broader rule that fires on the same
-    training claims is exactly what consolidation is for. Losing coverage never is.
+    Promote only if
+      (a) the new rule itself correctly fires on every claim any replaced rule correctly fired on
+          (no narrowing), and nothing the whole active set explained is lost after the swap,
+      (b) the new rule contradicts zero observed outcomes, and
+      (c) it replaces >= 1 active rule of its own kind and payer (never a "*" rule), and is not
+          condition-identical to any active rule nor repeats a condition.
+    Equal observed coverage is fine: a broader rule that fires on the same training claims is
+    exactly what consolidation is for. Losing coverage never is.
     """
+    replaced_rules = list({r.get("rule_id"): r for r in replaced_rules}.values())  # dedupe, keep order
     base = {"stage": "replacement", "replaces": [r.get("rule_id") for r in replaced_rules],
-            "fixes": [], "regressions": [], "lost": [], "preserved": [],
+            "fixes": [], "regressions": [], "lost": [], "narrowed": [], "preserved": [],
             "thresholds": {"max_regressions": MAX_REGRESSIONS, "max_lost": 0, "min_fixes": MIN_FIXES},
             "evidence_size": len(evidence)}
     try:
@@ -112,15 +156,21 @@ def evaluate_replacement(new_rule: dict, replaced_rules: list[dict], active_rule
         reason = "replaces no rule"
     elif not replaced_ids <= active_ids:
         reason = "replaces a rule that is not active: " + ", ".join(sorted(map(str, replaced_ids - active_ids)))
+    elif any(r.get("payer") == "*" for r in replaced_rules):
+        reason = "wildcard (\"*\") rules are not consolidated"
+    elif any(r.get("payer") != new_rule["payer"] for r in replaced_rules):
+        reason = f"replaced rules must all belong to payer {new_rule['payer']!r} (no cross-payer replacement)"
     elif any(outcome_of(r) != kind for r in replaced_rules):
         reason = "replaced rules must predict the same outcome kind as the replacement"
+    elif _repeats(new_rule["when"]):
+        reason = "rule repeats a condition"
     elif any(_canon(new_rule) == _canon(r) for r in active_rules):
         reason = "condition-identical to an active rule"
     if reason:
         return {**base, "verdict": "rejected", "kind": kind, "reason": reason}
 
     after = [r for r in active_rules if r["rule_id"] not in replaced_ids] + [new_rule]
-    fixes, regressions, lost, preserved = [], [], [], []
+    fixes, regressions, lost, narrowed, preserved = [], [], [], [], []
     for ev in evidence:
         obs = ev["observed"]
         if fires(new_rule, ev["features"]):
@@ -130,22 +180,24 @@ def evaluate_replacement(new_rule: dict, replaced_rules: list[dict], active_rule
                 regressions.append(ev["claim_id"])
             else:
                 fixes.append(ev["claim_id"])
-        if _explained(active_rules, ev, kind):
-            if not _explained(after, ev, kind):
-                lost.append(ev["claim_id"])
-            elif any(fires(r, ev["features"]) for r in replaced_rules):
-                preserved.append(ev["claim_id"])
+        if any(_correct(r, ev, kind) for r in replaced_rules):
+            (preserved if _correct(new_rule, ev, kind) else narrowed).append(ev["claim_id"])
+        if _explained(active_rules, ev, kind) and not _explained(after, ev, kind):
+            lost.append(ev["claim_id"])
 
     if len(regressions) > MAX_REGRESSIONS:
         verdict, reason = "rejected", (f"replacement contradicts {len(regressions)} observed outcome(s): "
                                        + ", ".join(regressions))
+    elif narrowed:
+        verdict, reason = "rejected", (f"replacement no longer fires on {len(narrowed)} claim(s) the replaced "
+                                       "rules explained: " + ", ".join(narrowed))
     elif lost:
-        verdict, reason = "rejected", (f"replacement loses {len(lost)} claim(s) the replaced rules explained: "
+        verdict, reason = "rejected", (f"replacement loses {len(lost)} claim(s) the active rules explained: "
                                        + ", ".join(lost))
     elif len(fixes) < MIN_FIXES:
         verdict, reason = "rejected", "replacement explains no observed claim"
     else:
-        verdict, reason = "promote", (f"replaces {len(replaced_rules)} rule(s), keeps all {len(preserved)} "
-                                      f"claim(s) they explained, 0 regressions")
+        verdict, reason = "promote", (f"replaces {len(replaced_rules)} rule(s), fires correctly on all "
+                                      f"{len(preserved)} claim(s) they explained, 0 regressions")
     return {**base, "verdict": verdict, "kind": kind, "reason": reason, "fixes": fixes,
-            "regressions": regressions, "lost": lost, "preserved": preserved}
+            "regressions": regressions, "lost": lost, "narrowed": narrowed, "preserved": preserved}

@@ -204,7 +204,7 @@ def learn(store: Store, run_id: str, iteration: int) -> dict:
         feedback = None
         for attempt in range(MAX_REVISIONS + 1):
             head, active = store.active()
-            lessons = store.rejected_rules()
+            lessons = [r for r in store.rejected_rules() if not r.get("replaces")]  # consolidation lessons stay there
             try:
                 candidates, meta = propose(groups["uncovered"], groups["holds"], paid_examples=paid_examples,
                                            denied_examples=denied_examples, active_rules=active,
@@ -300,15 +300,20 @@ def consolidate_rules(store: Store, run_id: str, iteration: int) -> dict:
         store.audit("consolidation_proposal", run_id=run_id, iteration=iteration, payer=payer,
                     n_replacements=len(reps), notes=meta.get("notes"), model=meta["model"])
         for rep in reps:
-            replaces = [str(x) for x in (rep.get("replaces") or [])]
+            replaces = list(dict.fromkeys(str(x) for x in (rep.get("replaces") or [])))
             cand = {**rep["rule"], "rule_id": f"R-{seq:03d}", "payer": rep["rule"].get("payer") or payer,
                     "replaces": replaces}
             seq += 1
             stats["proposed"] += 1
             head, active = store.active()
             by_id = {r["rule_id"]: r for r in active}
-            replaced = [by_id.get(rid, {"rule_id": rid}) for rid in replaces]
-            verdict = evaluate_replacement(cand, replaced, active, evidence)
+            foreign = [rid for rid in replaces if by_id.get(rid, {}).get("payer") != payer]
+            if foreign:  # only this payer's own active rules are in scope for this call
+                verdict = {"verdict": "rejected", "stage": "scope", "replaces": replaces, "fixes": [],
+                           "regressions": [], "lost": [], "evidence_size": len(evidence),
+                           "reason": f"replaces rules that are not active {payer} rules: " + ", ".join(foreign)}
+            else:
+                verdict = evaluate_replacement(cand, [by_id[rid] for rid in replaces], active, evidence)
             ev_id = store.insert_evaluation({"run_id": run_id, "iteration": iteration, "rule_id": cand["rule_id"],
                                              "baseline_version": head["version"], **verdict})
             try:

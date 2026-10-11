@@ -82,6 +82,14 @@ def claim_brief(ev: dict) -> dict:
             "scrubber_said": ev.get("predicted")}
 
 
+_RULE_DEFAULTS = {"rule_id": "", "payer": "", "description": "", "when": [], "predict": {}}
+
+
+def _rule_view(rule: dict, keys: tuple) -> dict:
+    """Prompt view of a stored rule; a malformed document can never KeyError a prompt build."""
+    return {k: rule.get(k, _RULE_DEFAULTS[k]) for k in keys}
+
+
 THRESHOLD_FIELDS = ("days_to_submit", "days_since_last_preventive", "context.visit_count_ytd")
 
 
@@ -126,8 +134,8 @@ def propose(uncovered: list[dict], false_holds: list[dict], *, paid_examples: li
         "paid_claims": [claim_brief(p) for p in paid_examples],
         "denied_claims": [claim_brief(d) for d in denied_examples],
         "threshold_evidence": threshold_evidence(paid_examples, denied_examples),
-        "active_rules": [{k: r[k] for k in ("payer", "description", "when", "predict")} for r in active_rules],
-        "previously_rejected_rules": [{"description": r["description"], "when": r["when"], "predict": r["predict"],
+        "active_rules": [_rule_view(r, ("payer", "description", "when", "predict")) for r in active_rules],
+        "previously_rejected_rules": [{**_rule_view(r, ("description", "when", "predict")),
                                        "rejected_because": r.get("rejection_reason")} for r in lessons],
     }
     if taxonomy:  # taxonomic memory: denial categories seen so far for this payer (training evidence only)
@@ -181,14 +189,13 @@ def consolidate(payer: str, active_rules: list[dict], *, paid_examples: list[dic
     model = model or os.environ.get("WATCHER_MODEL", "")
     payload = {
         "payer": payer,
-        "active_rules": [{k: r[k] for k in ("rule_id", "payer", "description", "when", "predict")}
-                         for r in active_rules],
+        "active_rules": [_rule_view(r, ("rule_id", "payer", "description", "when", "predict")) for r in active_rules],
         "paid_claims": [claim_brief(p) for p in paid_examples],
         "denied_claims": [claim_brief(d) for d in denied_examples],
         "threshold_evidence": threshold_evidence(paid_examples, denied_examples),
         "previously_rejected_replacements": [
-            {"replaces": r.get("replaces"), "description": r["description"], "when": r["when"],
-             "predict": r["predict"], "rejected_because": r.get("rejection_reason")} for r in lessons],
+            {"replaces": r.get("replaces"), **_rule_view(r, ("description", "when", "predict")),
+             "rejected_because": r.get("rejection_reason")} for r in lessons],
     }
     out, meta = complete_json(model, CONSOLIDATE_SYSTEM, json.dumps(payload, indent=1, default=str), max_tokens=4000)
     reps = [r for r in (out.get("replacements") or []) if isinstance(r, dict) and isinstance(r.get("rule"), dict)]

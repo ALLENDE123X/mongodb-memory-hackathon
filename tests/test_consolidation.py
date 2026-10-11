@@ -58,10 +58,16 @@ def test_coverage_losing_replacement_is_rejected():
     assert v["verdict"] == "rejected" and v["lost"] == ["D2"]
 
 
-def test_loss_is_fine_when_another_remaining_rule_still_explains_it():
+def test_narrowing_is_rejected_even_when_another_remaining_rule_still_explains_it():
     other = rule("O", [{"any_line": [{"field": "cpt", "op": "in", "value": ["80048"]}]}, VENIPUNCTURE])
     narrow = rule("NEW", [VENIPUNCTURE, {"any_line": [{"field": "cpt", "op": "in", "value": ["80053", "80054"]}]}])
-    assert evaluate_replacement(narrow, [N1, N2], [N1, N2, other], no_d3())["verdict"] == "promote"
+    v = evaluate_replacement(narrow, [N1, N2], [N1, N2, other], no_d3())
+    assert v["verdict"] == "rejected" and v["narrowed"] == ["D2"] and v["lost"] == []
+
+
+def test_duplicate_replaces_ids_are_deduped():
+    v = evaluate_replacement(LAB_RANGE, [N1, N1, N2], [N1, N2], no_d3())
+    assert v["verdict"] == "promote" and v["replaces"] == ["N1", "N2"]
 
 
 def test_replacement_firing_on_a_paid_claim_is_rejected():
@@ -74,14 +80,33 @@ def test_replacement_firing_on_a_denial_with_another_carc_is_rejected():
     assert v["verdict"] == "rejected" and v["regressions"] == ["D3"]
 
 
+LINE_GROUP = rule("LG", [{"any_line": [{"field": "units", "op": "gte", "value": 1},
+                                       {"field": "cpt", "op": "in", "value": ["80053", "80048"]}]}])
+
+
 @pytest.mark.parametrize("new,replaced,why", [
     ({**N1, "rule_id": "NEW", "when": list(reversed(N1["when"]))}, [N1], "condition-identical"),
     (LAB_RANGE, [], "replaces no rule"),
     (LAB_RANGE, [rule("GONE", [VENIPUNCTURE])], "not active"),
     ({**LAB_RANGE, "predict": {"outcome": "paid"}}, [N1], "same outcome kind"),
+    ({**LAB_RANGE, "payer": "*"}, [N1, N2], "cross-payer"),
+    (LAB_RANGE, [{**N1, "payer": "NORTHSTAR"}], "cross-payer"),
+    ({**LAB_RANGE, "payer": "*"}, [{**N1, "payer": "*"}], "wildcard"),
+    # identity survives reordering inside line groups and list values, and `in [x]` == `eq x`
+    (rule("NEW", [{"any_line": [{"field": "cpt", "op": "in", "value": ["80053"]}]},
+                  {"any_line": [{"field": "cpt", "op": "eq", "value": "36415"}]}]), [N2], "condition-identical"),
+    (rule("NEW", [{"any_line": [{"field": "cpt", "op": "in", "value": ["80048", "80053"]},
+                                {"field": "units", "op": "gte", "value": 1}]}]), [N2], "condition-identical"),
+    (rule("NEW", [{"any_line": [{"field": "units", "op": "gte", "value": 1},
+                                {"field": "cpt", "op": "in", "value": ["80053", "80048", "80053"]}]}]), [N2],
+     "condition-identical"),
+    ({**LAB_RANGE, "when": LAB_RANGE["when"] + [VENIPUNCTURE]}, [N1, N2], "repeats a condition"),
+    (rule("NEW", [{"any_line": [{"field": "cpt", "op": "eq", "value": "36415"},
+                                {"field": "cpt", "op": "in", "value": ["36415"]}]}]), [N1], "repeats a condition"),
 ])
 def test_replacement_structural_rejections(new, replaced, why):
-    v = evaluate_replacement(new, replaced, [N1, N2], no_d3())
+    active = [N1, N2, LINE_GROUP] + [r for r in replaced if r["rule_id"] in ("N1", "N2") and r not in (N1, N2)]
+    v = evaluate_replacement(new, replaced, active, no_d3())
     assert v["verdict"] == "rejected" and why in v["reason"]
 
 
@@ -152,3 +177,54 @@ def test_loop_consolidates_even_with_zero_misses(monkeypatch):
 def test_consolidate_prompt_does_not_leak_answer_key():
     for needle in ("80048", "80053", "36415", "96372", "17000", "11102", "82306", "70551", "72148", "PAYER_RULES"):
         assert needle not in watcher_mod.CONSOLIDATE_SYSTEM, needle
+
+
+def _ruleset_store():
+    s = Store(mongomock.MongoClient().db)
+    s.bootstrap()
+    for r in (N1, N2, LAB_RANGE):
+        s.insert_rule(r, status="candidate", iteration=0, evidence=[])
+    s.promote(["N1", "N2"], expected_version=0, evaluation_id="e1", note="narrow")
+    return s
+
+
+def test_existing_ruleset_version_is_a_conflict_not_a_crash():
+    s = _ruleset_store()
+    s.db.rulesets.insert_one({"_id": "rs-2", "version": 2, "rule_ids": [], "parent": "rs-1"})  # left by a lost CAS
+    with pytest.raises(ConflictError):
+        s.promote(["NEW"], expected_version=1, evaluation_id="e", note="x")
+    with pytest.raises(ConflictError):
+        s.replace_rules("NEW", ["N1", "N2"], expected_version=1, evaluation_id="e", note="x")
+    assert s.active()[0]["version"] == 1
+
+
+def test_consolidation_rejects_replacing_another_payers_rule(monkeypatch):
+    s = _ruleset_store()
+    ns = rule("NS1", [{"field": "days_to_submit", "op": "gt", "value": 180}], carc="29", payer="NORTHSTAR")
+    s.insert_rule(ns, status="candidate", iteration=0, evidence=[])
+    s.promote(["NS1"], expected_version=1, evaluation_id="e2", note="ns")
+
+    def fake(payer, mine, **kw):
+        reps = [] if payer != "BAYVIEW" else [{"op": "replace", "replaces": ["NS1"], "rule": {
+            "payer": "BAYVIEW", "description": "steal", "when": ns["when"], "predict": ns["predict"]}}]
+        return reps, {"model": "fake"}
+
+    monkeypatch.setattr(loop, "consolidate", fake)
+    stats = loop.consolidate_rules(s, "r", 0)
+    assert stats["promoted"] == 0 and stats["rejected"] == 1
+    assert "not active BAYVIEW rules: NS1" in stats["replacements"][0]["reason"]
+    assert s.db.rules.find_one({"_id": "NS1"})["status"] == "candidate"
+
+
+def test_malformed_stored_rules_never_break_prompts_or_export(monkeypatch):
+    from demo.export import export
+    seen = []
+    monkeypatch.setattr(watcher_mod, "complete_json",
+                        lambda *a, **k: (seen.append(a) or {"rules": [], "replacements": []}, {"model": "fake"}))
+    bad = {"rule_id": "BAD", "replaces": ["N1"], "rejection_reason": "x"}  # no description/when/predict
+    watcher_mod.propose([], [], paid_examples=[], denied_examples=[], active_rules=[], lessons=[bad])
+    watcher_mod.consolidate("BAYVIEW", [N1], paid_examples=[], denied_examples=[], lessons=[bad])
+    assert len(seen) == 2
+    db = mongomock.MongoClient().db
+    db.rules.insert_one({"_id": "BAD", "created_at": 0})
+    assert export(db, "none")["rules"][0]["when"] == []
