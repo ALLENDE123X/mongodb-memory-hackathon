@@ -28,7 +28,7 @@ def test_mock_prints_all_five_beats(capsys):
     out = capsys.readouterr().out
     for n, name in demo.BEATS.items():
         assert f"BEAT {n} of 5: {name}" in out
-    assert "—" not in out  # no em dashes in printed prose
+    assert "\u2014" not in out  # no em dashes in printed prose
     assert "1 rule doc (status rejected), 1 evaluation doc, 1 audit doc" in out
 
 
