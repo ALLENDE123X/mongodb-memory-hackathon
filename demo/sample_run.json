@@ -1,0 +1,2028 @@
+{
+  "run_id": "sample",
+  "scrubber_model": null,
+  "watcher_model": null,
+  "baseline": {
+    "iteration": 0,
+    "ruleset_version": 0,
+    "rule_count": 0,
+    "label": "no learned rules",
+    "heldout": {
+      "n": 22,
+      "n_paid": 11,
+      "n_denied": 11,
+      "balanced_accuracy": 0.5,
+      "accuracy_with_reason": 0.5,
+      "denials_caught": 0,
+      "denials_caught_right_reason": 0,
+      "unnecessary_holds": 0,
+      "unnecessary_hold_rate": 0.0,
+      "missed_denials": 11
+    },
+    "train": {
+      "n": 24,
+      "n_paid": 11,
+      "n_denied": 13,
+      "balanced_accuracy": 0.5,
+      "accuracy_with_reason": 0.458,
+      "denials_caught": 0,
+      "denials_caught_right_reason": 0,
+      "unnecessary_holds": 0,
+      "unnecessary_hold_rate": 0.0,
+      "missed_denials": 13
+    }
+  },
+  "curve": [
+    {
+      "iteration": 0,
+      "ruleset_version": 0,
+      "rule_count": 0,
+      "label": "no learned rules",
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.5,
+        "accuracy_with_reason": 0.5,
+        "denials_caught": 0,
+        "denials_caught_right_reason": 0,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 11
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 0.5,
+        "accuracy_with_reason": 0.458,
+        "denials_caught": 0,
+        "denials_caught_right_reason": 0,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 13
+      }
+    },
+    {
+      "iteration": 1,
+      "ruleset_version": 13,
+      "rule_count": 13,
+      "label": "ruleset v13",
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.955,
+        "accuracy_with_reason": 0.955,
+        "denials_caught": 10,
+        "denials_caught_right_reason": 10,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 1
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 1.0,
+        "accuracy_with_reason": 1.0,
+        "denials_caught": 13,
+        "denials_caught_right_reason": 13,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 0
+      }
+    },
+    {
+      "iteration": 2,
+      "ruleset_version": 13,
+      "rule_count": 13,
+      "label": "ruleset v13",
+      "heldout": {
+        "n": 22,
+        "n_paid": 11,
+        "n_denied": 11,
+        "balanced_accuracy": 0.955,
+        "accuracy_with_reason": 0.955,
+        "denials_caught": 10,
+        "denials_caught_right_reason": 10,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 1
+      },
+      "train": {
+        "n": 24,
+        "n_paid": 11,
+        "n_denied": 13,
+        "balanced_accuracy": 1.0,
+        "accuracy_with_reason": 1.0,
+        "denials_caught": 13,
+        "denials_caught_right_reason": 13,
+        "unnecessary_holds": 0,
+        "unnecessary_hold_rate": 0.0,
+        "missed_denials": 0
+      }
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "R-001",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW bundles venipuncture 36415 into the payment for a same-claim lab panel (e.g., 80053) and denies it with CARC 97.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 1,
+      "kind": "denial",
+      "carc": "29",
+      "when": [
+        {
+          "field": "days_to_submit",
+          "op": "gt",
+          "value": 90
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-027"
+      ],
+      "learned_from": [
+        "CLM-027"
+      ],
+      "fixes": [
+        "CLM-027"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-002",
+      "payer": "BAYVIEW",
+      "description": "NORTHSTAR rejects modifier 59 as inconsistent with the procedure (CARC 4) and expects the X{EPSU} subset modifiers (e.g., XU) instead.",
+      "status": "superseded",
+      "iteration": 0,
+      "version": 2,
+      "kind": "denial",
+      "carc": "97",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "eq",
+              "value": "36415"
+            }
+          ]
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "between",
+              "value": [
+                80047,
+                89398
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-016"
+      ],
+      "learned_from": [
+        "CLM-016"
+      ],
+      "fixes": [
+        "CLM-016"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": "R-018",
+      "probe": false
+    },
+    {
+      "rule_id": "R-003",
+      "payer": "BAYVIEW",
+      "description": "NORTHSTAR requires prior authorization for advanced imaging (MRI/CT such as 70551, 72148, 74177) and denies with CARC 197 when no auth is on the claim.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 3,
+      "kind": "denial",
+      "carc": "5",
+      "when": [
+        {
+          "field": "pos",
+          "op": "eq",
+          "value": "02"
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "99202",
+                "99203",
+                "99204",
+                "99205",
+                "99206",
+                "99207",
+                "99208",
+                "99209",
+                "99210",
+                "99211",
+                "99212",
+                "99213",
+                "99214",
+                "99215"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-012"
+      ],
+      "learned_from": [
+        "CLM-012"
+      ],
+      "fixes": [
+        "CLM-012"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-004",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW denies telehealth billed with POS 02 when the patient was at home (POS 10 required) with CARC 5.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "4",
+      "when": [
+        {
+          "field": "pos",
+          "op": "eq",
+          "value": "10"
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "99202",
+                "99203",
+                "99204",
+                "99205",
+                "99206",
+                "99207",
+                "99208",
+                "99209",
+                "99210",
+                "99211",
+                "99212",
+                "99213",
+                "99214",
+                "99215"
+              ]
+            },
+            {
+              "field": "modifiers",
+              "op": "not_contains",
+              "value": "95"
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-005",
+      "payer": "BAYVIEW",
+      "description": "BAYVIEW denies claims with a service line billed at zero charge as missing information (CARC 16, RARC M79).",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 4,
+      "kind": "denial",
+      "carc": "242",
+      "when": [
+        {
+          "field": "in_network",
+          "op": "eq",
+          "value": false
+        },
+        {
+          "field": "pos",
+          "op": "ne",
+          "value": "23"
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-029"
+      ],
+      "learned_from": [
+        "CLM-029"
+      ],
+      "fixes": [
+        "CLM-029"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-006",
+      "payer": "*",
+      "description": "BAYVIEW (Medicaid managed care) denies claims submitted more than 90 days after the date of service for timely filing (CARC 29).",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 5,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "dx_pointer_count",
+              "op": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-002"
+      ],
+      "learned_from": [
+        "CLM-002"
+      ],
+      "fixes": [
+        "CLM-002"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-007",
+      "payer": "*",
+      "description": "NORTHSTAR caps outpatient therapy visits at 20 per plan year and denies further PT/OT/ST visits (GP/GO/GN modifier lines) with CARC 119 once 20 visits have been used year-to-date.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 6,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "charge",
+              "op": "lte",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-015"
+      ],
+      "learned_from": [
+        "CLM-015"
+      ],
+      "fixes": [
+        "CLM-015"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-008",
+      "payer": "BAYVIEW",
+      "description": "deny everything",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "field": "line_count",
+          "op": "gte",
+          "value": 1
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [
+        "CLM-017",
+        "CLM-022"
+      ],
+      "rejection_reason": "would wrongly deny 2 claim(s) whose real outcome contradicts it: CLM-017, CLM-022",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-009",
+      "payer": "CASCADE",
+      "description": "NORTHSTAR rejects modifier 59 as inconsistent with the procedure (CARC 4) and expects the X{EPSU} subset modifiers (e.g., XU) instead.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "29",
+      "when": [
+        {
+          "field": "days_to_submit",
+          "op": "gt",
+          "value": 365
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-010",
+      "payer": "CASCADE",
+      "description": "NORTHSTAR requires prior authorization for advanced imaging (MRI/CT such as 70551, 72148, 74177) and denies with CARC 197 when no auth is on the claim.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 7,
+      "kind": "denial",
+      "carc": "4",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "99202",
+                "99203",
+                "99204",
+                "99205",
+                "99206",
+                "99207",
+                "99208",
+                "99209",
+                "99210",
+                "99211",
+                "99212",
+                "99213",
+                "99214",
+                "99215"
+              ]
+            },
+            {
+              "field": "modifiers",
+              "op": "not_contains",
+              "value": "25"
+            }
+          ]
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "96372",
+                "96373",
+                "96374",
+                "G0008",
+                "G0009",
+                "G0010",
+                "90460",
+                "90461",
+                "90471",
+                "90472",
+                "90473",
+                "90474"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-036"
+      ],
+      "learned_from": [
+        "CLM-036"
+      ],
+      "fixes": [
+        "CLM-036"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-011",
+      "payer": "CASCADE",
+      "description": "BAYVIEW denies telehealth billed with POS 02 when the patient was at home (POS 10 required) with CARC 5.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "4",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "99202",
+                "99203",
+                "99204",
+                "99205",
+                "99206",
+                "99207",
+                "99208",
+                "99209",
+                "99210",
+                "99211",
+                "99212",
+                "99213",
+                "99214",
+                "99215"
+              ]
+            },
+            {
+              "field": "modifiers",
+              "op": "not_contains",
+              "value": "25"
+            }
+          ]
+        },
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "between",
+              "value": [
+                10004,
+                69990
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-012",
+      "payer": "CASCADE",
+      "description": "BAYVIEW denies claims with a service line billed at zero charge as missing information (CARC 16, RARC M79).",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 8,
+      "kind": "denial",
+      "carc": "167",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "eq",
+              "value": "82306"
+            },
+            {
+              "field": "dx_codes",
+              "op": "contains_none",
+              "value": [
+                "E200",
+                "E20810",
+                "E20811",
+                "E20812",
+                "E20818",
+                "E20819",
+                "E2089",
+                "E209",
+                "E210",
+                "E211",
+                "E212",
+                "E213",
+                "E41",
+                "E43",
+                "E550",
+                "E559",
+                "E673",
+                "E678",
+                "E68",
+                "E8331",
+                "E8332",
+                "E8339",
+                "E8351",
+                "E8352",
+                "E840",
+                "E8411",
+                "E8419",
+                "E848",
+                "E892",
+                "K5000",
+                "K50011",
+                "K50012",
+                "K50013",
+                "K50014",
+                "K50018",
+                "K50111",
+                "K50112",
+                "K50113",
+                "K50114",
+                "K50118",
+                "K5080",
+                "K50811",
+                "K50812",
+                "K50813",
+                "K50814",
+                "K50818",
+                "K5090",
+                "K50911",
+                "K50912",
+                "K50913",
+                "K50914",
+                "K50918",
+                "K5100",
+                "K51011",
+                "K51012",
+                "K51013",
+                "K51014",
+                "K51018",
+                "K5120",
+                "K51211",
+                "K51212",
+                "K51213",
+                "K51214",
+                "K51218",
+                "K5130",
+                "K51311",
+                "K51312",
+                "K51313",
+                "K51314",
+                "K51318",
+                "K5140",
+                "K51411",
+                "K51412",
+                "K51413",
+                "K51414",
+                "K51418",
+                "K5150",
+                "K51511",
+                "K51512",
+                "K51513",
+                "K51514",
+                "K51518",
+                "K520",
+                "K702",
+                "K7030",
+                "K7031",
+                "K741",
+                "K742",
+                "K743",
+                "K744",
+                "K7469",
+                "K769",
+                "K831",
+                "K900",
+                "K901",
+                "K902",
+                "K903",
+                "K9041",
+                "K9049",
+                "K9089",
+                "K909",
+                "K912",
+                "M8000XA",
+                "M80011A",
+                "M80012A",
+                "M80021A",
+                "M80022A",
+                "M80031A",
+                "M80032A",
+                "M80041A",
+                "M80042A",
+                "M80051A",
+                "M80052A",
+                "M80061A",
+                "M80062A",
+                "M80071A",
+                "M80072A",
+                "M8008XA",
+                "M800B1A",
+                "M800B1D",
+                "M800B1G",
+                "M800B1K",
+                "M800B1P",
+                "M800B1S",
+                "M800B2A",
+                "M800B2D",
+                "M800B2G",
+                "M800B2K",
+                "M800B2P",
+                "M800B2S",
+                "M810",
+                "M816",
+                "M818",
+                "M830",
+                "M831",
+                "M832",
+                "M833",
+                "M834",
+                "M835",
+                "M838",
+                "M8580",
+                "M85811",
+                "M85812",
+                "M85821",
+                "M85822",
+                "M85831",
+                "M85832",
+                "M85841",
+                "M85842",
+                "M85851",
+                "M85852",
+                "M85861",
+                "M85862",
+                "M85871",
+                "M85872",
+                "M8588",
+                "M8589",
+                "M899",
+                "M949",
+                "N1830",
+                "N1831",
+                "N1832",
+                "N184",
+                "N185",
+                "N186",
+                "N2581",
+                "Q782",
+                "R82994",
+                "Z6830",
+                "Z6831",
+                "Z6832",
+                "Z6833",
+                "Z6834",
+                "Z6835",
+                "Z6836",
+                "Z6837",
+                "Z6838",
+                "Z6839",
+                "Z6841",
+                "Z6842",
+                "Z6843",
+                "Z6844",
+                "Z6845"
+              ]
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-013"
+      ],
+      "learned_from": [
+        "CLM-013"
+      ],
+      "fixes": [
+        "CLM-013"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-013",
+      "payer": "*",
+      "description": "BAYVIEW (Medicaid managed care) denies claims submitted more than 90 days after the date of service for timely filing (CARC 29).",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "dx_pointer_count",
+              "op": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case (already covered)",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-014",
+      "payer": "*",
+      "description": "NORTHSTAR caps outpatient therapy visits at 20 per plan year and denies further PT/OT/ST visits (GP/GO/GN modifier lines) with CARC 119 once 20 visits have been used year-to-date.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "charge",
+              "op": "lte",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case (already covered)",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-015",
+      "payer": "CASCADE",
+      "description": "deny everything",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "field": "line_count",
+          "op": "gte",
+          "value": 1
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [
+        "CLM-010",
+        "CLM-011",
+        "CLM-014",
+        "CLM-018",
+        "CLM-040"
+      ],
+      "rejection_reason": "would wrongly deny 5 claim(s) whose real outcome contradicts it: CLM-010, CLM-011, CLM-014, CLM-018, CLM-040",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-016",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR rejects modifier 59 as inconsistent with the procedure (CARC 4) and expects the X{EPSU} subset modifiers (e.g., XU) instead.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 9,
+      "kind": "denial",
+      "carc": "197",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "70551",
+                "72148",
+                "74177"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "prior_auth",
+          "op": "missing"
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-030"
+      ],
+      "learned_from": [
+        "CLM-030"
+      ],
+      "fixes": [
+        "CLM-030"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-017",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR requires prior authorization for advanced imaging (MRI/CT such as 70551, 72148, 74177) and denies with CARC 197 when no auth is on the claim.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 10,
+      "kind": "denial",
+      "carc": "29",
+      "when": [
+        {
+          "field": "days_to_submit",
+          "op": "gt",
+          "value": 180
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-007"
+      ],
+      "learned_from": [
+        "CLM-007"
+      ],
+      "fixes": [
+        "CLM-007"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-018",
+      "payer": "NORTHSTAR",
+      "description": "BAYVIEW denies telehealth billed with POS 02 when the patient was at home (POS 10 required) with CARC 5.",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 11,
+      "kind": "denial",
+      "carc": "4",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "97164",
+                "11102",
+                "17000"
+              ]
+            },
+            {
+              "field": "modifiers",
+              "op": "contains",
+              "value": "59"
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-026"
+      ],
+      "learned_from": [
+        "CLM-026"
+      ],
+      "fixes": [
+        "CLM-026"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-019",
+      "payer": "NORTHSTAR",
+      "description": "BAYVIEW denies claims with a service line billed at zero charge as missing information (CARC 16, RARC M79).",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 12,
+      "kind": "denial",
+      "carc": "119",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "between",
+              "value": [
+                99381,
+                99397
+              ]
+            }
+          ]
+        },
+        {
+          "field": "days_since_last_preventive",
+          "op": "lt",
+          "value": 365
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-009"
+      ],
+      "learned_from": [
+        "CLM-009"
+      ],
+      "fixes": [
+        "CLM-009"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-020",
+      "payer": "NORTHSTAR",
+      "description": "BAYVIEW (Medicaid managed care) denies claims submitted more than 90 days after the date of service for timely filing (CARC 29).",
+      "status": "promoted",
+      "iteration": 0,
+      "version": 13,
+      "kind": "denial",
+      "carc": "119",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "cpt",
+              "op": "in",
+              "value": [
+                "97110",
+                "97112",
+                "97140",
+                "97530",
+                "97161",
+                "97162",
+                "97163",
+                "97164"
+              ]
+            }
+          ]
+        },
+        {
+          "field": "context.visit_count_ytd",
+          "op": "gte",
+          "value": 20
+        }
+      ],
+      "evidence": [
+        "sample:0:CLM-021"
+      ],
+      "learned_from": [
+        "CLM-021"
+      ],
+      "fixes": [
+        "CLM-021"
+      ],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-021",
+      "payer": "*",
+      "description": "NORTHSTAR caps outpatient therapy visits at 20 per plan year and denies further PT/OT/ST visits (GP/GO/GN modifier lines) with CARC 119 once 20 visits have been used year-to-date.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "dx_pointer_count",
+              "op": "eq",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case (already covered)",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-022",
+      "payer": "*",
+      "description": "BAYVIEW bundles venipuncture 36415 into the payment for a same-claim lab panel (e.g., 80053) and denies it with CARC 97.",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "any_line": [
+            {
+              "field": "charge",
+              "op": "lte",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": "corrects no observed case (already covered)",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-023",
+      "payer": "NORTHSTAR",
+      "description": "deny everything",
+      "status": "rejected",
+      "iteration": 0,
+      "version": null,
+      "kind": "denial",
+      "carc": "16",
+      "when": [
+        {
+          "field": "line_count",
+          "op": "gte",
+          "value": 1
+        }
+      ],
+      "evidence": [],
+      "learned_from": [],
+      "fixes": [],
+      "regressions": [
+        "CLM-020",
+        "CLM-028",
+        "CLM-035",
+        "CLM-039"
+      ],
+      "rejection_reason": "would wrongly deny 4 claim(s) whose real outcome contradicts it: CLM-020, CLM-028, CLM-035, CLM-039",
+      "superseded_by": null,
+      "probe": false
+    },
+    {
+      "rule_id": "R-900",
+      "payer": "NORTHSTAR",
+      "description": "NORTHSTAR pays modifier 59 when it is paired with a distinct-site anatomical modifier; the hold was unnecessary.",
+      "status": "promoted",
+      "iteration": 1,
+      "version": 14,
+      "kind": "exception",
+      "carc": null,
+      "when": [
+        {
+          "field": "payer",
+          "op": "eq",
+          "value": "NORTHSTAR"
+        }
+      ],
+      "evidence": [
+        "sample:1:CLM-044"
+      ],
+      "learned_from": [
+        "CLM-044"
+      ],
+      "fixes": [],
+      "regressions": [],
+      "rejection_reason": null,
+      "superseded_by": null,
+      "probe": false
+    }
+  ],
+  "learning": [
+    {
+      "iteration": 0,
+      "uncovered_denials": 13,
+      "false_holds": 0,
+      "proposed": 23,
+      "promoted": 13,
+      "rejected": 10,
+      "revised": 0,
+      "n": 23,
+      "acceptance_rate": 0.565,
+      "n_train": 24
+    },
+    {
+      "iteration": 1,
+      "uncovered_denials": 0,
+      "false_holds": 0,
+      "proposed": 0,
+      "promoted": 0,
+      "rejected": 0,
+      "revised": 0,
+      "n": 0,
+      "acceptance_rate": null,
+      "n_train": 24
+    }
+  ],
+  "rsi": [
+    {
+      "iteration": 0,
+      "uncovered_denials": 13,
+      "false_holds": 0,
+      "proposed": 23,
+      "promoted": 13,
+      "rejected": 10,
+      "revised": 0,
+      "n": 23,
+      "acceptance_rate": 0.565,
+      "n_train": 24
+    },
+    {
+      "iteration": 1,
+      "uncovered_denials": 0,
+      "false_holds": 0,
+      "proposed": 0,
+      "promoted": 0,
+      "rejected": 0,
+      "revised": 0,
+      "n": 0,
+      "acceptance_rate": null,
+      "n_train": 24
+    }
+  ],
+  "gate": [
+    {
+      "rule_id": "R-001",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 0,
+      "probe": false
+    },
+    {
+      "rule_id": "R-002",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 1,
+      "probe": false
+    },
+    {
+      "rule_id": "R-003",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 2,
+      "probe": false
+    },
+    {
+      "rule_id": "R-004",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 3,
+      "probe": false
+    },
+    {
+      "rule_id": "R-005",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 3,
+      "probe": false
+    },
+    {
+      "rule_id": "R-006",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 4,
+      "probe": false
+    },
+    {
+      "rule_id": "R-007",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 5,
+      "probe": false
+    },
+    {
+      "rule_id": "R-008",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "would wrongly deny 2 claim(s) whose real outcome contradicts it: CLM-017, CLM-022",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 2,
+      "redundant": 5,
+      "evidence_size": 24,
+      "baseline_version": 6,
+      "probe": false
+    },
+    {
+      "rule_id": "R-009",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 6,
+      "probe": false
+    },
+    {
+      "rule_id": "R-010",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 6,
+      "probe": false
+    },
+    {
+      "rule_id": "R-011",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 7,
+      "probe": false
+    },
+    {
+      "rule_id": "R-012",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 7,
+      "probe": false
+    },
+    {
+      "rule_id": "R-013",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case (already covered)",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 1,
+      "evidence_size": 24,
+      "baseline_version": 8,
+      "probe": false
+    },
+    {
+      "rule_id": "R-014",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case (already covered)",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 1,
+      "evidence_size": 24,
+      "baseline_version": 8,
+      "probe": false
+    },
+    {
+      "rule_id": "R-015",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "would wrongly deny 5 claim(s) whose real outcome contradicts it: CLM-010, CLM-011, CLM-014, CLM-018, CLM-040",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 5,
+      "redundant": 3,
+      "evidence_size": 24,
+      "baseline_version": 8,
+      "probe": false
+    },
+    {
+      "rule_id": "R-016",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 8,
+      "probe": false
+    },
+    {
+      "rule_id": "R-017",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 9,
+      "probe": false
+    },
+    {
+      "rule_id": "R-018",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 10,
+      "probe": false
+    },
+    {
+      "rule_id": "R-019",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 11,
+      "probe": false
+    },
+    {
+      "rule_id": "R-020",
+      "iteration": 0,
+      "verdict": "promote",
+      "kind": "denied",
+      "reason": "corrects 1 observed case(s), 0 regressions",
+      "stage": "replay",
+      "fixes": 1,
+      "regressions": 0,
+      "redundant": 0,
+      "evidence_size": 24,
+      "baseline_version": 12,
+      "probe": false
+    },
+    {
+      "rule_id": "R-021",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case (already covered)",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 1,
+      "evidence_size": 24,
+      "baseline_version": 13,
+      "probe": false
+    },
+    {
+      "rule_id": "R-022",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "corrects no observed case (already covered)",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 0,
+      "redundant": 1,
+      "evidence_size": 24,
+      "baseline_version": 13,
+      "probe": false
+    },
+    {
+      "rule_id": "R-023",
+      "iteration": 0,
+      "verdict": "rejected",
+      "kind": "denied",
+      "reason": "would wrongly deny 4 claim(s) whose real outcome contradicts it: CLM-020, CLM-028, CLM-035, CLM-039",
+      "stage": "replay",
+      "fixes": 0,
+      "regressions": 4,
+      "redundant": 5,
+      "evidence_size": 24,
+      "baseline_version": 13,
+      "probe": false
+    }
+  ],
+  "ledger": [
+    {
+      "kind": "proposal",
+      "created_at": "2026-10-11 21:11:20.275000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": null,
+      "description": null,
+      "rule_kind": null,
+      "reason": "fake",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.276000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-001",
+      "description": "PR-02-BV",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 1,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.276000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-002",
+      "description": "PR-05",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 2,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.277000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-003",
+      "description": "PR-09a",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 3,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.278000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-004",
+      "description": "PR-09b",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.279000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-005",
+      "description": "PR-10",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 4,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.280000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-006",
+      "description": "PR-11",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 5,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.282000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-007",
+      "description": "PR-12",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 6,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.283000",
+      "iteration": 0,
+      "payer": "BAYVIEW",
+      "rule_id": "R-008",
+      "description": "deny everything",
+      "rule_kind": "denial",
+      "reason": "would wrongly deny 2 claim(s) whose real outcome contradicts it: CLM-017, CLM-022",
+      "fixes": 0,
+      "regressions": 2,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "proposal",
+      "created_at": "2026-10-11 21:11:20.285000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": null,
+      "description": null,
+      "rule_kind": null,
+      "reason": "fake",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.286000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": "R-009",
+      "description": "PR-02-CA",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.290000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": "R-010",
+      "description": "PR-03a",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 7,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.291000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": "R-011",
+      "description": "PR-03b",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.291000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": "R-012",
+      "description": "PR-08",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 8,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.292000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-013",
+      "description": "PR-11",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case (already covered)",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.292000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-014",
+      "description": "PR-12",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case (already covered)",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.292000",
+      "iteration": 0,
+      "payer": "CASCADE",
+      "rule_id": "R-015",
+      "description": "deny everything",
+      "rule_kind": "denial",
+      "reason": "would wrongly deny 5 claim(s) whose real outcome contradicts it: CLM-010, CLM-011, CLM-014, CLM-018, CLM-040",
+      "fixes": 0,
+      "regressions": 5,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "proposal",
+      "created_at": "2026-10-11 21:11:20.294000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": null,
+      "description": null,
+      "rule_kind": null,
+      "reason": "fake",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.295000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-016",
+      "description": "PR-01",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 9,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.296000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-017",
+      "description": "PR-02-NS",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 10,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.296000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-018",
+      "description": "PR-04",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 11,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.297000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-019",
+      "description": "PR-06",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 12,
+      "extra": {}
+    },
+    {
+      "kind": "promotion",
+      "created_at": "2026-10-11 21:11:20.297000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-020",
+      "description": "PR-07",
+      "rule_kind": "denial",
+      "reason": null,
+      "fixes": 1,
+      "regressions": 0,
+      "version": 13,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.298000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-021",
+      "description": "PR-11",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case (already covered)",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.298000",
+      "iteration": 0,
+      "payer": "*",
+      "rule_id": "R-022",
+      "description": "PR-12",
+      "rule_kind": "denial",
+      "reason": "corrects no observed case (already covered)",
+      "fixes": 0,
+      "regressions": 0,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "rejection",
+      "created_at": "2026-10-11 21:11:20.299000",
+      "iteration": 0,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-023",
+      "description": "deny everything",
+      "rule_kind": "denial",
+      "reason": "would wrongly deny 4 claim(s) whose real outcome contradicts it: CLM-020, CLM-028, CLM-035, CLM-039",
+      "fixes": 0,
+      "regressions": 4,
+      "version": null,
+      "extra": {}
+    },
+    {
+      "kind": "consolidation",
+      "created_at": "2026-10-11 21:11:20.360000",
+      "iteration": 1,
+      "payer": "NORTHSTAR",
+      "rule_id": "R-018",
+      "description": "Merged two BAYVIEW bundling rules into one",
+      "rule_kind": "denial",
+      "reason": "subsumed by broader rule",
+      "fixes": 1,
+      "regressions": 0,
+      "version": null,
+      "extra": {
+        "superseded": [
+          "R-002"
+        ]
+      }
+    }
+  ],
+  "memory_counts": {
+    "semantic": [
+      {
+        "collection": "semantic_kb",
+        "count": 18
+      }
+    ],
+    "episodic": [
+      {
+        "collection": "episodes",
+        "count": 138
+      }
+    ],
+    "procedural": [
+      {
+        "collection": "rules",
+        "count": 24
+      },
+      {
+        "collection": "rulesets",
+        "count": 14
+      }
+    ],
+    "taxonomic": [
+      {
+        "collection": "taxonomy",
+        "count": 9
+      }
+    ]
+  },
+  "counts": {
+    "episodes": 138,
+    "rules": 24,
+    "rulesets": 14,
+    "evaluations": 23,
+    "audits": 27,
+    "semantic_kb": 18,
+    "taxonomy": 9
+  }
+}
