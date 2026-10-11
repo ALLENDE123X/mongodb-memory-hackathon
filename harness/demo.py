@@ -1,6 +1,6 @@
 """Stage demo: five beats that tell the story in three minutes.
 
-    python -m harness.demo --mock                  # fully offline, in-memory database
+    python -m harness.demo --mock                  # fully offline, in-memory database (run from the repo root)
     python -m harness.demo --run-id run2           # against Atlas (read-only except beat 3)
     python -m harness.demo --run-id run2 --beat 3  # any beat alone
 
@@ -33,6 +33,8 @@ from memory.store import Store
 
 BEATS = {1: "BEFORE", 2: "LEARNED", 3: "REFUSES", 4: "REMEMBERS", 5: "SCORE"}
 WRITE_COLLECTIONS = ("rules", "evaluations", "audits")
+MOCK_BANNER = "[MOCK: stand-in watcher seeded from the hand-written oracle rules, not a learned result]"
+_state = {"mock": False}
 
 
 # -- offline seeding ----------------------------------------------------------------------
@@ -81,6 +83,7 @@ def seed_mock(run_id: str = "mock"):
     import mongomock
 
     from harness import loop
+    _state["mock"] = True
     client = mongomock.MongoClient()
     with mock.patch.object(scrubber_mod, "complete_json", _fake_scrub_llm), \
             mock.patch.object(watcher_mod, "complete_json", _fake_watch_llm), \
@@ -94,6 +97,8 @@ def seed_mock(run_id: str = "mock"):
 def heading(n: int) -> None:
     bar = "=" * 72
     print(f"\n{bar}\n  BEAT {n} of {len(BEATS)}: {BEATS[n]}\n{bar}")
+    if _state["mock"] and n in (2, 5):
+        print(MOCK_BANNER)
 
 
 def _compact(obj):
@@ -292,6 +297,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--mock", action="store_true", help="offline: seed an in-memory database with a fake-model loop")
     args = ap.parse_args(argv)
     run_id = args.run_id or ("mock" if args.mock else "run2")
+    _state["mock"] = args.mock
     if args.mock:
         import mongomock
         client = seed_mock(run_id)

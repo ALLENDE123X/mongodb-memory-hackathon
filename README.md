@@ -35,27 +35,30 @@ claim -> scrubber (rules -> exceptions -> LLM with memories) -> payer sim (835)
       -> episodes -> watcher -> gate -> CAS promote -> rulesets/head -> scrubber
 ```
 
+## Landed
+- [#1](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/1) watcher prompt asks for the most general rule the evidence supports, shows the gate's threshold evidence, and gives concrete revision feedback when a rule is rejected.
+- [#4](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/4) semantic and taxonomic memory (see the memory table).
+- [#12](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/12) remittance realism: denial detection no longer depends on the adjustment group, CO versus PR groups, and patient cost share on paid lines.
+- [#14](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/14) Raindrop telemetry: a `claim_scrub` event per scrub, then `payer_outcome` and `gate_verdict` Signals. Write-only and a no-op without `RAINDROP_WRITE_KEY`; nothing is read back, so held-out isolation holds.
+
 ## In flight alongside this
-These are tracked as issues and land independently, so check the commit history for what is on `main` when you read this. None of the walkthrough above depends on them.
+These are tracked as issues and land independently, so check the commit history for what is on `main` when you read this. None of the walkthrough depends on them.
 - [#2](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/2) rule consolidation: the watcher can propose a gated replacement that merges narrow rules, producing a new ruleset version with the old rules marked superseded.
 - [#3](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/3) streaming training slices so the learning curve has more than one step, plus a minimum-evidence check in the gate.
-- [#4](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/4) Voyage semantic memory and taxonomic memory (see the memory table).
 - [#5](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/5) the demo page rendered from `demo/run.json`.
-- [#12](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/12) remittance realism: CO versus PR adjustment groups and patient cost share.
-- [#14](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/14) Raindrop telemetry, a no-op without a key.
 
 ## Four memory types, all in Atlas
 | Memory | What it holds | Collections |
 |---|---|---|
 | Episodic | every scrub decision, its reasoning, and the real remittance | `episodes` |
 | Procedural | every rule ever proposed with provenance, immutable ruleset versions, the head pointer, gate verdicts, loop checkpoints, an audit log | `rules`, `rulesets`, `heads`, `evaluations`, `runs`, `audits` |
-| Semantic | payer policy text and past denials as embeddings (Voyage AI, Atlas Vector Search) | `semantic_kb` |
-| Taxonomic | payer -> claim category -> denial category (CARC group) counts | `taxonomy` |
+| Semantic | one Voyage AI embedding (`voyage-3.5`) per distinct training claim, summarizing its payer, codes and observed outcome; retrieved with Atlas Vector Search (index `semantic_kb_vector`) | `semantic_kb` |
+| Taxonomic | payer -> claim category -> denial category counts, with categories derived from CPT families (E/M, imaging, lab, therapy, surgery) and CARC groups (never from the hidden claim category); a compact summary goes to the watcher | `taxonomy` |
 
-Episodic and procedural memory drive the loop today. The semantic and taxonomic collections are filled by the Voyage and taxonomy work tracked in issue #4; until that is merged and enabled, the scrubber's "similar past outcomes" come from a lexical CPT-overlap lookup over episodes. In every mode only training episodes are retrievable.
+All four are populated by the loop. Semantic retrieval uses Voyage embeddings and Atlas Vector Search when `VOYAGE_API_KEY` is set and the vector index exists; it falls back to a lexical CPT-overlap lookup over episodes otherwise (and on mongomock), and tops up a short vector result lexically while the index is still building. Only training episodes are ever embedded, counted or retrievable. The vector index is created once by an operator (`python -m memory.semantic --ensure-index`), never implicitly.
 
 ## Results
-Held-out set only (22 claims the watcher never saw). Numbers below are from one recorded run; the orchestrator fills them in from the final live run.
+Held-out set only (22 claims the watcher never saw). The table is filled in from the final recorded run; `TBD` means that run has not been recorded into this file yet.
 
 | | Held-out balanced accuracy | Accuracy with right CARC | Denials caught (right reason) | Unnecessary holds | Learned rules |
 |---|---|---|---|---|---|
@@ -78,7 +81,8 @@ python -m pytest -q                    # all tests use mongomock and a fake mode
 Environment (`.env.local`, never committed):
 - `MONGODB_URI`, `MONGODB_DB` - the Atlas cluster. Defaults to database `recursive_harness`.
 - `SCRUBBER_MODEL`, `WATCHER_MODEL` - LiteLLM-style model names, for example `anthropic/<model-id>`. Provider key (for example `ANTHROPIC_API_KEY`) as needed.
-- `VOYAGE_API_KEY` - optional, for semantic memory once issue #4 is merged. Without it the harness uses the lexical fallback.
+- `VOYAGE_API_KEY` - optional, enables semantic memory (`VOYAGE_MODEL` defaults to `voyage-3.5`, `VECTOR_INDEX` to `semantic_kb_vector`). Without it the harness uses the lexical fallback.
+- `RAINDROP_WRITE_KEY` - optional, enables Raindrop telemetry (`RAINDROP_SAMPLE`, `RAINDROP_DISABLE`, `RAINDROP_DASHBOARD_URL`). Without it telemetry is a no-op.
 - `LLM_CASSETTE=record|replay|off` - every model response is cached in `data/cassette.jsonl`; `replay` re-runs a known-good run byte for byte with no model calls.
 - `SCRUB_WORKERS` - parallel scrubbing threads (default 8).
 
@@ -88,7 +92,7 @@ python -m memory.atlas_schema                          # ping Atlas, create rule
 python -m harness.loop --run-id demo --iterations 3    # add --reset to drop all harness collections first
 python -m demo.export --run-id demo                    # write demo/run.json for the demo page
 python -m harness.demo --run-id demo                   # the five-beat stage script
-python -m harness.demo --mock                          # same beats, fully offline, no Atlas, no model
+python -m harness.demo --mock                          # same beats, fully offline, no Atlas, no model (run from the repo root)
 python -m harness.probe --run-id demo                  # push an over-broad rule at the gate
 ```
 The loop resumes after a crash: rerun the same command and it continues from the last checkpoint without re-submitting any claim.
@@ -115,8 +119,8 @@ The loop resumes after a crash: rerun the same command and it continues from the
 Sources, CMS document versions, and what was not verified are listed in `eval/PAYER_RULES.md`.
 
 ## Layout
-- `agents/` - `scrubber.py` (rules, then exceptions, then model), `watcher.py` (proposes rules from misses), `llm.py` (LiteLLM JSON client with record/replay cassette)
-- `memory/` - `store.py` (Atlas collections, CAS promotion), `atlas_schema.py` (connection)
+- `agents/` - `scrubber.py` (rules, then exceptions, then model), `watcher.py` (proposes rules from misses), `llm.py` (LiteLLM JSON client with record/replay cassette), `telemetry.py` (Raindrop events and Signals)
+- `memory/` - `store.py` (Atlas collections, CAS promotion), `semantic.py` (Voyage + Atlas Vector Search), `taxonomy.py` (taxonomic counts), `atlas_schema.py` (connection)
 - `harness/` - `loop.py` (the recursive loop), `gate.py` (replay gate), `rules.py` (executable rule language), `payer_sim.py` (835 simulator), `probe.py` (over-broad rule probe), `demo.py` (stage script)
 - `eval/` - 46 synthetic 837P claims (24 train, 22 held-out), loader and validator, metrics
 - `demo/` - `export.py` writes `run.json` from Atlas; `index.html` is the demo page

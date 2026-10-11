@@ -30,6 +30,7 @@ def test_mock_prints_all_five_beats(capsys):
         assert f"BEAT {n} of 5: {name}" in out
     assert "\u2014" not in out  # no em dashes in printed prose
     assert "1 rule doc (status rejected), 1 evaluation doc, 1 audit doc" in out
+    assert out.count(demo.MOCK_BANNER) == 2  # under beats 2 and 5
 
 
 def test_beats_tell_a_true_story(seeded, capsys):
