@@ -23,16 +23,14 @@ OVERBROAD = {
 }
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--run-id", default="run2")
-    args = ap.parse_args()
-    store = Store(get_db())
+def run_probe(store: Store, run_id: str) -> dict:
+    """Replay OVERBROAD through the real gate and record it. Writes exactly one rule doc
+    (status rejected), one evaluation doc and one audit doc; the head never moves."""
     head, active = store.active()
-    evidence = latest_train_evidence(store, args.run_id)
+    evidence = latest_train_evidence(store, run_id)
     rule = {**OVERBROAD, "rule_id": f"PROBE-{store.db.rules.count_documents({}) + 1:03d}"}
     verdict = evaluate(rule, active, evidence)
-    ev_id = store.insert_evaluation({"run_id": args.run_id, "rule_id": rule["rule_id"], "probe": True,
+    ev_id = store.insert_evaluation({"run_id": run_id, "rule_id": rule["rule_id"], "probe": True,
                                      "baseline_version": head["version"], **verdict})
     store.insert_rule(rule, status="candidate", iteration=-1, evidence=[])
     if verdict["verdict"] == "promote":  # should never happen; refuse to promote a probe anyway
@@ -40,8 +38,18 @@ def main() -> None:
     else:
         store.set_rule_status(rule["rule_id"], "rejected", rejection_reason=verdict["reason"],
                               regressions=verdict["regressions"])
-    store.audit("rejection", run_id=args.run_id, rule_id=rule["rule_id"], reason=verdict["reason"],
+    store.audit("rejection", run_id=run_id, rule_id=rule["rule_id"], reason=verdict["reason"],
                 description=rule["description"], probe=True, evaluation_id=ev_id)
+    return {"rule": rule, "verdict": verdict, "head": head, "evaluation_id": ev_id}
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run-id", default="run2")
+    args = ap.parse_args()
+    store = Store(get_db())
+    out = run_probe(store, args.run_id)
+    rule, verdict, head = out["rule"], out["verdict"], out["head"]
     print(f"proposed : {rule['description']}")
     print(f"replayed : {verdict['evidence_size']} observed claims, ruleset v{head['version']}")
     print(f"verdict  : {verdict['verdict'].upper()}  {verdict['reason']}")
