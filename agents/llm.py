@@ -8,6 +8,9 @@ Models are named LiteLLM-style in env vars, e.g.
 LLM_CASSETTE=record|replay|off (default record): every response is appended to
 data/cassette.jsonl keyed by a hash of (model, messages), so a known-good run can be
 replayed byte-for-byte on stage without network.
+
+LLM_CONCURRENCY (default 6) bounds in-flight provider calls across all threads, so the scrub
+pool and watcher cannot stampede a rate limit; rate-limit errors back off exponentially.
 """
 from __future__ import annotations
 
@@ -27,8 +30,21 @@ load_dotenv()
 CASSETTE = Path(os.environ.get("LLM_CASSETTE_PATH", "data/cassette.jsonl"))
 SYNTHETIC_BASE = "https://api.synthetic.new/v1"
 
+MAX_TRIES = 3
+
 _cache: dict[str, str] | None = None
 _lock = threading.Lock()
+_slots = threading.BoundedSemaphore(int(os.environ.get("LLM_CONCURRENCY", "6")))
+
+
+def _rate_limited(e: Exception) -> bool:
+    text = f"{type(e).__name__} {e}".lower()
+    return "ratelimit" in text or "rate limit" in text or "429" in text
+
+
+def _backoff(attempt: int, e: Exception) -> float:
+    """Seconds to wait before the next try: exponential on rate limits, linear otherwise."""
+    return 5.0 * 2 ** attempt if _rate_limited(e) else 2.0 * (attempt + 1)
 
 
 def _key(model: str, messages: list[dict]) -> str:
@@ -82,11 +98,12 @@ def complete_json(model: str, system: str, user: str, *, max_tokens: int = 2000)
     # Run-to-run determinism comes from the cassette, not from sampling settings.
     litellm.drop_params = True
     last_err = None
-    for attempt in range(3):
+    for attempt in range(MAX_TRIES):
         t0 = time.time()
         try:
-            resp = litellm.completion(messages=messages, temperature=0, max_tokens=max_tokens,
-                                      response_format={"type": "json_object"}, **_route(model))
+            with _slots:  # held only for the call itself, never while backing off
+                resp = litellm.completion(messages=messages, temperature=0, max_tokens=max_tokens,
+                                          response_format={"type": "json_object"}, **_route(model))
             raw = resp.choices[0].message.content or ""
             parsed = _parse(raw)
             if mode == "record":
@@ -98,5 +115,6 @@ def complete_json(model: str, system: str, user: str, *, max_tokens: int = 2000)
             return parsed, {"model": model, "latency_s": round(time.time() - t0, 2), "cached": False, "raw": raw}
         except Exception as e:  # noqa: BLE001 - surface after retries
             last_err = e
-            time.sleep(2 * (attempt + 1))
-    raise RuntimeError(f"{model} failed after 3 attempts: {last_err}")
+            if attempt + 1 < MAX_TRIES:
+                time.sleep(_backoff(attempt, e))
+    raise RuntimeError(f"{model} failed after {MAX_TRIES} attempts: {last_err}") from last_err

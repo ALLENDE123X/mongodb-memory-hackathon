@@ -47,7 +47,7 @@ def _scrubbed(monkeypatch, iterations=(0,)):
     store = Store(mongomock.MongoClient().db)
     store.bootstrap()
     for it in iterations:
-        loop.scrub_pass(store, "t", it)
+        loop.scrub_pass(store, "t", it, slices=1)
     return store
 
 
@@ -145,7 +145,7 @@ def test_loop_uses_semantic_memory_and_gives_watcher_the_taxonomy(monkeypatch):
     emb = FakeEmbedder()
     monkeypatch.setattr(loop, "semantic_memory", lambda db: LocalSemantic(db, emb))
     store = Store(mongomock.MongoClient().db)
-    loop.run(store, "t", iterations=1)
+    loop.run(store, "t", iterations=1, slices=1)
     train_ids = {c["id"] for c in load_claims("train")}
     assert {d["claim_id"] for d in store.db.semantic_kb.find({})} == train_ids
     assert any(c[0] == "query" for c in emb.calls) and any(c[0] == "document" for c in emb.calls)
@@ -229,8 +229,8 @@ def test_memory_failures_never_crash_scrub_pass(monkeypatch):
     monkeypatch.setattr(loop, "semantic_memory", lambda db: LocalSemantic(db, Boom()))
     store = Store(mongomock.MongoClient().db)
     store.bootstrap()
-    loop.scrub_pass(store, "t", 0)
-    loop.scrub_pass(store, "t", 1)  # second pass retrieves with an embedder that raises: lexical fallback
+    loop.scrub_pass(store, "t", 0, slices=1)
+    loop.scrub_pass(store, "t", 1, slices=1)  # second pass retrieves with an embedder that raises: lexical fallback
     assert store.db.semantic_kb.count_documents({}) == 0
 
     def no_construct(db):
@@ -238,7 +238,7 @@ def test_memory_failures_never_crash_scrub_pass(monkeypatch):
 
     monkeypatch.setattr(loop, "semantic_memory", no_construct)
     monkeypatch.setattr(loop, "sync_taxonomy", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("tax")))
-    assert loop.scrub_pass(store, "t", 2)["train"]
+    assert loop.scrub_pass(store, "t", 2, slices=1)["train"]
 
 
 def test_voyage_embedder_retries_rate_limits(monkeypatch):

@@ -3,9 +3,13 @@
     python -m harness.loop --run-id demo --iterations 3 --reset
     python -m harness.loop --run-id demo --iterations 3          # resume after a crash/restart
 
-Iteration k scrubs every claim with ruleset v(k). Training claims are submitted to the
-simulated payer and their remittances become learning evidence. Held-out claims are scored
-the same way but their outcomes are never shown to the watcher or used for retrieval.
+Iteration k scrubs claims with ruleset v(k). Training claims stream in: they are split into
+`--slices N` stratified slices and iteration k reveals slices 0..k, so learning evidence grows
+each iteration and later slices act as counterexamples to over-broad early rules. An unrevealed
+claim is never scrubbed, stored, embedded or shown to a model. Revealed training claims are
+submitted to the simulated payer and their remittances become learning evidence. Held-out claims
+are scored in full every iteration but their outcomes are never shown to the watcher or used for
+retrieval.
 """
 from __future__ import annotations
 
@@ -31,6 +35,7 @@ from memory.taxonomy import sync_taxonomy, taxonomy_summary
 
 MAX_REVISIONS = 1
 MAX_FEEDBACK_BRIEFS = 6  # keep the revision prompt small when a rule is badly over-broad
+DEFAULT_SLICES = 3
 
 
 def log(msg: str) -> None:
@@ -110,10 +115,36 @@ def _semantic_or_none(db):
         return None
 
 
+# -- streaming training slices ------------------------------------------------------------
+
+def train_slices(n: int) -> list[list[str]]:
+    """Deterministic slices of the training claim ids, stratified by (payer, outcome).
+
+    Each (payer, outcome) group is dealt round-robin from slice 0 in id order, so every payer
+    with a paid training claim has one in slice 0 (the gate's MIN_PAYER_PAID_SEEN needs paid
+    counterexamples) and each payer's denials spread across slices. The outcome is read only to
+    design the stream, like the train/held-out split itself; it never reaches a prompt."""
+    n = max(1, n)
+    out: list[list[str]] = [[] for _ in range(n)]
+    groups: dict[tuple, list[str]] = defaultdict(list)
+    for rec in load_claims("train"):
+        groups[(rec["payer"], rec["ground_truth"]["outcome"])].append(rec["id"])
+    for key in sorted(groups):
+        for i, cid in enumerate(sorted(groups[key])):
+            out[i % n].append(cid)
+    return [sorted(s) for s in out]
+
+
+def revealed_train_ids(iteration: int, n: int) -> set[str]:
+    """Training ids visible at `iteration`: slices 0..iteration (everything once past the last)."""
+    return {cid for s in train_slices(n)[:iteration + 1] for cid in s}
+
+
 # -- one pass over the claims ------------------------------------------------------------
 
-def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
+def scrub_pass(store: Store, run_id: str, iteration: int, slices: int = DEFAULT_SLICES) -> dict:
     head, rules = store.active()
+    revealed = revealed_train_ids(iteration, slices)
     memory = latest_train_evidence(store, run_id)
     sem = _semantic_or_none(store.db)
     notes: set = set()
@@ -121,6 +152,8 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     todo = []
     for split in ("train", "heldout"):
         for rec in load_claims(split):
+            if split == "train" and rec["id"] not in revealed:
+                continue  # not streamed in yet: never scrubbed, stored, embedded or retrievable
             ep_id = f"{run_id}:{iteration}:{rec['id']}"
             existing = store.db.episodes.find_one({"_id": ep_id})
             if existing:  # idempotent resume: never re-submit a claim
@@ -151,6 +184,7 @@ def scrub_pass(store: Store, run_id: str, iteration: int) -> dict:
     metrics = {split: score(eps) for split, eps in rows.items()}
     metrics["ruleset_version"] = head["version"]
     metrics["rule_count"] = len(rules)
+    metrics["train_revealed"] = len(revealed)  # distinct training claims streamed in so far
     return metrics
 
 
@@ -348,20 +382,24 @@ def consolidate_rules(store: Store, run_id: str, iteration: int) -> dict:
 
 # -- driver -------------------------------------------------------------------------------
 
-def run(store: Store, run_id: str, iterations: int) -> list[dict]:
+def run(store: Store, run_id: str, iterations: int, slices: int = DEFAULT_SLICES) -> list[dict]:
     store.bootstrap()
     state = store.run_state(run_id) or {}
     history = state.get("history", [])
+    if history and state.get("slices") and state["slices"] != slices:
+        log(f"  resuming with the run's original --slices {state['slices']} (ignoring {slices})")
+        slices = state["slices"]
     start = len(history)
     prior_sent = (state.get("telemetry") or {}).get("events_sent")
     if start:
         log(f"resuming {run_id} at iteration {start} (ruleset v{store.active()[0]['version']} loaded from the database)")
     for it in range(start, iterations + 1):
         log(f"iteration {it}: scrubbing with ruleset v{store.active()[0]['version']}")
-        metrics = scrub_pass(store, run_id, it)
+        metrics = scrub_pass(store, run_id, it, slices)
         log(f"  heldout balanced acc {metrics['heldout']['balanced_accuracy']}  "
-            f"train {metrics['train']['balanced_accuracy']}  rules {metrics['rule_count']}")
-        entry = {"iteration": it, "metrics": metrics,
+            f"train {metrics['train']['balanced_accuracy']} (n={metrics['train_revealed']})  "
+            f"rules {metrics['rule_count']}")
+        entry = {"iteration": it, "metrics": metrics, "n": metrics["train_revealed"],
                  "scrubber_model": os.environ.get("SCRUBBER_MODEL"), "watcher_model": os.environ.get("WATCHER_MODEL")}
         if it < iterations:
             log(f"iteration {it}: watcher learning from training misses")
@@ -370,7 +408,8 @@ def run(store: Store, run_id: str, iterations: int) -> list[dict]:
             entry["consolidation"] = consolidate_rules(store, run_id, it)
         history.append(entry)
         extra = {"telemetry": telemetry.summary(prior_sent)} if telemetry.enabled() else {}
-        store.checkpoint(run_id, history=history, phase="done" if it == iterations else "running", **extra)
+        store.checkpoint(run_id, history=history, slices=slices,
+                         phase="done" if it == iterations else "running", **extra)
     telemetry.flush()
     return history
 
@@ -379,6 +418,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", default="demo")
     ap.add_argument("--iterations", type=int, default=3)
+    ap.add_argument("--slices", type=int, default=DEFAULT_SLICES,
+                    help="stream training claims in N stratified slices (1 = all at iteration 0)")
     ap.add_argument("--reset", action="store_true", help="drop all harness collections first")
     ap.add_argument("--mock", action="store_true", help="use an in-memory database instead of Atlas")
     args = ap.parse_args()
@@ -394,12 +435,12 @@ def main() -> None:
             db[c].drop()
         for c in ("semantic_kb", "taxonomy"):  # emptied, not dropped: dropping would remove the Atlas vector index
             db[c].delete_many({})
-    history = run(store, args.run_id, args.iterations)
+    history = run(store, args.run_id, args.iterations, args.slices)
     telemetry.shutdown()
-    print("\niteration  heldout_bal_acc  heldout_acc_w_reason  unnecessary_holds  rules")
+    print("\niteration  train_n  heldout_bal_acc  heldout_acc_w_reason  unnecessary_holds  rules")
     for h in history:
         m = h["metrics"]["heldout"]
-        print(f"{h['iteration']:>9}  {m['balanced_accuracy']!s:>15}  {m['accuracy_with_reason']!s:>20}  "
+        print(f"{h['iteration']:>9}  {h.get('n', '-')!s:>7}  {m['balanced_accuracy']!s:>15}  {m['accuracy_with_reason']!s:>20}  "
               f"{m['unnecessary_holds']:>17}  {h['metrics']['rule_count']:>5}")
 
 
