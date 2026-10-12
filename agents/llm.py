@@ -3,7 +3,7 @@
 Models are named LiteLLM-style in env vars, e.g.
   SCRUBBER_MODEL=openai/<model-id>        WATCHER_MODEL=gemini/<model-id>
   SCRUBBER_MODEL=anthropic/<model-id>     (needs ANTHROPIC_API_KEY)
-  SCRUBBER_MODEL=synthetic/<hf-model-id>  (Bruce's synthetic.new, OpenAI-compatible)
+  SCRUBBER_MODEL=synthetic/<hf-model-id>  (synthetic.new, OpenAI-compatible)
 
 LLM_CASSETTE=record|replay|off (default record): every response is appended to
 data/cassette.jsonl keyed by a hash of (model, messages), so a known-good run can be

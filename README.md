@@ -149,7 +149,7 @@ Tracked issues:
 - [#15](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/15) corrected-claim processing (frequency 7, payer reversal and reissue)
 - [#16](https://github.com/ALLENDE123X/mongodb-memory-hackathon/issues/16) new 837P scrubber checks (CLIA, NDC, ordering provider, subscriber address)
 
-## New work and prior art
-Every line of code in this repository was written during the hackathon (after the 10:30 AM PT start on Oct 11, 2026); see the commit history. The gated-learning design (candidate rule, replay against known outcomes, conditional promotion, restart from durable state) is adapted from Bruce Beckley's pre-event MemGit architecture notes. No MemGit code is used here.
+## New work
+Every line of code in this repository was written during the hackathon (after the 10:30 AM PT start on Oct 11, 2026); see the commit history.
 
 All claims, members, providers, and payers are synthetic. `eval/PAYER_RULES.md` is the simulator's hidden answer key: the scrubber and watcher never read it.
