@@ -6,6 +6,8 @@ Billing and coverage only, never clinical judgment. All data is synthetic, no PH
 
 Built at the SF Tech Week Harness Engineering hackathon (Shack15, Oct 11 2026) by Pranav Lende, Bruce Beckley, Arjun Prasad, Xavier Huang.
 
+Live demo page: [Modelence](https://paper-trail-mv4hkq2wko8-prod.cloud.modelence.app) (mirror: [Vercel](https://rcm-harness-demo.vercel.app)).
+
 ## What it does in one minute
 1. A claim arrives. The scrubber checks the learned rules first, then learned exceptions, and only then asks a model, which sees the payer's rules and similar past outcomes.
 2. The claim is submitted to a simulated payer that returns an 835-style remittance (paid, or denied with CARC and RARC codes). Both the decision and the real outcome are stored as an episode.
