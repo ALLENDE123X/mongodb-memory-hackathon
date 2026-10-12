@@ -63,6 +63,11 @@ svg .val { fill:var(--ink); font-weight:700; font-size:16px; }
 .chip.gate.fail { background:var(--panel); color:var(--bad); border-color:var(--bad); }
 .chip.ver { color:var(--muted); }
 .desc { font-size:1.05rem; margin:0 0 6px; }
+.gate-grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.gate-grid .card h3 { margin:0 0 8px; font-size:1.05rem; }
+.gate-grid ul { margin:0; padding-left:1.1em; }
+.gate-grid li { margin:4px 0; font-size:.95rem; }
+.gate-grid .card.pinned { border-left-color:var(--warn); }
 .meta { color:var(--muted); font-size:.9rem; }
 .reason { color:var(--bad); font-weight:600; font-size:.95rem; margin:4px 0; }
 .note { color:var(--muted); font-size:.9rem; padding:6px 0 0 4px; }
@@ -101,6 +106,30 @@ footer { margin:64px 0 24px; padding-top:20px; border-top:1px solid var(--line);
     <h2>Accuracy on claims it never learned from</h2>
     <p class="sub" id="curve-sub"></p>
     <div class="panel"><svg id="curve" role="img" aria-label="Balanced accuracy per iteration"></svg></div>
+  </section>
+
+  <section id="s-gate">
+    <h2>How the gate decides</h2>
+    <p class="sub">Plain code in <code>harness/gate.py</code>, not a model. It replays every candidate against every training claim seen so far, using the payer's real outcome, and computes every number itself. Held-out claims are never used.</p>
+    <div class="gate-grid">
+      <div class="card"><h3>New denial rule</h3><ul>
+        <li>Valid structure: allowed claim fields and operators only, no patient identifiers.</li>
+        <li>Zero regressions: never fires on a claim that was paid, or on a denial with a different reason code.</li>
+        <li>At least one fix: catches a real denial, with the right CARC, that the current rulebook missed.</li>
+        <li>Enough evidence: at least 2 distinct paid claims from that payer were replayed.</li></ul></div>
+      <div class="card"><h3>Exception rule (payer pays)</h3><ul>
+        <li>Zero regressions: never fires on a claim that was denied.</li>
+        <li>At least one fix: corrects a paid claim the scrubber wrongly held.</li></ul></div>
+      <div class="card"><h3>Consolidation</h3><ul>
+        <li>Replaces active rules of the same payer and kind only.</li>
+        <li>No narrowing: still fires correctly on every claim the old rules explained.</li>
+        <li>Nothing lost: the whole rulebook keeps every claim it got right.</li>
+        <li>Zero regressions, at least one fix, enough evidence.</li></ul></div>
+      <div class="card pinned"><h3>Guardrails on the gate</h3><ul>
+        <li>Thresholds are pinned in code: 0 regressions, 1 fix, 2 paid claims. The watcher cannot change them.</li>
+        <li>Promotion is a compare-and-swap: a rule goes live only if the rulebook has not moved since it was checked, and each promotion is a new immutable version.</li>
+        <li>Rejections go back to the watcher with the reason. Insufficient-evidence rules are retried when more claims arrive.</li></ul></div>
+    </div>
   </section>
 
   <section id="s-rules" hidden>
