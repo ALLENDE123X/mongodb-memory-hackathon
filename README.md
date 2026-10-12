@@ -4,7 +4,7 @@ A claim-scrubbing agent that improves itself without weight updates. Before a he
 
 Billing and coverage only, never clinical judgment. All data is synthetic, no PHI.
 
-Built at the SF Tech Week Harness Engineering hackathon (Shack15, Oct 11 2026) by Bruce Beckley, Xavier Huang, Arjun Prasad, Pranav Lende.
+Built at the SF Tech Week Harness Engineering hackathon (Shack15, Oct 11 2026) by Pranav Lende, Bruce Beckley, Arjun Prasad, Xavier Huang.
 
 ## What it does in one minute
 1. A claim arrives. The scrubber checks the learned rules first, then learned exceptions, and only then asks a model, which sees the payer's rules and similar past outcomes.
